@@ -41,7 +41,10 @@ public class Activator implements BundleActivator {
 	private static final String CONTROL_FILENAME = "control";
 	public static final String BUNDLE_DIRECTORY = "bundle";
 	
-	public static final String KNAPSACK_VERSION = "0.1.0";
+	/**
+	 * This should be in sync with manifest version.
+	 */
+	public static final String KNAPSACK_VERSION = "0.2.0";
 	
 	private static BundleContext context;
 	private static Config config;

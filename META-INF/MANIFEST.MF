@@ -1,8 +1,8 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: OSGi Knapsack
+Bundle-Name: Knapsack for Apache Felix
 Bundle-SymbolicName: org.knapsack
-Bundle-Version: 1.0.0.qualifier
+Bundle-Version: 0.2.0
 Bundle-Activator: org.knapsack.Activator
 Main-Class: org.knapsack.BootStrap
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
