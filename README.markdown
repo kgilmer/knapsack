@@ -19,11 +19,11 @@ Most of the above behavior is the default behavior.  As Knapsack is just a minim
 
 # Getting Started
 1. Run the knapsack jar from a designated directory.
+
 ```
 $ java -jar knapsack.jar &
 [1] 5513
 INFO: Framework started in 0.144 seconds with activators: [org.apache.felix.log.Activator@44bd928a, org.apache.felix.cm.impl.ConfigurationManager@79dfc547, org.knapsack.Activator@5210f6d3]
-$
 ```
 
 Knapsack will create it's preferred configuration environment if it's not already provided.  After running the directory should look something like this:
@@ -33,25 +33,45 @@ $ ls
 bin  bundle  bundleCache  configAdmin  control  info  knapsack.conf  knapsack.jar
 ```
 
-## `/bin`
+Check the log with:
+
+```
+$ bin/knapsack-log.sh 
+05.15 17:43:01 INFO   	 ServiceEvent REGISTERED	 org.apache.felix.framework
+05.15 17:43:01 INFO   	 ServiceEvent REGISTERED	 org.apache.felix.framework
+05.15 17:43:01 INFO   	 ServiceEvent REGISTERED	 org.apache.felix.framework
+05.15 17:43:01 INFO   	 ServiceEvent REGISTERED	 org.apache.felix.framework
+05.15 17:43:01 INFO   	 Knapsack 0.1.0 starting in /tmp/kn2	 org.apache.felix.framework
+05.15 17:43:01 INFO   	 FrameworkEvent STARTED	 org.apache.felix.framework
+05.15 17:43:01 INFO   	 BundleEvent STARTED	 org.apache.felix.framework
+```
+
+See which bundles are running with:
+
+```
+$ bin/knapsack-bundles.sh 
+org.apache.felix.framework
+```
+
+## /bin
 This directory contains some script files for common operations such as shutting down the framework or reading the log.
 
-## `/info`
+## /info
 This is the output pipe by which information about the OSGi runtime is exposed.
 
-## `/control` 
+## /control
 This is the input pipe which allows the framework administrator to change the state of the OSGi runtime.
 
-## `/bundle`
+## /bundle
 Like the standard Felix launcher, this is where bundles go.  If a bundle has executable permission, knapsack will start it.  Otherwise it will remain in the `INSTALLED` state.
 
-## `knapsack.conf`
+## knapsack.conf
 The configuration file used to set Felix properties on launch.
 
-## `/configAdmin`
+## /configAdmin
 The root directory for storage of ConfigAdmin's data.   
 
-## `/bundleCache`
+## /bundleCache
 Renamed from `felix-cache`, this is the storage dir, and by default it is deleted on each framework start.
 
 # License
