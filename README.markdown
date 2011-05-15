@@ -37,3 +37,7 @@ bundle
 knapsack.conf
 configAdmin
 bin
+
+# License
+
+Knapsack is Apache 2.0 licensed.  Portions of pre-existing dependent code are BSD 3-clause.
