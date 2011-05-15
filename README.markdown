@@ -53,6 +53,12 @@ $ bin/knapsack-bundles.sh
 org.apache.felix.framework
 ```
 
+Shut the framework down with:
+
+```
+$ bin/knapsack-shutdown.sh
+```
+
 ## /bin
 This directory contains some script files for common operations such as shutting down the framework or reading the log.
 
