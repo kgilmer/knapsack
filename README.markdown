@@ -18,25 +18,41 @@ Knapsack is a custom launcher for the [Apache Felix OSGi Framework](http://felix
 Most of the above behavior is the default behavior.  As Knapsack is just a minimal facade to Felix, adding bundles (shell, webadmin, etc.) and changing the configuration (`onFirstInit`, etc.) allows for much flexibility if a default behavior is undesired.  
 
 # Getting Started
-1. Run the knapsack jar from a designated directory.  Knapsack will create it's preferred configuration environment if it's not already provided.  After running the directory should look something like this:
-
+1. Run the knapsack jar from a designated directory.
 ```
-drwxr-xr-x 2 kgilmer kgilmer 4096 2011-05-15 09:35 bin
-drwxr-xr-x 2 kgilmer kgilmer 4096 2011-05-15 09:35 bundle
-drwxr-xr-x 4 kgilmer kgilmer 4096 2011-05-15 09:35 bundleCache
-drwxr-xr-x 2 kgilmer kgilmer 4096 2011-05-15 09:35 configAdmin
-prw-r--r-- 1 kgilmer kgilmer    0 2011-05-15 09:36 control
-prw-r--r-- 1 kgilmer kgilmer    0 2011-05-15 09:36 info
--rw-r--r-- 1 kgilmer kgilmer  983 2011-05-15 09:35 knapsack.conf
+$ java -jar knapsack.jar &
+[1] 5513
+INFO: Framework started in 0.144 seconds with activators: [org.apache.felix.log.Activator@44bd928a, org.apache.felix.cm.impl.ConfigurationManager@79dfc547, org.knapsack.Activator@5210f6d3]
+$
 ```
 
-TODO:
-info
-control
-bundle
-knapsack.conf
-configAdmin
-bin
+Knapsack will create it's preferred configuration environment if it's not already provided.  After running the directory should look something like this:
+
+```
+$ ls
+bin  bundle  bundleCache  configAdmin  control  info  knapsack.conf  knapsack.jar
+```
+
+## `/bin`
+This directory contains some script files for common operations such as shutting down the framework or reading the log.
+
+## `/info`
+This is the output pipe by which information about the OSGi runtime is exposed.
+
+## `/control` 
+This is the input pipe which allows the framework administrator to change the state of the OSGi runtime.
+
+## `/bundle`
+Like the standard Felix launcher, this is where bundles go.  If a bundle has executable permission, knapsack will start it.  Otherwise it will remain in the `INSTALLED` state.
+
+## `knapsack.conf`
+The configuration file used to set Felix properties on launch.
+
+## `/configAdmin`
+The root directory for storage of ConfigAdmin's data.   
+
+## `/bundleCache`
+Renamed from `felix-cache`, this is the storage dir, and by default it is deleted on each framework start.
 
 # License
 
