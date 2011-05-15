@@ -41,6 +41,8 @@ public class Activator implements BundleActivator {
 	private static final String CONTROL_FILENAME = "control";
 	public static final String BUNDLE_DIRECTORY = "bundle";
 	
+	public static final String KNAPSACK_VERSION = "0.1.0";
+	
 	private static BundleContext context;
 	private static Config config;
 
@@ -70,7 +72,7 @@ public class Activator implements BundleActivator {
 		Activator.context = bundleContext;
 		
 		config = Config.getRef();
-		log(LogService.LOG_INFO, "Knapsack starting in " + config.get(Config.CONFIG_KEY_ROOT_DIR));
+		log(LogService.LOG_INFO, "Knapsack " + KNAPSACK_VERSION + " starting in " + config.get(Config.CONFIG_KEY_ROOT_DIR));
 		
 		writer = new PipeWriterThread(new File(config.get(Config.CONFIG_KEY_ROOT_DIR), INFO_FILENAME), new KnapsackWriterInput());
 		writer.start();
