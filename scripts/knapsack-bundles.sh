@@ -1,4 +1,6 @@
 #!/bin/sh
+# Knapsack shell script - Print bundle info
+
 if [ ! -p control ]; then
 	echo "Script must be run from root of knapsack instance."
 	exit 1
