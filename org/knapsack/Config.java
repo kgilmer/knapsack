@@ -103,6 +103,15 @@ public class Config {
 	 */
 	private static Config ref;
 	
+	private final static String [] shellScripts = new String [] {
+			"knapsack-bundles.sh",  
+			"knapsack-log.sh",
+			"knapsack-rescan.sh",
+			"knapsack-get-all.sh",
+			"knapsack-properties.sh",
+			"knapsack-services.sh",
+			"knapsack-shutdown.sh"
+	};
 	/**
 	 * Map that stores configuration.
 	 */
@@ -147,16 +156,7 @@ public class Config {
 			if (!scriptDir.mkdirs())
 				throw new IOException("Unable to create directories: " + scriptDir);
 		
-		String [] scripts = new String [] {
-				"knapsack-bundles.sh",  
-				"knapsack-log.sh",
-				"knapsack-rescan.sh",
-				"knapsack-get-all.sh",
-				"knapsack-properties.sh",
-				"knapsack-services.sh"
-		};
-		
-		for (String script : Arrays.asList(scripts)) {
+		for (String script : Arrays.asList(shellScripts)) {
 			File f = new File(scriptDir, script);
 			writeToFile(f, Config.class.getResourceAsStream("/scripts/" + script));
 			f.setExecutable(true, true);
