@@ -1,7 +1,7 @@
 
 # Knapsack for Apache Felix
 
-Knapsack is a custom launcher for the [Apache Felix OSGi Framework](http://felix.apache.org/site/index.html) with a filesystem-based management library, and a few default services that run out of the box.  Knapsack was born out the desire to remove some of the complexities that ship with more full featured launchers, and is designed for small and simple projects.  The problem that knapsack tries to address is to get an OSGi framework up and running with a minimum of fiddling.  Knapsack is both a little less and a little more than Felix's built-in launcher.  It's less in that it does not use runlevels and all bundle install/start configuration is done via the filesystem.  It is a little more because a few bundles are started by default.  Knapsack's design is a result of the following opinions.
+Knapsack is a custom launcher for the [Apache Felix OSGi Framework](http://felix.apache.org/site/index.html) with a filesystem-based management library, and a few default services that run out of the box.  Knapsack was born out the desire to remove some of the complexities with more full-featured launchers, and is designed for smaller projects and experiments.  The problem that knapsack addresses is; **get an OSGi framework up and running with a minimum of fiddling.**  Knapsack is both a little less and a little more than Felix's built-in launcher.  It's less in that it does not use runlevels and all bundle install/start configuration is done via the filesystem.  It is a little more because a few bundles are started by default.  Knapsack's design is a result of the following opinions.
 
 *OSGi Shells are usually overkill for what a framework admin needs to do.*  Most of the time, we ask **"Is my bundle running?"** or **"is the HTTP service available?"**.  OSGi shells are a way of answering that question, but are worlds into themselves and the source of unnecessary complexity.  Based on ideas from the [OSGiFS prototype](http://kgilmersden.wordpress.com/2010/12/14/a-shell-less-osgi-shell/), Knapsack creates two filesystem pipes, one for reading and one for writing.  To see service or bundle state, simply cat the contents of `/info`.  To shutdown the framework, simply write `shutdown` to `/control`.  Bouncing a bundle or restarting the framework work similarly.  To install a bundle, just put it in `/bundle`.  Want it started by default?  Set the execution bit on the bundle file.  Done.
 
@@ -18,14 +18,20 @@ Knapsack is a custom launcher for the [Apache Felix OSGi Framework](http://felix
 Most of the above behavior is the default behavior.  As Knapsack is just a minimal facade to Felix, adding bundles (shell, webadmin, etc.) and changing the configuration (`onFirstInit`, etc.) allows for much flexibility if a default behavior is undesired.  
 
 # Getting Started
-1. Run the knapsack jar from a designated directory.
+1. [Download the knapsack binary](https://github.com/downloads/kgilmer/knapsack/knapsack.jar) from Github.
+2. Run the knapsack jar from a designated directory.
 
 ```
+$ mkdir test && cp knapsack.jar test/ && cd test
 $ java -jar knapsack.jar &
 [1] 5513
 INFO: Framework started in 0.144 seconds with activators: [org.apache.felix.log.Activator@44bd928a, org.apache.felix.cm.impl.ConfigurationManager@79dfc547, org.knapsack.Activator@5210f6d3]
 ```
-
+3. That's it.  But to make things more interesting lets install some bundles.
+```
+$ cp /tmp/mybundle.jar bundle/
+$ bin/knapsack-rescan.sh
+```
 Knapsack will create it's preferred configuration environment if it's not already provided.  After running the directory should look something like this:
 
 ```

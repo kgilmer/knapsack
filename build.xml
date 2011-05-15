@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<project name="Knapsack" default="jar">
+<project name="knapsack" default="jar">
 	<property name="external.dir" location="external" />
 	
 	<property name="wget.bin" location="/usr/bin/wget" />
