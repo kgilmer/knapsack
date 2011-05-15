@@ -149,6 +149,11 @@ public class Config {
 		}
 	}
 	
+	/**
+	 * Copy shell scripts from the Jar into the deployment directory.
+	 * @param parentFile
+	 * @throws IOException
+	 */
 	private void copyScripts(File parentFile) throws IOException {
 		File scriptDir = new File(parentFile, "bin");
 		
@@ -158,11 +163,26 @@ public class Config {
 		
 		for (String script : Arrays.asList(shellScripts)) {
 			File f = new File(scriptDir, script);
-			writeToFile(f, Config.class.getResourceAsStream("/scripts/" + script));
+			
+			if (f.exists())
+				continue;
+			
+			InputStream istream = Config.class.getResourceAsStream("/scripts/" + script);
+			if (istream == null)
+				throw new IOException("Script file does not exist: " + f);
+			
+			writeToFile(f, istream);
 			f.setExecutable(true, true);
 		}
 	}
 
+	/**
+	 * Write an inputstream to a file.
+	 * 
+	 * @param outputFile
+	 * @param inputStream
+	 * @throws IOException
+	 */
 	private void writeToFile(File outputFile, InputStream inputStream) throws IOException {
 		FileOutputStream fos = new FileOutputStream(outputFile);
 		byte [] buff = new byte[4096];
