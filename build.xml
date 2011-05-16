@@ -60,7 +60,7 @@
 		
 		<exec executable="${git.bin}">
 			<arg value="clone" />
-			<arg value="git@github.com:kgilmer/Sprinkles.git" />
+			<arg value="git://github.com/kgilmer/Sprinkles.git" />
 			<arg value="${external.dir}/sprinkles" />
 		</exec>
 		
