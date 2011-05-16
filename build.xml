@@ -26,7 +26,6 @@
     <target name="clean" description="remove intermediate files">
         <delete dir="classes"/>
     	<delete dir="external"/>
-    	<delete dir="javadoc"/>
     </target>
 	
     <target name="clobber" depends="clean" description="remove all artifact files">
@@ -75,14 +74,12 @@
 			<fileset dir="${external.dir}/${configadmin.fqpn}/src/main/java" includes="**/*.java" />
 			<fileset dir="${external.dir}/${compendium.fqpn}/src/main/java" includes="org/osgi/service/cm/*.java, org/osgi/service/log/*.java" />
 			<fileset dir="${external.dir}/sprinkles/src" includes="**/*.java" />
-		</copy>
-		
-		<delete dir="${external.dir}" />	
+		</copy>		
 	</target>
 	
     <target name="compile" depends="stage" description="compile the Java source code to class files">
         <mkdir dir="classes"/>
-        <javac srcdir="." destdir="classes"/>
+        <javac srcdir="." destdir="classes" source="1.6" target="1.6" excludes="${external.dir}/**" />
     </target>
 	
     <target name="jar" depends="compile" description="create a Jar file for the application">
@@ -110,7 +107,7 @@
 		           sourcepath="."
 		           packagenames="org.knapsack*, org.knapsack.*"
 		           defaultexcludes="yes"
-		           destdir="javadoc/"
+		           destdir="docs/"
 		           author="true"
 		           version="true"
 		           use="true"
