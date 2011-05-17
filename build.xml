@@ -79,7 +79,10 @@
 	
     <target name="compile" depends="stage" description="compile the Java source code to class files">
         <mkdir dir="classes"/>
-        <javac srcdir="." destdir="classes" source="1.6" target="1.6" excludes="${external.dir}/**" />
+        <javac srcdir="." destdir="classes" source="1.6" target="1.6">	
+        	<include name="org/**" />
+        	<exclude name="${external.dir}/**" />
+        </javac>
     </target>
 	
     <target name="jar" depends="compile" description="create a Jar file for the application">
