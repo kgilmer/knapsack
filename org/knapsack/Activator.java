@@ -26,6 +26,8 @@ import org.knapsack.out.KnapsackWriterInput;
 import org.knapsack.out.PipeWriterThread;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkEvent;
+import org.osgi.framework.FrameworkListener;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.log.LogService;
 
@@ -36,7 +38,7 @@ import org.osgi.service.log.LogService;
  * @author kgilmer
  *
  */
-public class Activator implements BundleActivator {
+public class Activator implements BundleActivator, FrameworkListener {
 	private static final String INFO_FILENAME = "info";
 	private static final String CONTROL_FILENAME = "control";
 	public static final String BUNDLE_DIRECTORY = "bundle";
@@ -64,6 +66,7 @@ public class Activator implements BundleActivator {
 	private PipeWriterThread writer;
 
 	private PipeReaderThread reader;
+	private InitThread init;
 	private static Logger logger;
 	private static LogService logService;
 
@@ -73,18 +76,15 @@ public class Activator implements BundleActivator {
 	 */
 	public void start(BundleContext bundleContext) throws Exception {
 		Activator.context = bundleContext;
-		
+		bundleContext.removeFrameworkListener(this);
 		config = Config.getRef();
 		log(LogService.LOG_INFO, "Knapsack " + KNAPSACK_VERSION + " starting in " + config.get(Config.CONFIG_KEY_ROOT_DIR));
 		
 		writer = new PipeWriterThread(new File(config.get(Config.CONFIG_KEY_ROOT_DIR), INFO_FILENAME), new KnapsackWriterInput());
-		writer.start();
 		
 		reader = new PipeReaderThread(new File(config.get(Config.CONFIG_KEY_ROOT_DIR), CONTROL_FILENAME), new KnapsackReaderOutput());
-		reader.start();
 		
-		InitThread init = new InitThread(new File(config.get(Config.CONFIG_KEY_ROOT_DIR), BUNDLE_DIRECTORY));
-		init.start();
+		init = new InitThread(new File(config.get(Config.CONFIG_KEY_ROOT_DIR), BUNDLE_DIRECTORY));
 	}
 	
 	/*
@@ -162,5 +162,14 @@ public class Activator implements BundleActivator {
 
 	public void setLogger(Logger logger) {
 		Activator.logger = logger;
+	}
+
+	@Override
+	public void frameworkEvent(FrameworkEvent event) {
+		if (event.getType() == FrameworkEvent.STARTED) {
+			writer.start();
+			reader.start();
+			init.start();
+		}
 	}
 }

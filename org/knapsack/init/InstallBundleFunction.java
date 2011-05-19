@@ -68,7 +68,6 @@ class InstallBundleFunction implements Fn.Function<File, BundleJarWrapper> {
 			
 		try {
 			Bundle b = this.context.installBundle(fileUri);			
-			Activator.log(LogService.LOG_INFO, "Installed " + KnapsackWriterInput.getBundleName(b) + " [" + b.getBundleId() + "]");
 			return new BundleJarWrapper(element, b);
 		} catch (BundleException e) {
 			Activator.log(LogService.LOG_ERROR, "Unable to install " + element.getName() + " as a bundle.", e);

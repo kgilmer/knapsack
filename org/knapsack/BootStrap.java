@@ -31,39 +31,53 @@ import org.osgi.framework.launch.Framework;
 import org.osgi.service.log.LogService;
 
 /**
- * The bootstrap class for Knapsack.  Creates and starts a framework with the Knapsack launcher.
+ * The bootstrap class for Knapsack. Creates and starts a framework with the
+ * Knapsack launcher.
  * 
  * @author kgilmer
- *
+ * 
  */
 public class BootStrap {
 
 	public static void main(String[] args) throws IOException, BundleException {
 		long time = System.currentTimeMillis();
 		FrameworkFactory frameworkFactory = new FrameworkFactory();
-		
-		//Create initial configuration
+
+		// Create initial configuration
 		Map<String, Object> config = new HashMap<String, Object>(Config.getRef().asMap());
-		
+
 		Logger logger = new Logger();
-		
-		//Create activators that will start
+
+		// Create activators that will start
 		List<BundleActivator> activators = new ArrayList<BundleActivator>();
-		
-		if (config.containsKey(Config.CONFIG_KEY_BUILTIN_LOGGER) && Config.getRef().getBoolean(Config.CONFIG_KEY_BUILTIN_LOGGER)) 
+
+		if (config.containsKey(Config.CONFIG_KEY_BUILTIN_LOGGER) && Config.getRef().getBoolean(Config.CONFIG_KEY_BUILTIN_LOGGER))
 			activators.add(new org.apache.felix.log.Activator());
-		
+
 		if (config.containsKey(Config.CONFIG_KEY_BUILTIN_CONFIGADMIN) && Config.getRef().getBoolean(Config.CONFIG_KEY_BUILTIN_CONFIGADMIN))
 			activators.add(new ConfigurationManager());
-		
+
 		activators.add(new org.knapsack.Activator(logger));
-		
+
 		config.put("felix.log.logger", logger);
 		config.put("felix.systembundle.activators", activators);
+
+		final Framework framework = frameworkFactory.newFramework(config);
+		Runtime.getRuntime().addShutdownHook(new Thread("Felix Shutdown Hook") {
+			public void run() {
+				try {
+					if (framework != null) {
+						framework.stop();
+						framework.waitForStop(0);
+					}
+				} catch (Exception ex) {
+					System.err.println("Error stopping framework: " + ex);
+				}
+			}
+		});
 		
-		Framework framework = frameworkFactory.newFramework(config);
 		framework.init();
 		framework.start();
-		logger.log(LogService.LOG_INFO, "Framework started in " + ((double) (System.currentTimeMillis() - time) / 1000) + " seconds with activators: " + activators);		
+		logger.log(LogService.LOG_INFO, "Framework started in " + ((double) (System.currentTimeMillis() - time) / 1000) + " seconds with activators: " + activators);
 	}
 }
