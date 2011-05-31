@@ -18,11 +18,11 @@ package org.knapsack.init;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.knapsack.Activator;
-import org.knapsack.out.KnapsackWriterInput;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
@@ -31,22 +31,23 @@ import org.sprinkles.Fn;
 
 /**
  * Install a file as an OSGi bundle.
+ * 
  * @author kgilmer
  *
  */
 class InstallBundleFunction implements Fn.Function<File, BundleJarWrapper> {
 
-	private final BundleContext context;
-	private Map<String, Bundle> locationList;
+	private Map<String, Bundle> installedBundleMap;
+	private final Collection<BundleJarWrapper> installed;
 
-	public InstallBundleFunction() {
-		this.context = Activator.getContext();
-		locationList = createLocationList();
+	public InstallBundleFunction(Collection<BundleJarWrapper> installed) {
+		this.installed = installed;
+		installedBundleMap = createLocationList();
 	}
 
-	private Map<String, Bundle> createLocationList() {
+	public static Map<String, Bundle> createLocationList() {
 		Map<String, Bundle> l = new HashMap<String, Bundle>();
-		for (Bundle b : Arrays.asList(context.getBundles()))
+		for (Bundle b : Arrays.asList(Activator.getContext().getBundles()))
 			l.put(b.getLocation(), b);
 		
 		return l;
@@ -55,31 +56,79 @@ class InstallBundleFunction implements Fn.Function<File, BundleJarWrapper> {
 	@Override
 	public BundleJarWrapper apply(File element) {
 		if (!element.getName().toUpperCase().endsWith(".JAR")) {
-			Activator.log(LogService.LOG_WARNING, "Ignoring fine " + element.getName() + ", not a jar.");
+			Activator.log(LogService.LOG_WARNING, "Ignoring " + element.getName() + ", not a jar.");
 			return null;
 		}
 		
 		String fileUri = fileToUri(element);
 		
-		if (isInstalled(fileUri)) {
-			Activator.log(LogService.LOG_DEBUG, "Not installing " + element.getName() + ", already installed.");
-			return new BundleJarWrapper(element, locationList.get(fileUri));
+		if (isInstalled(fileUri) && !fileChanged(element)) {
+			Activator.log(LogService.LOG_DEBUG, element.getName() + " is already installed.");
+			return new BundleJarWrapper(element, installedBundleMap.get(fileUri));
+		} else if (isInstalled(fileUri) && fileChanged(element)) {
+			uninstallBundle(installedBundleMap.get(fileUri));
 		}
 			
 		try {
-			Bundle b = this.context.installBundle(fileUri);			
-			return new BundleJarWrapper(element, b);
+			Bundle b = Activator.getContext().installBundle(fileUri);		
+			Activator.getBundleSizeMap().put(element, element.length());
+			BundleJarWrapper wrapper = new BundleJarWrapper(element, b);
+			installed.add(wrapper);
+			return wrapper;		
 		} catch (BundleException e) {
 			Activator.log(LogService.LOG_ERROR, "Unable to install " + element.getName() + " as a bundle.", e);
 			return null;
 		}
 	}
 
-	private boolean isInstalled(String fileUri) {		
-		return locationList.keySet().contains(fileUri);
+	/**
+	 * Uninstall a bundle.  Will absorb any BundleException and log it but allow installation process to continue rather than aborting.
+	 * 
+	 * @param bundle
+	 */
+	private void uninstallBundle(Bundle bundle) {
+		try {
+			bundle.uninstall();
+		} catch (BundleException e) {
+			Activator.log(LogService.LOG_ERROR, "An error occurred while uninstalling " + bundle.getLocation() + ".", e);
+		}
 	}
 
-	private String fileToUri(File f) {
+	/**
+	 * Compares file on filesystem to internal state of file to determine if they are different.
+	 * 
+	 * @param element
+	 * @return
+	 */
+	private boolean fileChanged(File element) {
+		Map<File, Long> bsm = Activator.getBundleSizeMap();
+		
+		if (!bsm.containsKey(element))
+			return true;
+		
+		if (bsm.get(element) != element.length())
+			return true;
+		
+		return false;
+	}
+
+	/**
+	 * Determine if a given bundle is already installed.
+	 * 
+	 * @param fileUri
+	 * @return
+	 */
+	private boolean isInstalled(String fileUri) {		
+		return installedBundleMap.keySet().contains(fileUri);
+	}
+
+	/**
+	 * Create a string uri to compare against what the framework provides.
+	 * 
+	 * @param f
+	 * @return
+	 */
+	public static String fileToUri(File f) {
 		return "file://" + f.toString();
 	}
 	

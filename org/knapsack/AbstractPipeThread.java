@@ -38,6 +38,7 @@ import java.io.IOException;
  */
 public abstract class AbstractPipeThread extends Thread {
 
+	private static final String MKFIFO_COMMAND = "/usr/bin/mkfifo";
 	protected final File pipe;
 
 	/**
@@ -72,7 +73,7 @@ public abstract class AbstractPipeThread extends Thread {
 			if (!file.delete())
 				throw new IOException("Unable to delete existing file before pipe creation: " + file.getAbsolutePath());
 
-		Process p = Runtime.getRuntime().exec(new String[] { "/usr/bin/mkfifo", file.getAbsolutePath() });
+		Process p = Runtime.getRuntime().exec(new String[] { MKFIFO_COMMAND, file.getAbsolutePath() });
 		p.waitFor();
 
 		if (p.exitValue() < 0) {

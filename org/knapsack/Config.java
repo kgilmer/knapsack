@@ -16,19 +16,14 @@
  */
 package org.knapsack;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
+import java.util.Properties;
 
 /**
  * Class for knapsack and framework configuration.  
@@ -37,8 +32,9 @@ import java.util.Set;
  * @author kgilmer
  *
  */
-public class Config {
-	
+public class Config extends Properties {
+	private static final long serialVersionUID = -5479563157788056552L;
+
 	/**
 	 * Properties that cause behavior changes to OSGi instance.
 	 * @author kgilmer
@@ -77,6 +73,11 @@ public class Config {
 	 * Emit log info in pipe
 	 */
 	public static final String CONFIG_KEY_OUT_LOG = "org.knapsack.log";
+	
+	/**
+	 * Emit log events to stdout
+	 */
+	public static final String CONFIG_KEY_LOG_STDOUT = "org.knapsack.log.stdout";
 
 	/**
 	 * Emit verbose messages in pipe
@@ -99,6 +100,16 @@ public class Config {
 	public static final String CONFIG_KEY_BUILTIN_CONFIGADMIN = "org.knapsack.builtin.configAdmin";
 	
 	/**
+	 * A list of directory names which hold bundles that should be installed and optionally started.
+	 */
+	public static final String CONFIG_KEY_BUNDLE_DIRS = "org.knapsack.bundleDirs";
+	
+	/**
+	 * Filename for bundle directory
+	 */
+	public static final String DEFAULT_BUNDLE_DIRECTORY = "bundle";
+	
+	/**
 	 * Only one instance of Config per runtime.
 	 */
 	private static Config ref;
@@ -112,10 +123,6 @@ public class Config {
 			"knapsack-services.sh",
 			"knapsack-shutdown.sh"
 	};
-	/**
-	 * Map that stores configuration.
-	 */
-	private static Map<String, String> cmap;
 	
 	public static Config getRef() throws IOException {
 		if (ref == null)
@@ -137,16 +144,19 @@ public class Config {
 		
 		if (!confFile.exists()) {
 			//Create a default configuration
-			cmap = createDefaultConfiguration(confFile.getParentFile());
-					
-			writeToFile(cmap, confFile);
+			copyDefaultConfiguration(confFile);
 			copyScripts(confFile.getParentFile());
-		} else {
-			//Load the map from a file.
-			cmap = readFromFile(confFile);
-			if (!cmap.containsKey(CONFIG_KEY_ROOT_DIR))
-				cmap.put(CONFIG_KEY_ROOT_DIR, confFile.getParent());
 		}
+		
+		load(new FileInputStream(confFile));
+		
+		//Specify the root of the knapsack install if not explicitly defined.
+		if (!this.containsKey(CONFIG_KEY_ROOT_DIR))
+			this.put(CONFIG_KEY_ROOT_DIR, getInitRootDirectory());
+		
+		//Specify a default bundle directory if not explicitly defined.
+		if (!this.containsKey(CONFIG_KEY_BUNDLE_DIRS))
+			this.put(CONFIG_KEY_BUNDLE_DIRS, DEFAULT_BUNDLE_DIRECTORY);
 	}
 	
 	/**
@@ -216,71 +226,20 @@ public class Config {
 	 * 
 	 * @param rootDir
 	 * @return
+	 * @throws IOException 
 	 */
-	private Map<String, String> createDefaultConfiguration(File rootDir) {
-		Map<String, String> map = new HashMap<String, String>();
+	private void copyDefaultConfiguration(File rootDir) throws IOException {
+		byte [] buff = new byte[4096];
+		InputStream istream = Config.class.getResourceAsStream("/default.conf");
 		
-		// Knapsack properties
-		map.put(CONFIG_KEY_OUT_BUNDLE, "true");
-		map.put(CONFIG_KEY_OUT_SERVICE, "true");
-		map.put(CONFIG_KEY_OUT_PROPERTY, "false");
-		map.put(CONFIG_KEY_OUT_CONFIG, "false");
-		map.put(CONFIG_KEY_OUT_LOG, "true");
-		map.put(CONFIG_KEY_BUILTIN_LOGGER, "true");
-		map.put(CONFIG_KEY_BUILTIN_CONFIGADMIN, "true");
+		OutputStream fos = new FileOutputStream(rootDir);
 		
-		map.put(CONFIG_KEY_VERBOSE, "true");
-		map.put(CONFIG_KEY_ROOT_DIR, rootDir.getAbsolutePath());
-		
-		// Felix properties			
-		map.put("org.osgi.framework.storage.clean", "onFirstInit");
-		map.put("felix.log.level", "3");
-		map.put("org.osgi.framework.storage", "bundleCache");
-		map.put("felix.cm.dir", new File(rootDir, "configAdmin").getAbsolutePath());
-		map.put("org.osgi.framework.system.packages", 
-				"org.osgi.service.startlevel;uses:=\"org.osgi.framework\";version=\"1.1\",org.osgi.framework.launch;uses:=\"org.osgi.framework\";version=\"1.0\",org.osgi.util.tracker;uses:=\"org.osgi.framework\";version=\"1.4\",org.osgi.service.url;version=\"1.0\",org.osgi.framework;version=\"1.5\",org.osgi.service.packageadmin;uses:=\"org.osgi.framework\";version=\"1.2\",org.osgi.framework.hooks.service;uses:=\"org.osgi.framework\";version=\"1.0\", org.osgi.service.cm, org.osgi.service.log");
-		
-		return map;
-	}
-
-	/**
-	 * Read a configuration from file.
-	 * 
-	 * @param ifile
-	 * @return
-	 * @throws IOException
-	 */
-	private Map<String, String> readFromFile(File ifile) throws IOException {
-		HashMap<String, String> map = new HashMap<String, String>();
-		BufferedReader br = new BufferedReader(new FileReader(ifile));
-		
-		String line = null;
-		while ((line = br.readLine()) != null) {
-			line = line.trim();
-			if (!line.startsWith("#") && line.indexOf('=') > -1) {
-				String []nvp = line.split("=");
-				map.put(nvp[0].trim(), nvp[1].trim());
-			}				
+		while (istream.read(buff) > -1) {
+			fos.write(buff);
 		}
-		br.close();
-			
-		return map;
-	}
-
-	/**
-	 * Write a configuration to file.
-	 * 
-	 * @param map
-	 * @param ofile
-	 * @throws IOException
-	 */
-	private void writeToFile(Map<String, String> map, File ofile) throws IOException {
-		BufferedWriter br = new BufferedWriter(new FileWriter(ofile));
-		br.write("# This is a generated default configuration for knapsack\n\n");
-		for (Map.Entry<String, String> e: map.entrySet())
-			br.write(e.getKey() + " = " + e.getValue() + "\n");
 		
-		br.close();
+		istream.close();
+		fos.close();
 	}
 
 	/**
@@ -298,44 +257,22 @@ public class Config {
 	}
 
 	/**
-	 * Map.get(key).
-	 * 
-	 * @param key
-	 * @return
-	 */
-	public String get(String key) {		
-		return cmap.get(key);
-	}
-
-	/**
 	 * Parse value as boolean.
 	 * 
 	 * @param key
 	 * @return
 	 */
 	public boolean getBoolean(String key) {
-		return Boolean.parseBoolean(cmap.get(key));
+		if (this.containsKey(key))
+			return Boolean.parseBoolean(this.get(key).toString());
+		
+		return false;
 	}
 
-	/**
-	 * @return
-	 */
-	public Set<Entry<String, String>> entrySet() {		
-		return cmap.entrySet();
-	}
-
-	/**
-	 * @param key
-	 * @param val
-	 */
-	public void put(String key, String val) {
-		cmap.put(key, val);
-	}
-
-	/**
-	 * @return
-	 */
-	public Map<String, String> asMap() {
-		return cmap;
+	public String getString(String key) {	
+		if (this.containsKey(key))
+			return this.get(key).toString();
+		
+		return null;
 	}
 }

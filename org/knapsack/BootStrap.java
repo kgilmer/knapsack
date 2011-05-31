@@ -18,9 +18,7 @@ package org.knapsack;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.felix.cm.impl.ConfigurationManager;
 import org.apache.felix.framework.FrameworkFactory;
@@ -44,17 +42,17 @@ public class BootStrap {
 		FrameworkFactory frameworkFactory = new FrameworkFactory();
 
 		// Create initial configuration
-		Map<String, Object> config = new HashMap<String, Object>(Config.getRef().asMap());
+		Config config = Config.getRef();
 
 		Logger logger = new Logger();
 
 		// Create activators that will start
 		List<BundleActivator> activators = new ArrayList<BundleActivator>();
 
-		if (config.containsKey(Config.CONFIG_KEY_BUILTIN_LOGGER) && Config.getRef().getBoolean(Config.CONFIG_KEY_BUILTIN_LOGGER))
+		if (config.containsKey(Config.CONFIG_KEY_BUILTIN_LOGGER) && config.getBoolean(Config.CONFIG_KEY_BUILTIN_LOGGER))
 			activators.add(new org.apache.felix.log.Activator());
 
-		if (config.containsKey(Config.CONFIG_KEY_BUILTIN_CONFIGADMIN) && Config.getRef().getBoolean(Config.CONFIG_KEY_BUILTIN_CONFIGADMIN))
+		if (config.containsKey(Config.CONFIG_KEY_BUILTIN_CONFIGADMIN) && config.getBoolean(Config.CONFIG_KEY_BUILTIN_CONFIGADMIN))
 			activators.add(new ConfigurationManager());
 
 		activators.add(new org.knapsack.Activator(logger));

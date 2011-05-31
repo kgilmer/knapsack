@@ -45,7 +45,6 @@ import org.osgi.service.log.LogService;
  * 
  */
 public class KnapsackWriterInput implements WriterInput {
-
 	private static final String HEADER_CONFIG = 	"CONFIG : ";
 	private static final String HEADER_BUNDLE = 	"BUNDLE : ";
 	private static final String HEADER_PROPERTY = 	"PROP   : ";
@@ -97,7 +96,7 @@ public class KnapsackWriterInput implements WriterInput {
 		}
 
 		if (config.getBoolean(Config.CONFIG_KEY_OUT_CONFIG)) {
-			for (Map.Entry<String, String> e : config.entrySet())
+			for (Map.Entry<Object, Object> e : config.entrySet())
 				addConfigEntry(e, l, verbose);
 		}
 		
@@ -123,7 +122,7 @@ public class KnapsackWriterInput implements WriterInput {
 	}
 
 	private void addLogEntry(LogEntry entry, List<String> l, boolean verbose) {
-		String line = formatDateTime(entry.getTime()) + " " + Activator.getLevelLabel(entry.getLevel()) + "\t " + entry.getMessage() + "\t " + getBundleName(entry.getBundle());
+		String line = formatDateTime(entry.getTime()) + " " + getLevelLabel(entry.getLevel()) + "\t " + entry.getMessage() + "\t " + getBundleName(entry.getBundle());
 		
 		if (verbose)
 			line = HEADER_LOG + line;
@@ -182,7 +181,7 @@ public class KnapsackWriterInput implements WriterInput {
 		return sr.getProperty("service.id").toString();
 	}
 
-	private void addConfigEntry(Entry<String, String> e, List<String> l, boolean verbose) {
+	private void addConfigEntry(Entry<Object, Object> e, List<String> l, boolean verbose) {
 		String line = "";
 
 		if (verbose)
@@ -273,6 +272,24 @@ public class KnapsackWriterInput implements WriterInput {
 		return "[UNKNOWN STATE: " + state + "]";
 	}
 	
+	/**
+	 * @param level
+	 * @return A human-readable log level string.
+	 */
+	private static String getLevelLabel(int level) {
+		switch (level) {
+		case 1:
+			return "ERROR  ";
+		case 2:
+			return "WARNING";
+		case 3:
+			return "INFO   ";
+		case 4:
+			return "DEBUG  ";
+		}
+
+		return "UNKNOWN";
+	}
 	private class ComparableLogEntry  implements Comparable, LogEntry {
 
 		private final LogEntry entry;

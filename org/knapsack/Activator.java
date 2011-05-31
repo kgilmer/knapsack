@@ -17,6 +17,9 @@
 package org.knapsack;
 
 import java.io.File;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.felix.framework.Logger;
 import org.knapsack.in.KnapsackReaderOutput;
@@ -39,35 +42,55 @@ import org.osgi.service.log.LogService;
  *
  */
 public class Activator implements BundleActivator, FrameworkListener {
+	/**
+	 * Filename for read-only pipe.
+	 */
 	private static final String INFO_FILENAME = "info";
+	/**
+	 * Filename for write-only pipe.
+	 */
 	private static final String CONTROL_FILENAME = "control";
-	public static final String BUNDLE_DIRECTORY = "bundle";
+	
+	/**
+	 * Store all the bundle sizes at time of install to compare later for updates.
+	 */
+	private static HashMap<File, Long> sizeMap;
 	
 	/**
 	 * This should be in sync with manifest version.
 	 */
-	public static final String KNAPSACK_VERSION = "0.2.0";
+	public static final String KNAPSACK_VERSION = "0.3.0";
 	
 	private static BundleContext context;
 	private static Config config;
 
 	public Activator() {
-		
+		Activator.frameworkLogger = null;
 	}
 	
 	public Activator(Logger logger) {
-		Activator.logger = logger;
+		Activator.frameworkLogger = logger;
 	}
 
 	public static BundleContext getContext() {
 		return context;
 	}
 
+	/**
+	 * Thread for write-only pipe.
+	 */
 	private PipeWriterThread writer;
 
+	/**
+	 * Thread for read-only pipe.
+	 */
 	private PipeReaderThread reader;
+	/**
+	 * Non-persistent thread for bundle initialization.
+	 */
 	private InitThread init;
-	private static Logger logger;
+	private LogPrinter logPrinter;
+	private static Logger frameworkLogger;
 	private static LogService logService;
 
 	/*
@@ -76,15 +99,17 @@ public class Activator implements BundleActivator, FrameworkListener {
 	 */
 	public void start(BundleContext bundleContext) throws Exception {
 		Activator.context = bundleContext;
-		bundleContext.removeFrameworkListener(this);
+		
 		config = Config.getRef();
-		log(LogService.LOG_INFO, "Knapsack " + KNAPSACK_VERSION + " starting in " + config.get(Config.CONFIG_KEY_ROOT_DIR));
+		if (config.getBoolean(Config.CONFIG_KEY_LOG_STDOUT))
+			logPrinter = new LogPrinter(bundleContext);
 		
-		writer = new PipeWriterThread(new File(config.get(Config.CONFIG_KEY_ROOT_DIR), INFO_FILENAME), new KnapsackWriterInput());
+		sizeMap = new HashMap<File, Long>();
+		bundleContext.addFrameworkListener(this);
 		
-		reader = new PipeReaderThread(new File(config.get(Config.CONFIG_KEY_ROOT_DIR), CONTROL_FILENAME), new KnapsackReaderOutput());
-		
-		init = new InitThread(new File(config.get(Config.CONFIG_KEY_ROOT_DIR), BUNDLE_DIRECTORY));
+		writer = new PipeWriterThread(new File(config.getString(Config.CONFIG_KEY_ROOT_DIR), INFO_FILENAME), new KnapsackWriterInput());
+		reader = new PipeReaderThread(new File(config.getString(Config.CONFIG_KEY_ROOT_DIR), CONTROL_FILENAME), new KnapsackReaderOutput());
+		init = new InitThread(new File(config.getString(Config.CONFIG_KEY_ROOT_DIR)), Arrays.asList(config.getString(Config.CONFIG_KEY_BUNDLE_DIRS).split(",")));
 	}
 	
 	/*
@@ -105,6 +130,12 @@ public class Activator implements BundleActivator, FrameworkListener {
 		return config;
 	}
 
+	/**
+	 * Will log in order of availability: LogService, Framework Logger, System.out.
+	 * 
+	 * @param level LogService log level
+	 * @param message message to log
+	 */
 	public static void log(int level, String message) {
 		if (logService == null) {
 			ServiceReference rs = context.getServiceReference(LogService.class.getName());
@@ -116,12 +147,18 @@ public class Activator implements BundleActivator, FrameworkListener {
 		
 		if (logService != null)
 			logService.log(level, message);
-		else if (logger != null)
-			logger.log(level, message);
+		else if (frameworkLogger != null)
+			frameworkLogger.log(level, message);
 		else 
-			System.out.println("[" + getLevelLabel(level) + "]: " + message);		
+			LogPrinter.doLog(null, null, level, message, null);		
 	}
 	
+	/**
+	 * Log an error.  Will log in order of availability: LogService, Framework Logger, System.out.
+	 * @param level
+	 * @param message
+	 * @param error
+	 */
 	public static void log(int level, String message, Throwable error) {
 		if (logService == null) {
 			ServiceReference rs = context.getServiceReference(LogService.class.getName());
@@ -131,45 +168,32 @@ public class Activator implements BundleActivator, FrameworkListener {
 			}
 		}
 			
-		if (logService != null) {
+		if (logService != null) 
 			logService.log(level, message, error);
-		} else if (logger != null)  {
-			logger.log(level, message, error);
-		} else {
-			log(level, message);
-			error.printStackTrace();
-		}
-	}
-	
-	/**
-	 * @param level
-	 * @return A human-readable log level string.
-	 */
-	public static String getLevelLabel(int level) {
-		switch (level) {
-		case 1:
-			return "ERROR  ";
-		case 2:
-			return "WARNING";
-		case 3:
-			return "INFO   ";
-		case 4:
-			return "DEBUG  ";
-		}
-
-		return "UNKNOWN";
+		else if (frameworkLogger != null)  
+			frameworkLogger.log(level, message, error);
+		else 
+			LogPrinter.doLog(null, null, level, message, error);
 	}
 
 	public void setLogger(Logger logger) {
-		Activator.logger = logger;
+		Activator.frameworkLogger = logger;
 	}
 
 	@Override
 	public void frameworkEvent(FrameworkEvent event) {
 		if (event.getType() == FrameworkEvent.STARTED) {
+			log(LogService.LOG_INFO, "Knapsack " + KNAPSACK_VERSION + " starting in " + config.get(Config.CONFIG_KEY_ROOT_DIR));
 			writer.start();
 			reader.start();
 			init.start();
 		}
+	}
+	
+	/**
+	 * @return
+	 */
+	public static Map<File, Long> getBundleSizeMap() {
+		return sizeMap;
 	}
 }

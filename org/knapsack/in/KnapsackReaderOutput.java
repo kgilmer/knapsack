@@ -17,6 +17,7 @@
 package org.knapsack.in;
 
 import java.io.File;
+import java.util.Arrays;
 
 import org.knapsack.Activator;
 import org.knapsack.Config;
@@ -92,7 +93,7 @@ public class KnapsackReaderOutput implements ReaderOutput {
 	}
 
 	private void rescanBundles() {
-		InitThread init = new InitThread(new File(config.get(Config.CONFIG_KEY_ROOT_DIR), Activator.BUNDLE_DIRECTORY));
+		InitThread init = new InitThread(new File(config.getString(Config.CONFIG_KEY_ROOT_DIR)), Arrays.asList(config.getString(Config.CONFIG_KEY_BUNDLE_DIRS).split(",")));
 		init.start();
 	}
 
