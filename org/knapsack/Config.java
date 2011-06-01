@@ -115,13 +115,13 @@ public class Config extends Properties {
 	private static Config ref;
 	
 	private final static String [] shellScripts = new String [] {
-			"knapsack-bundles.sh",  
-			"knapsack-log.sh",
-			"knapsack-rescan.sh",
-			"knapsack-get-all.sh",
-			"knapsack-properties.sh",
-			"knapsack-services.sh",
-			"knapsack-shutdown.sh"
+			"ks-bundles.sh",  
+			"ks-log.sh",
+			"ks-rescan.sh",
+			"ks-get-all.sh",
+			"ks-properties.sh",
+			"ks-services.sh",
+			"ks-shutdown.sh"
 	};
 	
 	public static Config getRef() throws IOException {

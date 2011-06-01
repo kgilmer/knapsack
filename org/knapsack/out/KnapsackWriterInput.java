@@ -45,12 +45,6 @@ import org.osgi.service.log.LogService;
  * 
  */
 public class KnapsackWriterInput implements WriterInput {
-	private static final String HEADER_CONFIG = 	"CONFIG : ";
-	private static final String HEADER_BUNDLE = 	"BUNDLE : ";
-	private static final String HEADER_PROPERTY = 	"PROP   : ";
-	private static final String HEADER_SERVICE = 	"SERVICE: ";
-	private static final String HEADER_LOG = 		"LOG    : ";
-	
 	private Config config;
 	private BundleContext context;
 	private SimpleDateFormat dateFormatter;
@@ -123,10 +117,7 @@ public class KnapsackWriterInput implements WriterInput {
 
 	private void addLogEntry(LogEntry entry, List<String> l, boolean verbose) {
 		String line = formatDateTime(entry.getTime()) + " " + getLevelLabel(entry.getLevel()) + "\t " + entry.getMessage() + "\t " + getBundleName(entry.getBundle());
-		
-		if (verbose)
-			line = HEADER_LOG + line;
-		
+				
 		l.add(line);
 		
 		//Check for an exception, if available display it.
@@ -147,9 +138,6 @@ public class KnapsackWriterInput implements WriterInput {
 	private void addProperty(Entry<Object, Object> e, List<String> l, boolean verbose) {
 		String line = "";
 
-		if (verbose)
-			line = line + HEADER_PROPERTY;
-
 		line = line + e.getKey() + " = " + e.getValue();
 
 		l.add(line);
@@ -157,7 +145,7 @@ public class KnapsackWriterInput implements WriterInput {
 
 	private void addServiceReference(ServiceReference sr, List<String> l, boolean verbose) {
 		if (verbose)
-			l.add(HEADER_SERVICE + getServiceId(sr) + " \t" + getServiceName(sr));
+			l.add(getServiceId(sr) + " \t" + getServiceName(sr));
 		else
 			l.add(getServiceName(sr));
 	}
@@ -184,9 +172,6 @@ public class KnapsackWriterInput implements WriterInput {
 	private void addConfigEntry(Entry<Object, Object> e, List<String> l, boolean verbose) {
 		String line = "";
 
-		if (verbose)
-			line = line + HEADER_CONFIG;
-
 		line = line + e.getKey() + " = " + e.getValue();
 
 		l.add(line);
@@ -201,7 +186,7 @@ public class KnapsackWriterInput implements WriterInput {
 	 */
 	private void addBundle(Bundle b, List<String> l, boolean verbose) {
 		if (verbose)
-			l.add(HEADER_BUNDLE + getStateName(b.getState()) + " \t" + getBundleName(b) + " \t(" + getBundleVersion(b) + ") \t" + getBundleLocation(b));
+			l.add(getStateName(b.getState()) + " \t" + getBundleName(b) + " \t(" + getBundleVersion(b) + ") \t" + getBundleLocation(b));
 		else
 			l.add(getBundleName(b));
 	}
@@ -290,7 +275,8 @@ public class KnapsackWriterInput implements WriterInput {
 
 		return "UNKNOWN";
 	}
-	private class ComparableLogEntry  implements Comparable, LogEntry {
+	
+	private class ComparableLogEntry  implements Comparable<LogEntry>, LogEntry {
 
 		private final LogEntry entry;
 
@@ -324,7 +310,7 @@ public class KnapsackWriterInput implements WriterInput {
 		}
 
 		@Override
-		public int compareTo(Object o) {
+		public int compareTo(LogEntry o) {
 			if (o instanceof ComparableLogEntry) {
 				long result = this.getTime() - (((ComparableLogEntry) o).getTime());
 				
