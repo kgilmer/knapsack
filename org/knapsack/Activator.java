@@ -17,6 +17,7 @@
 package org.knapsack;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -36,7 +37,7 @@ import org.osgi.service.log.LogService;
 
 /**
  * Activator for Knapsack.  Is not typically called as a regular bundle but via the BootStrap
- * class as a system bundle.
+ * class as part of system bundle.
  * 
  * @author kgilmer
  *
@@ -64,12 +65,18 @@ public class Activator implements BundleActivator, FrameworkListener {
 	private static BundleContext context;
 	private static Config config;
 
-	public Activator() {
+	public Activator() throws IOException {
 		Activator.frameworkLogger = null;
 	}
 	
-	public Activator(Logger logger) {
+	public Activator(Logger logger) throws IOException {
 		Activator.frameworkLogger = logger;
+		config = Config.getRef();
+		if (getInfoFile().exists())
+			throw new IOException("Pipe already exists.  This means a framework is already running or has crashed in the same directory.  Manually remove " + getInfoFile() + " and run again.");
+		
+		if (getControlFile().exists())
+			throw new IOException("Pipe already exists.  This means a framework is already running or has crashed in the same directory.  Manually remove " + getControlFile() + " and run again.");
 	}
 
 	public static BundleContext getContext() {
@@ -89,7 +96,6 @@ public class Activator implements BundleActivator, FrameworkListener {
 	 * Non-persistent thread for bundle initialization.
 	 */
 	private InitThread init;
-	private LogPrinter logPrinter;
 	private static Logger frameworkLogger;
 	private static LogService logService;
 
@@ -100,16 +106,32 @@ public class Activator implements BundleActivator, FrameworkListener {
 	public void start(BundleContext bundleContext) throws Exception {
 		Activator.context = bundleContext;
 		
-		config = Config.getRef();
+		if (config == null)
+			config = Config.getRef();
+		
 		if (config.getBoolean(Config.CONFIG_KEY_LOG_STDOUT))
-			logPrinter = new LogPrinter(bundleContext);
+			new LogPrinter(bundleContext);
 		
 		sizeMap = new HashMap<File, Long>();
 		bundleContext.addFrameworkListener(this);
 		
-		writer = new PipeWriterThread(new File(config.getString(Config.CONFIG_KEY_ROOT_DIR), INFO_FILENAME), new KnapsackWriterInput());
-		reader = new PipeReaderThread(new File(config.getString(Config.CONFIG_KEY_ROOT_DIR), CONTROL_FILENAME), new KnapsackReaderOutput());
+		writer = new PipeWriterThread(getInfoFile(), new KnapsackWriterInput());
+		reader = new PipeReaderThread(getControlFile(), new KnapsackReaderOutput());
 		init = new InitThread(new File(config.getString(Config.CONFIG_KEY_ROOT_DIR)), Arrays.asList(config.getString(Config.CONFIG_KEY_BUNDLE_DIRS).split(",")));
+	}
+	
+	/**
+	 * @return A file that represents the pipe file used for info (out) pipe.
+	 */
+	public static File getInfoFile() {
+		return new File(config.getString(Config.CONFIG_KEY_ROOT_DIR), INFO_FILENAME);
+	}
+	
+	/**
+	 * @return A file that represents the pipe file used for control (in) pipe.
+	 */
+	public static File getControlFile() {
+		return new File(config.getString(Config.CONFIG_KEY_ROOT_DIR), CONTROL_FILENAME);
 	}
 	
 	/*

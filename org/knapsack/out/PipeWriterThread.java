@@ -64,8 +64,9 @@ public class PipeWriterThread extends AbstractPipeThread {
 	 * 
 	 * @param pipe
 	 * @param reader
+	 * @throws IOException 
 	 */
-	public PipeWriterThread(File pipe, WriterInput output) {
+	public PipeWriterThread(File pipe, WriterInput output) throws IOException {
 		super(pipe);
 		this.source = output;
 	}
@@ -73,7 +74,8 @@ public class PipeWriterThread extends AbstractPipeThread {
 	public void run() {
 		File pfile = null;
 		try {
-			pfile = createPipe(pipe);
+			Activator.log(LogService.LOG_DEBUG, "Creating fifo pipe for writing: " + pipe.getAbsolutePath());
+			pfile = createPipe();
 			BufferedWriter bw = null;
 			Iterator<String> contentIterator = null;
 

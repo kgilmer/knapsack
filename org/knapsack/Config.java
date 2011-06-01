@@ -260,7 +260,7 @@ public class Config extends Properties {
 	 * Parse value as boolean.
 	 * 
 	 * @param key
-	 * @return
+	 * @return true if key value is 'true', false otherwise.
 	 */
 	public boolean getBoolean(String key) {
 		if (this.containsKey(key))
@@ -269,6 +269,11 @@ public class Config extends Properties {
 		return false;
 	}
 
+	/**
+	 * Convenience method to return value as a string or null if key doesn't exist.
+	 * @param key
+	 * @return
+	 */
 	public String getString(String key) {	
 		if (this.containsKey(key))
 			return this.get(key).toString();

@@ -31,24 +31,58 @@ import java.io.File;
 import java.io.IOException;
 
 /**
- * Push output of reader to clients on other side of pipe.
+ * Abstract class for filesystem pipes.  Requires that filesystem supports pipes and that 
+ * the mkfifi command is available in the /usr/bin directory of the system.
  * 
  * @author kgilmer
  * 
  */
 public abstract class AbstractPipeThread extends Thread {
 
+	/**
+	 * A default path for the mkfifo command that creates a filesystem pipe.
+	 */
 	private static final String MKFIFO_COMMAND = "/usr/bin/mkfifo";
+	
+	/**
+	 * File that represents the pipe.
+	 */
 	protected final File pipe;
+	
+	/**
+	 * The pipe command that is executed.
+	 */
+	private String mkpipeCommand;
 
 	/**
-	 * Create writer
+	 * Initialize pipe thread, use the default pipe command.
 	 * 
 	 * @param pipe
 	 * @param reader
+	 * @throws IOException 
 	 */
-	public AbstractPipeThread(File pipe) {
+	public AbstractPipeThread(File pipe) throws IOException {
 		this.pipe = pipe;
+		this.mkpipeCommand = MKFIFO_COMMAND;
+		//Test that pipe does not exist
+		if (pipe.exists())
+			throw new IOException("Pipe already exists.  This means a framework is already running or has crashed in the same directory.  Manually remove " + pipe.getAbsolutePath() + " and run again.");
+	}
+	
+	/**
+	 * Initialize pipe thread, specify a pipe command.
+	 * 
+	 * @param pipe
+	 * @param pipeCommand
+	 * @param reader
+	 * @throws IOException 
+	 */
+	public AbstractPipeThread(File pipe, String pipeCommand) throws IOException {
+		this.pipe = pipe;
+		this.mkpipeCommand = pipeCommand;
+		//Test that pipe does not exist, and if it does, refuse to continue.
+		if (pipe.exists())
+			throw new IOException("Pipe already exists.  This means a framework is already running or has crashed in the same directory.  Manually remove " + pipe.getAbsolutePath() + " and run again.");
 	}
 
 	/**
@@ -59,27 +93,29 @@ public abstract class AbstractPipeThread extends Thread {
 	/**
 	 * Create a pipe file
 	 * 
-	 * @param file
+	 * @param pipe
 	 * @return
 	 * @throws IOException
 	 * @throws InterruptedException
 	 */
-	protected File createPipe(File file) throws IOException, InterruptedException {
-		if (!file.getParentFile().exists())
-			if (!file.getParentFile().mkdirs())
-				throw new IOException("Cannot create directory: " + file.getParentFile().getAbsolutePath());
+	protected File createPipe() throws IOException, InterruptedException {
+		//Test that mkfifo is available
+		File mkpipecommand = new File(mkpipeCommand);
+		if (!mkpipecommand.isFile() || !mkpipecommand.canExecute())
+			throw new IOException("Cannot create pipe, mkfifo command is unavailable in " + mkpipeCommand);
+		
+		//Test that pipe dir is there or create
+		if (!pipe.getParentFile().exists())
+			if (!pipe.getParentFile().mkdirs())
+				throw new IOException("Cannot create directory: " + pipe.getParentFile().getAbsolutePath());
 
-		if (file.exists() && file.isFile())
-			if (!file.delete())
-				throw new IOException("Unable to delete existing file before pipe creation: " + file.getAbsolutePath());
-
-		Process p = Runtime.getRuntime().exec(new String[] { MKFIFO_COMMAND, file.getAbsolutePath() });
+		Process p = Runtime.getRuntime().exec(new String[] { mkpipeCommand, pipe.getAbsolutePath() });
 		p.waitFor();
 
 		if (p.exitValue() < 0) {
 			throw new IOException("Unable to create pipe, process returned error exit code: " + p.exitValue());
 		}
 
-		return file;
+		return pipe;
 	}
 }

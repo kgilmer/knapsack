@@ -51,7 +51,7 @@ public class PipeReaderThread extends AbstractPipeThread {
 		public void inputReceived(String input);
 	}
 	
-	public PipeReaderThread(File pipe, ReaderOutput action) {
+	public PipeReaderThread(File pipe, ReaderOutput action) throws IOException {
 		super(pipe);
 		this.pipe = pipe;
 		this.action = action;
@@ -61,7 +61,7 @@ public class PipeReaderThread extends AbstractPipeThread {
 	public void run() {
 		try {
 			Activator.log(LogService.LOG_DEBUG, "Creating fifo pipe for reading: " + pipe.getAbsolutePath());
-			createPipe(pipe);
+			createPipe();
 
 			while (!Thread.interrupted()) {
 				if (pipe == null)

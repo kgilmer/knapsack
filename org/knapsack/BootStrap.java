@@ -37,24 +37,34 @@ import org.osgi.service.log.LogService;
  */
 public class BootStrap {
 
+	/**
+	 * Entry point for the knapsack.  Creates a felix framework and attaches the Log, ConfigAdmin, and Knapsack bundles.  Registers a shutdown hook to cleanup.
+	 * 
+	 * See http://felix.apache.org/site/apache-felix-framework-launching-and-embedding.html
+	 * 
+	 * @param args
+	 * @throws IOException
+	 * @throws BundleException
+	 */
 	public static void main(String[] args) throws IOException, BundleException {
 		long time = System.currentTimeMillis();
 		FrameworkFactory frameworkFactory = new FrameworkFactory();
 
-		// Create initial configuration
-		Config config = Config.getRef();
-
-		Logger logger = new Logger();
+		// Create initial configuration, this will load some values with defaults.
+		Config config = Config.getRef();		
 
 		// Create activators that will start
 		List<BundleActivator> activators = new ArrayList<BundleActivator>();
 
-		if (config.containsKey(Config.CONFIG_KEY_BUILTIN_LOGGER) && config.getBoolean(Config.CONFIG_KEY_BUILTIN_LOGGER))
+		if (config.getBoolean(Config.CONFIG_KEY_BUILTIN_LOGGER))
 			activators.add(new org.apache.felix.log.Activator());
 
-		if (config.containsKey(Config.CONFIG_KEY_BUILTIN_CONFIGADMIN) && config.getBoolean(Config.CONFIG_KEY_BUILTIN_CONFIGADMIN))
+		if (config.getBoolean(Config.CONFIG_KEY_BUILTIN_CONFIGADMIN))
 			activators.add(new ConfigurationManager());
 
+		// Create an internal logger that will be used for log output before LogService takes over.
+		Logger logger = new Logger();
+		
 		activators.add(new org.knapsack.Activator(logger));
 
 		config.put("felix.log.logger", logger);
