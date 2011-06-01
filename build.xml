@@ -1,0 +1,120 @@
+<?xml version="1.0"?>
+<project name="knapsack" default="jar">
+	<property name="project.description" value="Knapsack for Apache Felix" />
+	<property name="external.dir" location="external" />
+	
+	<property name="wget.bin" location="/usr/bin/wget" />
+	<property name="svn.bin" location="/usr/bin/svn" />
+	<property name="git.bin" location="/usr/bin/git" />
+	
+	<property name="knapsack.version" value="0.2.0" />
+	<property name="framework.version" value="3.2.1" />
+	<property name="log.version" value="1.0.1" />
+	<property name="configadmin.version" value="1.2.8" />
+	<property name="compendium.version" value="1.4.0" />
+	
+	<property name="framework.fqpn" value="org.apache.felix.framework" />
+	<property name="log.fqpn" value="org.apache.felix.log" />
+	<property name="configadmin.fqpn" value="org.apache.felix.configadmin" />
+	<property name="compendium.fqpn" value="org.osgi.compendium" />
+	
+	<tstamp>
+    	<format property="TS_NOW" pattern="yyyy-MM-dd HH:mm:ss" />
+   	</tstamp>
+	
+	
+    <target name="clean" description="remove intermediate files">
+        <delete dir="classes"/>
+    	<delete dir="external"/>
+    </target>
+	
+    <target name="clobber" depends="clean" description="remove all artifact files">
+        <delete file="${ant.project.name}.jar"/>
+    </target>
+	
+	<target name="fetch">
+		<mkdir dir="${external.dir}"/>
+		
+		<exec executable="${svn.bin}">
+			<arg value="export" />
+			<arg value="http://svn.apache.org/repos/asf/felix/releases/${framework.fqpn}-${framework.version}" />
+			<arg value="${external.dir}/${framework.fqpn}" />
+		</exec>
+		
+		<exec executable="${svn.bin}">
+			<arg value="export" />
+			<arg value="http://svn.apache.org/repos/asf/felix/releases/${log.fqpn}-${log.version}" />
+			<arg value="${external.dir}/${log.fqpn}" />
+		</exec>
+		
+		<exec executable="${svn.bin}">
+			<arg value="export" />
+			<arg value="http://svn.apache.org/repos/asf/felix/releases/${configadmin.fqpn}-${configadmin.version}" />
+			<arg value="${external.dir}/${configadmin.fqpn}" />
+		</exec>
+		
+		<exec executable="${svn.bin}">
+			<arg value="export" />
+			<arg value="http://svn.apache.org/repos/asf/felix/releases/${compendium.fqpn}-${compendium.version}" />
+			<arg value="${external.dir}/${compendium.fqpn}" />
+		</exec>
+		
+		<exec executable="${git.bin}">
+			<arg value="clone" />
+			<arg value="git://github.com/kgilmer/Sprinkles.git" />
+			<arg value="${external.dir}/sprinkles" />
+		</exec>
+		
+	</target>
+	
+	<target name="stage" depends="fetch">
+		<copy toDir=".">
+			<fileset dir="${external.dir}/${framework.fqpn}/src/main/java" includes="**/*.java" />
+			<fileset dir="${external.dir}/${log.fqpn}/src/main/java" includes="**/*.java" />
+			<fileset dir="${external.dir}/${configadmin.fqpn}/src/main/java" includes="**/*.java" />
+			<fileset dir="${external.dir}/${compendium.fqpn}/src/main/java" includes="org/osgi/service/cm/*.java, org/osgi/service/log/*.java" />
+			<fileset dir="${external.dir}/sprinkles/src" includes="**/*.java" />
+		</copy>		
+	</target>
+	
+    <target name="compile" depends="stage" description="compile the Java source code to class files">
+        <mkdir dir="classes"/>
+        <javac srcdir="." destdir="classes" source="1.6" target="1.6" encoding="utf-8" fork="true" >	
+        	<include name="org/**" />
+        	<exclude name="${external.dir}/**" />
+        </javac>
+    </target>
+	
+    <target name="jar" depends="compile" description="create a Jar file for the application">
+    	<mkdir dir="classes/scripts"/>
+    	<copy toDir="classes/scripts/">
+    		<fileset dir="scripts" />
+    	</copy>
+    	<manifest file="META-INF/MANIFEST.MF" mode="update">
+    		<attribute name="Bundle-Version" value="${knapsack.version}"/>
+    		<attribute name="Felix-Framework-Version" value="${framework.version}"/>
+    		<attribute name="OSGi-Compendium-Version" value="${compendium.version}"/>
+			<attribute name="Felix-ConfigAdmin-Version" value="${configadmin.version}"/>
+			<attribute name="Felix-Log-Version" value="${log.version}"/>
+    		<attribute name="Built-By" value="${user.name}"/>
+    		<attribute name="Built-Date" value="${TS_NOW}"/>
+    	</manifest>
+        <jar destfile="${ant.project.name}.jar" manifest="META-INF/MANIFEST.MF">
+            <fileset dir="classes" includes="**/*.class,**/*.sh"/>        	    
+        	<filename name="LICENSE-2.0.txt"/>
+        </jar>
+    </target>
+	
+	<target name="javadoc" depends="jar">
+		 <javadoc 
+		           sourcepath="."
+		           packagenames="org.knapsack*, org.knapsack.*"
+		           defaultexcludes="yes"
+		           destdir="docs/"
+		           author="true"
+		           version="true"
+		           use="true"
+		           windowtitle="${project.description}">		   
+		  </javadoc>
+	</target>
+</project>
