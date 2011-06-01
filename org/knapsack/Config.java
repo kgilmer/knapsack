@@ -234,8 +234,9 @@ public class Config extends Properties {
 		
 		OutputStream fos = new FileOutputStream(rootDir);
 		
-		while (istream.read(buff) > -1) {
-			fos.write(buff);
+		int len = 0;
+		while ((len = istream.read(buff)) > -1) {
+			fos.write(buff, 0, len);
 		}
 		
 		istream.close();
