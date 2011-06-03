@@ -123,6 +123,8 @@ public class Config extends Properties {
 			"ks-services.sh",
 			"ks-shutdown.sh"
 	};
+
+	private static final String DEFAULT_CONFIGURATION = "/default.conf";
 	
 	public static Config getRef() throws IOException {
 		if (ref == null)
@@ -230,7 +232,10 @@ public class Config extends Properties {
 	 */
 	private void copyDefaultConfiguration(File rootDir) throws IOException {
 		byte [] buff = new byte[4096];
-		InputStream istream = Config.class.getResourceAsStream("/default.conf");
+		InputStream istream = Config.class.getResourceAsStream(DEFAULT_CONFIGURATION);
+		
+		if (istream == null)
+			throw new IOException("Default configuration resource is not present: " + DEFAULT_CONFIGURATION);
 		
 		OutputStream fos = new FileOutputStream(rootDir);
 		

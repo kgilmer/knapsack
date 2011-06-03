@@ -100,7 +100,7 @@
     		<attribute name="Built-Date" value="${TS_NOW}"/>
     	</manifest>
         <jar destfile="${ant.project.name}.jar" manifest="META-INF/MANIFEST.MF">
-            <fileset dir="classes" includes="**/*.class,**/*.sh"/>        	    
+            <fileset dir="classes" includes="**/*.class,**/*.sh,**/*.conf"/>        	    
         	<filename name="LICENSE-2.0.txt"/>
         </jar>
     </target>
