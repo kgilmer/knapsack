@@ -87,7 +87,7 @@ public class Config extends Properties {
 	/**
 	 * Name of knapsack's configuration file
 	 */
-	private static final String CONFIGURATION_FILENAME = "knapsack.conf";
+	private static final String CONFIGURATION_FILENAME = "felix.conf";
 
 	/**
 	 * If true the internal Logger will be started with the framework.
@@ -124,7 +124,8 @@ public class Config extends Properties {
 			"ks-shutdown.sh"
 	};
 
-	private static final String DEFAULT_CONFIGURATION = "/default.conf";
+	private static final String FELIX_CONFIGURATION = "/felix.conf";
+	private static final String KNAPSACK_CONFIGURATION = "/knapsack.conf";
 	
 	public static Config getRef() throws IOException {
 		if (ref == null)
@@ -146,7 +147,12 @@ public class Config extends Properties {
 		
 		if (!confFile.exists()) {
 			//Create a default configuration
-			copyDefaultConfiguration(confFile);
+			copyDefaultConfiguration(FELIX_CONFIGURATION, confFile, true);
+			File kc = getCreateKnapsackDefault(getInitRootDirectory());
+			
+			if (!kc.exists())
+				copyDefaultConfiguration(KNAPSACK_CONFIGURATION, kc, false);
+			
 			copyScripts(confFile.getParentFile());
 		}
 		
@@ -161,6 +167,16 @@ public class Config extends Properties {
 			this.put(CONFIG_KEY_BUNDLE_DIRS, DEFAULT_BUNDLE_DIRECTORY);
 	}
 	
+	private File getCreateKnapsackDefault(String initRootDirectory) throws IOException {
+		File defDir = new File(initRootDirectory, Activator.DEFAULT_FILENAME);
+		
+		if (!defDir.exists())
+			if (!defDir.mkdirs())
+				throw new IOException("Unable to create directory: " + defDir);
+		
+		return new File(defDir, Activator.KNAPSACK_PID);
+	}
+
 	/**
 	 * Copy shell scripts from the Jar into the deployment directory.
 	 * @param parentFile
@@ -230,12 +246,12 @@ public class Config extends Properties {
 	 * @return
 	 * @throws IOException 
 	 */
-	private void copyDefaultConfiguration(File confFile) throws IOException {
+	private void copyDefaultConfiguration(String inFile, File confFile, boolean addCmDir) throws IOException {
 		byte [] buff = new byte[4096];
-		InputStream istream = Config.class.getResourceAsStream(DEFAULT_CONFIGURATION);
+		InputStream istream = Config.class.getResourceAsStream(inFile);
 		
 		if (istream == null)
-			throw new IOException("Default configuration resource is not present: " + DEFAULT_CONFIGURATION);
+			throw new IOException("Configuration resource is not present: " + inFile);
 		
 		OutputStream fos = new FileOutputStream(confFile);
 		
@@ -244,8 +260,10 @@ public class Config extends Properties {
 			fos.write(buff, 0, len);
 		}
 		
-		//Since this property is not static, create dynamically.  If multiple properties need to be set dynamically in the future, consider using a template format.
-		fos.write(("\nfelix.cm.dir = " + getInitRootDirectory() + File.separator + Activator.CONFIGADMIN_FILENAME + "\n").getBytes());
+		if (addCmDir) {
+			//Since this property is not static, create dynamically.  If multiple properties need to be set dynamically in the future, consider using a template format.
+			fos.write(("\nfelix.cm.dir = " + getInitRootDirectory() + File.separator + Activator.CONFIGADMIN_FILENAME + "\n").getBytes());
+		}
 		
 		istream.close();
 		fos.close();

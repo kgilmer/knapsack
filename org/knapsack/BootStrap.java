@@ -19,6 +19,7 @@ package org.knapsack;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 import org.apache.felix.cm.impl.ConfigurationManager;
 import org.apache.felix.framework.FrameworkFactory;
@@ -51,7 +52,7 @@ public class BootStrap {
 		FrameworkFactory frameworkFactory = new FrameworkFactory();
 
 		// Create initial configuration, this will load some values with defaults.
-		Config config = Config.getRef();		
+		Config config = Config.getRef();	
 
 		// Create activators that will start
 		List<BundleActivator> activators = new ArrayList<BundleActivator>();

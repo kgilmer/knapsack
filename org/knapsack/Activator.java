@@ -19,8 +19,11 @@ package org.knapsack;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Dictionary;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 
 import org.apache.felix.framework.Logger;
 import org.knapsack.in.KnapsackReaderOutput;
@@ -30,10 +33,14 @@ import org.knapsack.out.KnapsackWriterInput;
 import org.knapsack.out.PipeWriterThread;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
 import org.osgi.framework.FrameworkEvent;
 import org.osgi.framework.FrameworkListener;
 import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.cm.ConfigurationAdmin;
+import org.osgi.service.cm.ConfigurationException;
+import org.osgi.service.cm.ManagedService;
 import org.osgi.service.log.LogService;
 import org.sprinkles.Fn;
 import org.sprinkles.functions.ReturnFilesFunction;
@@ -45,7 +52,7 @@ import org.sprinkles.functions.ReturnFilesFunction;
  * @author kgilmer
  *
  */
-public class Activator implements BundleActivator, FrameworkListener {
+public class Activator implements BundleActivator, FrameworkListener, ManagedService {
 	/**
 	 * Filename for read-only pipe.
 	 */
@@ -73,6 +80,7 @@ public class Activator implements BundleActivator, FrameworkListener {
 	 * This should be in sync with manifest version.
 	 */
 	public static final String KNAPSACK_VERSION = "0.3.0";
+	public static final String KNAPSACK_PID = "org.knapsack";
 	
 	private static BundleContext context;
 	private static Config config;
@@ -107,6 +115,7 @@ public class Activator implements BundleActivator, FrameworkListener {
 	 * Non-persistent thread for bundle initialization.
 	 */
 	private InitThread init;
+	private ServiceRegistration sr;
 	private static Logger frameworkLogger;
 	private static LogService logService;
 
@@ -120,15 +129,7 @@ public class Activator implements BundleActivator, FrameworkListener {
 		if (config == null)
 			config = Config.getRef();
 		
-		if (config.getBoolean(Config.CONFIG_KEY_LOG_STDOUT))
-			new LogPrinter(bundleContext);
-		
-		sizeMap = new HashMap<File, Long>();
-		bundleContext.addFrameworkListener(this);
-		
-		writer = new PipeWriterThread(getInfoFile(), new KnapsackWriterInput());
-		reader = new PipeReaderThread(getControlFile(), new KnapsackReaderOutput());
-		init = new InitThread(new File(config.getString(Config.CONFIG_KEY_ROOT_DIR)), Arrays.asList(config.getString(Config.CONFIG_KEY_BUNDLE_DIRS).split(",")));
+		sr = bundleContext.registerService(ManagedService.class.getName(), this, getManagedServiceProperties());
 		
 		if (embeddedMode && defaultDirExists()) {
 			ServiceReference sr = bundleContext.getServiceReference(ConfigurationAdmin.class.getName());
@@ -139,6 +140,12 @@ public class Activator implements BundleActivator, FrameworkListener {
 		}
 	}
 	
+	private Dictionary getManagedServiceProperties() {
+		Dictionary d = new Properties();
+		d.put(Constants.SERVICE_PID, KNAPSACK_PID);
+		return d;
+	}
+
 	private void loadDefaults(File defaultDir, ConfigurationAdmin ca) {
 
 		Fn.map(new LoadDefaultsFunction(ca, frameworkLogger), Fn.map(
@@ -184,6 +191,8 @@ public class Activator implements BundleActivator, FrameworkListener {
 		
 		if (reader != null);
 			reader.shutdown();
+			
+		sr.unregister();
 	
 		Activator.context = null;
 	}
@@ -246,9 +255,24 @@ public class Activator implements BundleActivator, FrameworkListener {
 	public void frameworkEvent(FrameworkEvent event) {
 		if (event.getType() == FrameworkEvent.STARTED) {
 			log(LogService.LOG_INFO, "Knapsack " + KNAPSACK_VERSION + " starting in " + config.get(Config.CONFIG_KEY_ROOT_DIR));
-			writer.start();
-			reader.start();
-			init.start();
+			if (config.getBoolean(Config.CONFIG_KEY_LOG_STDOUT))
+				new LogPrinter(context);
+			
+			sizeMap = new HashMap<File, Long>();
+			context.addFrameworkListener(this);
+			
+			try {
+				writer = new PipeWriterThread(getInfoFile(), new KnapsackWriterInput());
+				reader = new PipeReaderThread(getControlFile(), new KnapsackReaderOutput());
+				init = new InitThread(new File(config.getString(Config.CONFIG_KEY_ROOT_DIR)), Arrays.asList(config.getString(Config.CONFIG_KEY_BUNDLE_DIRS).split(",")));
+				
+				
+				writer.start();
+				reader.start();
+				init.start();
+			} catch (IOException e) {
+				log(LogService.LOG_ERROR, "Failed to start knapsack.", e);
+			}
 		}
 	}
 	
@@ -257,5 +281,17 @@ public class Activator implements BundleActivator, FrameworkListener {
 	 */
 	public static Map<File, Long> getBundleSizeMap() {
 		return sizeMap;
+	}
+
+	@Override
+	public void updated(Dictionary properties) throws ConfigurationException {
+		Enumeration i = properties.keys();
+			
+		while (i.hasMoreElements()) {
+			Object key = i.nextElement();
+			String val = properties.get(key).toString();
+			
+			config.put(key, val);
+		}
 	}
 }
