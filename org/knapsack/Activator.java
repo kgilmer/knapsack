@@ -33,7 +33,10 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkEvent;
 import org.osgi.framework.FrameworkListener;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.log.LogService;
+import org.sprinkles.Fn;
+import org.sprinkles.functions.ReturnFilesFunction;
 
 /**
  * Activator for Knapsack.  Is not typically called as a regular bundle but via the BootStrap
@@ -46,11 +49,20 @@ public class Activator implements BundleActivator, FrameworkListener {
 	/**
 	 * Filename for read-only pipe.
 	 */
-	private static final String INFO_FILENAME = "info";
+	protected static final String INFO_FILENAME = "info";
 	/**
 	 * Filename for write-only pipe.
 	 */
-	private static final String CONTROL_FILENAME = "control";
+	protected static final String CONTROL_FILENAME = "control";
+	/**
+	 * Filename for defaults directory.
+	 */
+	protected static final String DEFAULT_FILENAME = "default";
+	
+	/**
+	 * Filename for config admin directory.
+	 */
+	public static final String CONFIGADMIN_FILENAME = "configAdmin";
 	
 	/**
 	 * Store all the bundle sizes at time of install to compare later for updates.
@@ -64,6 +76,7 @@ public class Activator implements BundleActivator, FrameworkListener {
 	
 	private static BundleContext context;
 	private static Config config;
+	private boolean embeddedMode = false;
 
 	public Activator() throws IOException {
 		Activator.frameworkLogger = null;
@@ -71,12 +84,10 @@ public class Activator implements BundleActivator, FrameworkListener {
 	
 	public Activator(Logger logger) throws IOException {
 		Activator.frameworkLogger = logger;
+		embeddedMode  = true;
 		config = Config.getRef();
-		if (getInfoFile().exists())
-			throw new IOException("Pipe already exists.  This means a framework is already running or has crashed in the same directory.  Manually remove " + getInfoFile() + " and run again.");
-		
-		if (getControlFile().exists())
-			throw new IOException("Pipe already exists.  This means a framework is already running or has crashed in the same directory.  Manually remove " + getControlFile() + " and run again.");
+		if (getInfoFile().exists() || getControlFile().exists())
+			throw new IOException("Pipe already exists in " + config.getString(Config.CONFIG_KEY_ROOT_DIR) + ".  This means a framework is already running or has crashed in the same directory.  Shutdown existing framework or manually remove " + getInfoFile() + " and " +  getControlFile() + ", then run again.");	
 	}
 
 	public static BundleContext getContext() {
@@ -118,8 +129,37 @@ public class Activator implements BundleActivator, FrameworkListener {
 		writer = new PipeWriterThread(getInfoFile(), new KnapsackWriterInput());
 		reader = new PipeReaderThread(getControlFile(), new KnapsackReaderOutput());
 		init = new InitThread(new File(config.getString(Config.CONFIG_KEY_ROOT_DIR)), Arrays.asList(config.getString(Config.CONFIG_KEY_BUNDLE_DIRS).split(",")));
+		
+		if (embeddedMode && defaultDirExists()) {
+			ServiceReference sr = bundleContext.getServiceReference(ConfigurationAdmin.class.getName());
+			if (sr != null) {
+				ConfigurationAdmin ca = (ConfigurationAdmin) bundleContext.getService(sr);
+				loadDefaults(getDefaultDir(), ca);
+			}
+		}
 	}
 	
+	private void loadDefaults(File defaultDir, ConfigurationAdmin ca) {
+
+		Fn.map(new LoadDefaultsFunction(ca, frameworkLogger), Fn.map(
+				ReturnFilesFunction.GET_FILES_FN, defaultDir));
+	}
+
+	/**
+	 * @return File (that may or may not exist) of default dir.
+	 */
+	private File getDefaultDir() {
+		return new File(config.getString(Config.CONFIG_KEY_ROOT_DIR), DEFAULT_FILENAME);
+	}
+
+	/**
+	 * @return true if 'default' directory exists
+	 */
+	private boolean defaultDirExists() {
+		File d = getDefaultDir();
+		return d != null && d.isDirectory();
+	}
+
 	/**
 	 * @return A file that represents the pipe file used for info (out) pipe.
 	 */

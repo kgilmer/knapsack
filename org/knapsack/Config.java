@@ -226,23 +226,26 @@ public class Config extends Properties {
 	/**
 	 * Generate the default configuration.
 	 * 
-	 * @param rootDir
+	 * @param confFile
 	 * @return
 	 * @throws IOException 
 	 */
-	private void copyDefaultConfiguration(File rootDir) throws IOException {
+	private void copyDefaultConfiguration(File confFile) throws IOException {
 		byte [] buff = new byte[4096];
 		InputStream istream = Config.class.getResourceAsStream(DEFAULT_CONFIGURATION);
 		
 		if (istream == null)
 			throw new IOException("Default configuration resource is not present: " + DEFAULT_CONFIGURATION);
 		
-		OutputStream fos = new FileOutputStream(rootDir);
+		OutputStream fos = new FileOutputStream(confFile);
 		
 		int len = 0;
 		while ((len = istream.read(buff)) > -1) {
 			fos.write(buff, 0, len);
 		}
+		
+		//Since this property is not static, create dynamically.  If multiple properties need to be set dynamically in the future, consider using a template format.
+		fos.write(("\nfelix.cm.dir = " + getInitRootDirectory() + File.separator + Activator.CONFIGADMIN_FILENAME + "\n").getBytes());
 		
 		istream.close();
 		fos.close();

@@ -24,7 +24,6 @@ import java.util.Map;
 
 import org.knapsack.Activator;
 import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.service.log.LogService;
 import org.sprinkles.Fn;
