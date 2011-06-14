@@ -24,10 +24,12 @@ public class LoadDefaultsFunction implements Function<File, File> {
 
 	private final ConfigurationAdmin ca;
 	private final Logger log;
+	private final boolean overwriteConfiguration;
 
-	public LoadDefaultsFunction(ConfigurationAdmin ca, Logger frameworkLogger) {
+	public LoadDefaultsFunction(ConfigurationAdmin ca, Logger frameworkLogger, boolean overwriteConfiguration) {
 		this.ca = ca;
-		this.log = frameworkLogger;		
+		this.log = frameworkLogger;
+		this.overwriteConfiguration = overwriteConfiguration;		
 	}
 
 	@Override
@@ -50,7 +52,7 @@ public class LoadDefaultsFunction implements Function<File, File> {
 		String pid = f.getName();
 		
 		//Only set the configuration if it does not already exist.
-		if (!isPIDEmpty(pid)) {
+		if (!overwriteConfiguration && !isPIDEmpty(pid)) {
 			log.log(LogService.LOG_INFO, "Ignoring defaults for PID " + pid + ", configuration has data.");
 			return;
 		}

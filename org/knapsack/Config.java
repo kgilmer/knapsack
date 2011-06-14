@@ -89,6 +89,8 @@ public class Config extends Properties {
 	 */
 	private static final String CONFIGURATION_FILENAME = "felix.conf";
 
+	public static final String CONFIG_KEY_OVERWRITE_CONFIGADMIN = "org.knapsack.configAdmin.overwrite";
+	
 	/**
 	 * If true the internal Logger will be started with the framework.
 	 */

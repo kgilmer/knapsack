@@ -130,6 +130,7 @@ public class Activator implements BundleActivator, FrameworkListener, ManagedSer
 			config = Config.getRef();
 		
 		sr = bundleContext.registerService(ManagedService.class.getName(), this, getManagedServiceProperties());
+		context.addFrameworkListener(this);
 		
 		if (embeddedMode && defaultDirExists()) {
 			ServiceReference sr = bundleContext.getServiceReference(ConfigurationAdmin.class.getName());
@@ -148,7 +149,7 @@ public class Activator implements BundleActivator, FrameworkListener, ManagedSer
 
 	private void loadDefaults(File defaultDir, ConfigurationAdmin ca) {
 
-		Fn.map(new LoadDefaultsFunction(ca, frameworkLogger), Fn.map(
+		Fn.map(new LoadDefaultsFunction(ca, frameworkLogger, config.getBoolean(Config.CONFIG_KEY_OVERWRITE_CONFIGADMIN)), Fn.map(
 				ReturnFilesFunction.GET_FILES_FN, defaultDir));
 	}
 
@@ -259,13 +260,11 @@ public class Activator implements BundleActivator, FrameworkListener, ManagedSer
 				new LogPrinter(context);
 			
 			sizeMap = new HashMap<File, Long>();
-			context.addFrameworkListener(this);
 			
 			try {
 				writer = new PipeWriterThread(getInfoFile(), new KnapsackWriterInput());
 				reader = new PipeReaderThread(getControlFile(), new KnapsackReaderOutput());
 				init = new InitThread(new File(config.getString(Config.CONFIG_KEY_ROOT_DIR)), Arrays.asList(config.getString(Config.CONFIG_KEY_BUNDLE_DIRS).split(",")));
-				
 				
 				writer.start();
 				reader.start();
