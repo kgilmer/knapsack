@@ -18,7 +18,7 @@ package org.knapsack.init;
 
 import java.io.File;
 
-import org.knapsack.out.KnapsackWriterInput;
+import org.knapsack.shell.BuiltinCommands;
 import org.osgi.framework.Bundle;
 
 /**
@@ -46,6 +46,6 @@ class BundleJarWrapper {
 	
 	@Override
 	public String toString() {
-		return KnapsackWriterInput.getBundleName(bundle);
+		return BuiltinCommands.getBundleName(bundle);
 	}
 }

@@ -1,15 +1,19 @@
 package org.knapsack.shell;
 
+import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Map.Entry;
 
+import org.knapsack.Config;
+import org.knapsack.init.InitThread;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.log.LogEntry;
@@ -36,8 +40,27 @@ public class BuiltinCommands implements IKnapsackCommandProvider {
 		cmds.add(new BundlesCommand());
 		cmds.add(new ServicesCommand());
 		cmds.add(new LogCommand());
+		cmds.add(new UpdateCommand());
 
 		return cmds;
+	}
+	
+	private class UpdateCommand extends AbstractKnapsackCommand {
+
+		@Override
+		public String execute() throws Exception {
+			Config config = Config.getRef();
+			
+			InitThread init = new InitThread(new File(config.getString(Config.CONFIG_KEY_ROOT_DIR)), Arrays.asList(config.getString(Config.CONFIG_KEY_BUNDLE_DIRS).split(",")));
+			init.start();
+			
+			return "Rescanning and updating bundles from configured directories.";
+		}
+
+		@Override
+		public String getName() {
+			return "update";
+		}
 	}
 	
 	///  Commands
