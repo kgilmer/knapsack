@@ -53,37 +53,12 @@ public class Config extends Properties {
 	 * Optional system property that defines root directory where knapsack runs.
 	 */
 	public static final String CONFIG_KEY_ROOT_DIR = "org.knapsack.rootDir";
-	/**
-	 * Emit bundle info in pipe
-	 */
-	public static final String CONFIG_KEY_OUT_BUNDLE = "org.knapsack.bundle";
-	/**
-	 * Emit service info in pipe
-	 */
-	public static final String CONFIG_KEY_OUT_SERVICE = "org.knapsack.service";
-	/**
-	 * Emit system property info in pipe
-	 */
-	public static final String CONFIG_KEY_OUT_PROPERTY = "org.knapsack.property";
-	/**
-	 * Emit config info in pipe
-	 */
-	public static final String CONFIG_KEY_OUT_CONFIG = "org.knapsack.config";
-	/**
-	 * Emit log info in pipe
-	 */
-	public static final String CONFIG_KEY_OUT_LOG = "org.knapsack.log";
-	
+
 	/**
 	 * Emit log events to stdout
 	 */
 	public static final String CONFIG_KEY_LOG_STDOUT = "org.knapsack.log.stdout";
 
-	/**
-	 * Emit verbose messages in pipe
-	 */
-	public static final String CONFIG_KEY_VERBOSE = "org.knapsack.output.verbose";
-	
 	/**
 	 * Name of knapsack's configuration file
 	 */
@@ -117,23 +92,19 @@ public class Config extends Properties {
 	private static Config ref;
 	
 	private final static String baseScript = "knapsack-command.sh";
-	private final static String [] symlinks = {
-		"bundles",
-		"services",
-		"log",
-		"shutdown",
-		"update"
-	};
 
 	private static final String FELIX_CONFIGURATION = "/felix.conf";
-	private static final String KNAPSACK_CONFIGURATION = "/knapsack.conf";
 	
-	public static Config getRef() throws IOException, InterruptedException {
+	public static Config getRef() throws IOException {
 		if (ref == null)
 			ref = new Config();
 		
 		return ref;
 	}
+
+	private File scriptDir;
+
+	private File baseScriptFile;
 
 	/**
 	 * Initialize state
@@ -141,7 +112,7 @@ public class Config extends Properties {
 	 * @throws IOException
 	 * @throws InterruptedException 
 	 */
-	private Config() throws IOException, InterruptedException {		
+	private Config() throws IOException {		
 		File confFile = getConfigFile();
 		
 		if (confFile.isDirectory())
@@ -150,10 +121,7 @@ public class Config extends Properties {
 		if (!confFile.exists()) {
 			//Create a default configuration
 			copyDefaultConfiguration(FELIX_CONFIGURATION, confFile, true);
-			File kc = getCreateKnapsackDefault(getInitRootDirectory());
-			
-			if (!kc.exists())
-				copyDefaultConfiguration(KNAPSACK_CONFIGURATION, kc, false);
+			getCreateDefaultDir(getInitRootDirectory());			
 			
 			copyScripts(confFile.getParentFile());
 		}
@@ -169,14 +137,14 @@ public class Config extends Properties {
 			this.put(CONFIG_KEY_BUNDLE_DIRS, DEFAULT_BUNDLE_DIRECTORY);
 	}
 	
-	private File getCreateKnapsackDefault(String initRootDirectory) throws IOException {
+	private File getCreateDefaultDir(String initRootDirectory) throws IOException {
 		File defDir = new File(initRootDirectory, Activator.DEFAULT_FILENAME);
 		
 		if (!defDir.exists())
 			if (!defDir.mkdirs())
 				throw new IOException("Unable to create directory: " + defDir);
 		
-		return new File(defDir, Activator.KNAPSACK_PID);
+		return defDir;
 	}
 
 	/**
@@ -185,27 +153,56 @@ public class Config extends Properties {
 	 * @throws IOException
 	 * @throws InterruptedException 
 	 */
-	private void copyScripts(File parentFile) throws IOException, InterruptedException {
-		File scriptDir = new File(parentFile, "bin");
+	private void copyScripts(File parentFile) throws IOException {
+		scriptDir = new File(parentFile, "bin");
 		
 		if (!scriptDir.exists())
 			if (!scriptDir.mkdirs())
 				throw new IOException("Unable to create directories: " + scriptDir);
 		
-		File f = new File(scriptDir, baseScript);
+		baseScriptFile = new File(scriptDir, baseScript);
 		
-		if (!f.exists()) {	
+		if (!baseScriptFile.exists()) {	
 			InputStream istream = Config.class.getResourceAsStream("/scripts/" + baseScript);
 			if (istream == null)
-				throw new IOException("Script file does not exist: " + f);
+				throw new IOException("Script file does not exist: " + baseScriptFile);
 			
-			writeToFile(f, istream);
-			f.setExecutable(true, true);
+			writeToFile(baseScriptFile, istream);
+			baseScriptFile.setExecutable(true, true);
 		}
+	}
+	
+	/**
+	 * Generate the filesystem symlink necessary to allow a command to be called from the shell environment.
+	 * @param commandName
+	 * @throws IOException
+	 */
+	public void createFilesystemCommand(String commandName) throws IOException {
+		File sf = new File(scriptDir, commandName);
 		
-		for (String script : Arrays.asList(symlinks)) {
-			createSymlink(f.getAbsolutePath(), f.getParent() + File.separator + script);
-		}
+		if (sf.exists())
+			throw new IOException(commandName + " already exists in " + scriptDir);
+		
+		try {
+			createSymlink(baseScriptFile.getAbsolutePath(), scriptDir + File.separator + commandName);
+		} catch (InterruptedException e) {
+			throw new IOException("Process was interrupted.", e);
+		}		
+	}
+	
+	/**
+	 * Delete the filesystem symlink for a command.
+	 * @param commandName
+	 * @throws IOException
+	 */
+	public void deleteFilesystemCommand(String commandName) throws IOException {
+		File cmd = new File(scriptDir, commandName);
+		
+		if (!cmd.exists() || !cmd.isFile())
+			throw new IOException("Invalid file: " + cmd);
+		
+		if (!cmd.delete())
+			throw new IOException("Failed to delete " + cmd);
 	}
 
 	private void createSymlink(String baseFile, String link) throws InterruptedException, IOException {

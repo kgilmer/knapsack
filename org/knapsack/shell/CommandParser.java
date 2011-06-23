@@ -28,13 +28,13 @@
 package org.knapsack.shell;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
+import org.knapsack.Config;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
@@ -58,8 +58,11 @@ public class CommandParser implements ServiceListener {
 
 	private final LogService log;
 
-	protected CommandParser(final BundleContext context, final LogService log) {
+	private Config config;
+
+	protected CommandParser(final BundleContext context, final LogService log) throws IOException {
 		this.context = context;
+		this.config = Config.getRef();
 		this.log = log;
 		commands = new Hashtable<String, IKnapsackCommand>();
 		
@@ -74,7 +77,7 @@ public class CommandParser implements ServiceListener {
 						if (commands.containsKey(cmd.getName())) {
 							log.log(LogService.LOG_WARNING, "A shell command named " + cmd.getName() + " has already been registered.  Ignoring second registration.");
 						} else {
-							commands.put(cmd.getName(), cmd);
+							addCommand(cmd);
 						}
 					
 					return service;
@@ -149,7 +152,7 @@ public class CommandParser implements ServiceListener {
 				if (commands.containsKey(cmd.getName())) {
 					log.log(LogService.LOG_WARNING, "A shell command named " + cmd.getName() + " has already been registered.  Ignoring second registration.");
 				} else {
-					commands.put(cmd.getName(), cmd);
+					addCommand(cmd);				
 				}
 			}
 		} else if (type == ServiceEvent.UNREGISTERING) {
@@ -159,7 +162,7 @@ public class CommandParser implements ServiceListener {
 
 				for (IKnapsackCommand cmd : provider.getCommands()) {				
 					log.log(LogService.LOG_DEBUG, "Unregistering command " + cmd.getName());
-					commands.remove(cmd.getName());
+					removeCommand(cmd);
 				}
 			}
 		}
@@ -167,5 +170,23 @@ public class CommandParser implements ServiceListener {
 	
 	protected Map<String, IKnapsackCommand> getCommands() {
 		return Collections.unmodifiableMap(commands);
+	}
+	
+	private void addCommand(IKnapsackCommand command) {
+		commands.put(command.getName(), command);
+		try {
+			config.createFilesystemCommand(command.getName());
+		} catch (IOException e) {
+			log.log(LogService.LOG_ERROR, "Error while registering command " + command.getName(), e);
+		}
+	}
+	
+	private void removeCommand(IKnapsackCommand command) {
+		commands.remove(command.getName());
+		try {
+			config.deleteFilesystemCommand(command.getName());
+		} catch (IOException e) {
+			log.log(LogService.LOG_ERROR, "Error while unregistering command " + command.getName(), e);
+		}
 	}
 }

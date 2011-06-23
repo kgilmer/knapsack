@@ -101,7 +101,7 @@
     	</manifest>
 		<jar destfile="${ant.project.name}.jar" manifest="META-INF/MANIFEST.MF">
 		    <fileset dir="classes" includes="**/*.class,**/*.sh"/>        	    
-			<fileset dir="." includes="default.conf,LICENSE-2.0.txt"/>
+			<fileset dir="." includes="conf/*.conf,LICENSE-2.0.txt"/>
 		</jar>
     </target>
 	

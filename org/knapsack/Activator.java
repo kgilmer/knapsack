@@ -76,7 +76,7 @@ public class Activator implements BundleActivator, FrameworkListener, ManagedSer
 	/**
 	 * This should be in sync with manifest version.
 	 */
-	public static final String KNAPSACK_VERSION = "0.3.0";
+	public static final String KNAPSACK_VERSION = "0.4.0";
 	public static final String KNAPSACK_PID = "org.knapsack";
 	
 	private static BundleContext context;
@@ -286,6 +286,9 @@ public class Activator implements BundleActivator, FrameworkListener, ManagedSer
 
 	@Override
 	public void updated(Dictionary properties) throws ConfigurationException {
+		if (properties == null)
+			return;
+		
 		Enumeration i = properties.keys();
 			
 		while (i.hasMoreElements()) {
