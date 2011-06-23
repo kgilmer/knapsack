@@ -80,7 +80,7 @@ public class KnapsackWriterInput implements WriterInput {
 					for (ServiceReference sr : Arrays.asList(srs))
 						addServiceReference(sr, l, verbose);
 			} catch (InvalidSyntaxException e) {
-				Activator.log(LogService.LOG_ERROR, e.getMessage(), e);
+				Activator.logError(e.getMessage(), e);
 			}
 		}
 

@@ -62,7 +62,7 @@ public class KnapsackReaderOutput implements ReaderOutput {
 			return;
 		}
 		
-		Activator.log(LogService.LOG_ERROR, "Invalid config line: " + input);
+		Activator.logError("Invalid config line: " + input);
 	}
 
 	private String getToken(String input, int index, String delim) {
@@ -88,7 +88,7 @@ public class KnapsackReaderOutput implements ReaderOutput {
 		try {
 			context.getBundle(0).start();
 		} catch (BundleException e) {
-			Activator.log(LogService.LOG_ERROR, "Error occurred while starting system bundle.", e);
+			Activator.logError("Error occurred while starting system bundle.", e);
 		}
 	}
 
@@ -101,7 +101,7 @@ public class KnapsackReaderOutput implements ReaderOutput {
 		try {
 			context.getBundle(0).stop();
 		} catch (BundleException e) {
-			Activator.log(LogService.LOG_ERROR, "Error occurred while stopping system bundle.", e);
+			Activator.logError("Error occurred while stopping system bundle.", e);
 		}
 	}
 

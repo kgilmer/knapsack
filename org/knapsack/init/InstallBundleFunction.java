@@ -55,14 +55,14 @@ class InstallBundleFunction implements Fn.Function<File, BundleJarWrapper> {
 	@Override
 	public BundleJarWrapper apply(File element) {
 		if (!element.getName().toUpperCase().endsWith(".JAR")) {
-			Activator.log(LogService.LOG_WARNING, "Ignoring " + element.getName() + ", not a jar.");
+			Activator.logWarning("Ignoring " + element.getName() + ", not a jar.");
 			return null;
 		}
 		
 		String fileUri = fileToUri(element);
 		
 		if (isInstalled(fileUri) && !fileChanged(element)) {
-			Activator.log(LogService.LOG_DEBUG, element.getName() + " is already installed.");
+			Activator.logDebug(element.getName() + " is already installed.");
 			return new BundleJarWrapper(element, installedBundleMap.get(fileUri));
 		} else if (isInstalled(fileUri) && fileChanged(element)) {
 			uninstallBundle(installedBundleMap.get(fileUri));
@@ -75,7 +75,7 @@ class InstallBundleFunction implements Fn.Function<File, BundleJarWrapper> {
 			installed.add(wrapper);
 			return wrapper;		
 		} catch (BundleException e) {
-			Activator.log(LogService.LOG_ERROR, "Unable to install " + element.getName() + " as a bundle.", e);
+			Activator.logError("Unable to install " + element.getName() + " as a bundle.", e);
 			return null;
 		}
 	}
@@ -89,7 +89,7 @@ class InstallBundleFunction implements Fn.Function<File, BundleJarWrapper> {
 		try {
 			bundle.uninstall();
 		} catch (BundleException e) {
-			Activator.log(LogService.LOG_ERROR, "An error occurred while uninstalling " + bundle.getLocation() + ".", e);
+			Activator.logError("An error occurred while uninstalling " + bundle.getLocation() + ".", e);
 		}
 	}
 

@@ -26,11 +26,8 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.apache.felix.framework.Logger;
-import org.knapsack.in.KnapsackReaderOutput;
-import org.knapsack.in.PipeReaderThread;
 import org.knapsack.init.InitThread;
-import org.knapsack.out.KnapsackWriterInput;
-import org.knapsack.out.PipeWriterThread;
+import org.knapsack.shell.ConsoleSocketListener;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -52,7 +49,7 @@ import org.sprinkles.functions.ReturnFilesFunction;
  * @author kgilmer
  *
  */
-public class Activator implements BundleActivator, FrameworkListener, ManagedService {
+public class Activator implements BundleActivator, FrameworkListener, ManagedService, LogService {
 	/**
 	 * Filename for read-only pipe.
 	 */
@@ -85,12 +82,15 @@ public class Activator implements BundleActivator, FrameworkListener, ManagedSer
 	private static BundleContext context;
 	private static Config config;
 	private boolean embeddedMode = false;
+	private static Activator ref;
 
 	public Activator() throws IOException {
+		ref = this;
 		Activator.frameworkLogger = null;
 	}
 	
 	public Activator(Logger logger) throws IOException {
+		ref = this;
 		Activator.frameworkLogger = logger;
 		embeddedMode  = true;
 		config = Config.getRef();
@@ -104,18 +104,19 @@ public class Activator implements BundleActivator, FrameworkListener, ManagedSer
 
 	/**
 	 * Thread for write-only pipe.
-	 */
+	 *//*
 	private PipeWriterThread writer;
 
-	/**
+	*//**
 	 * Thread for read-only pipe.
-	 */
-	private PipeReaderThread reader;
+	 *//*
+	private PipeReaderThread reader;*/
 	/**
 	 * Non-persistent thread for bundle initialization.
 	 */
 	private InitThread init;
 	private ServiceRegistration sr;
+	private ConsoleSocketListener shell;
 	private static Logger frameworkLogger;
 	private static LogService logService;
 
@@ -187,11 +188,14 @@ public class Activator implements BundleActivator, FrameworkListener, ManagedSer
 	 * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
 	 */
 	public void stop(BundleContext bundleContext) throws Exception {
-		if (writer != null) 
+		/*if (writer != null) 
 			writer.shutdown();
 		
-		if (reader != null);
-			reader.shutdown();
+		if (reader != null)
+			reader.shutdown();*/
+			
+		if (shell != null)
+			shell.shutdown();
 			
 		sr.unregister();
 	
@@ -202,13 +206,8 @@ public class Activator implements BundleActivator, FrameworkListener, ManagedSer
 		return config;
 	}
 
-	/**
-	 * Will log in order of availability: LogService, Framework Logger, System.out.
-	 * 
-	 * @param level LogService log level
-	 * @param message message to log
-	 */
-	public static void log(int level, String message) {
+	@Override
+	public void log(int level, String message) {
 		if (logService == null) {
 			ServiceReference rs = context.getServiceReference(LogService.class.getName());
 			
@@ -231,7 +230,8 @@ public class Activator implements BundleActivator, FrameworkListener, ManagedSer
 	 * @param message
 	 * @param error
 	 */
-	public static void log(int level, String message, Throwable error) {
+	@Override
+	public void log(int level, String message, Throwable error) {
 		if (logService == null) {
 			ServiceReference rs = context.getServiceReference(LogService.class.getName());
 			
@@ -262,14 +262,16 @@ public class Activator implements BundleActivator, FrameworkListener, ManagedSer
 			sizeMap = new HashMap<File, Long>();
 			
 			try {
-				writer = new PipeWriterThread(getInfoFile(), new KnapsackWriterInput());
-				reader = new PipeReaderThread(getControlFile(), new KnapsackReaderOutput());
+				/*writer = new PipeWriterThread(getInfoFile(), new KnapsackWriterInput());
+				reader = new PipeReaderThread(getControlFile(), new KnapsackReaderOutput());*/
+				shell = new ConsoleSocketListener(8892, context, this);
 				init = new InitThread(new File(config.getString(Config.CONFIG_KEY_ROOT_DIR)), Arrays.asList(config.getString(Config.CONFIG_KEY_BUNDLE_DIRS).split(",")));
 				
-				writer.start();
-				reader.start();
-				init.start();
-			} catch (IOException e) {
+				/*writer.start();
+				reader.start();*/
+				shell.start();
+				init.start();				
+			} catch (Exception e) {
 				log(LogService.LOG_ERROR, "Failed to start knapsack.", e);
 			}
 		}
@@ -292,5 +294,35 @@ public class Activator implements BundleActivator, FrameworkListener, ManagedSer
 			
 			config.put(key, val);
 		}
+	}
+
+	@Override
+	public void log(ServiceReference servicereference, int level, String message) {
+		log(level, message);
+	}
+
+	@Override
+	public void log(ServiceReference servicereference, int level, String message, Throwable exception) {
+		log(level,message, exception);
+	}
+
+	public static void logError(String message) {
+		ref.log(LogService.LOG_ERROR, message);
+	}
+
+	public static void logInfo(String message) {
+		ref.log(LogService.LOG_INFO, message);
+	}
+
+	public static void logWarning(String message) {
+		ref.log(LogService.LOG_WARNING, message);
+	}
+
+	public static void logDebug(String message) {
+		ref.log(LogService.LOG_DEBUG, message);
+	}
+
+	public static void logError(String message, Exception e) {
+		ref.log(LogService.LOG_ERROR, message, e);
 	}
 }

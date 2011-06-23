@@ -34,7 +34,7 @@ class StopBundleFunction implements Fn.Function<BundleJarWrapper, BundleJarWrapp
 			element.getBundle().stop();
 			return element;
 		} catch (Exception e) {
-			Activator.log(LogService.LOG_INFO, "Unable to stop " + element.getJar() + ".", e);
+			Activator.logError("Unable to stop " + element.getJar() + ".", e);
 			return null;
 		}			
 	}		

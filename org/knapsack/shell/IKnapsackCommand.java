@@ -1,7 +1,7 @@
 /*******************************************************************************
- * Copyright (c) 2010 Bug Labs, Inc.
+ * Copyright (c) 2008, 2009 Bug Labs, Inc.
  * All rights reserved.
- *
+ * 
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *    - Redistributions of source code must retain the above copyright notice,
@@ -12,7 +12,7 @@
  *    - Neither the name of Bug Labs, Inc. nor the names of its contributors may be
  *      used to endorse or promote products derived from this software without
  *      specific prior written permission.
- *
+ * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -25,81 +25,54 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
-package org.knapsack.in;
+package org.knapsack.shell;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.OutputStream;
+import java.util.List;
 
-import org.knapsack.AbstractPipeThread;
-import org.knapsack.Activator;
-import org.osgi.service.log.LogService;
+import org.osgi.framework.BundleContext;
 
 /**
- * Given a filename and an InputAction, will create and read from a pipe, passing input to the InputAction.
+ * A command interface for the Bug Labs OSGi shell.
+ * 
  * @author kgilmer
- *
+ * 
  */
-public class PipeReaderThread extends AbstractPipeThread {
+public interface IKnapsackCommand {
+	/**
+	 * Command initialization.
+	 * 
+	 * @param arguments
+	 * @param out
+	 * @param err
+	 * @param context
+	 */
+	public void initialize(List<String> arguments, BundleContext context);
 
-	private final File pipe;
-	private final ReaderOutput action;
+	/**
+	 * Execute the command
+	 * 
+	 * @throws Exception
+	 */
+	public String execute() throws Exception;
 
-	public interface ReaderOutput {
-		public void inputReceived(String input);
-	}
-	
-	public PipeReaderThread(File pipe, ReaderOutput action) throws IOException {
-		super(pipe);
-		this.pipe = pipe;
-		this.action = action;
-	}
-	
-	@Override
-	public void run() {
-		try {
-			Activator.logDebug("Creating fifo pipe for reading: " + pipe.getAbsolutePath());
-			createPipe();
+	/**
+	 * @return true if the command and parameters are valid.
+	 */
+	public boolean isValid();
 
-			while (!Thread.interrupted()) {
-				if (pipe == null)
-					return;
-				
-				BufferedReader br = new BufferedReader(new FileReader(pipe));
-				
-				if (Thread.interrupted()) {
-					return;
-				}
-				String line = null;
-				
-				while ((line = br.readLine()) != null) {
-					action.inputReceived(line);
-				}
-				
-				br.close();
-			}
-		} catch (IOException e) {
-			Activator.logError("Error occured while reading from client on pipe: " + pipe.getAbsolutePath(), e);
-		} catch (InterruptedException e) {			
-		} finally {
-			Activator.logDebug("Deleting pipe file: " + pipe.getAbsolutePath());
-			pipe.delete();
-		}
-	}
-	
-	public void shutdown() {
-		this.interrupt();
-		
-		try {
-			FileWriter fw = new FileWriter(pipe);
-			fw.close();
-		} catch (Exception e) {		
-		}
-		
-		if (pipe != null) {
-			pipe.delete();
-		}
-	}
+	/**
+	 * @return Name of command.
+	 */
+	public String getName();
+
+	/**
+	 * @return A short textual description of command usage.
+	 */
+	public String getUsage();
+
+	/**
+	 * @return A description of what the command does.
+	 */
+	public String getDescription();
 }

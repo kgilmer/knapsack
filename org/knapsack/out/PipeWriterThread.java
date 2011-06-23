@@ -74,7 +74,7 @@ public class PipeWriterThread extends AbstractPipeThread {
 	public void run() {
 		File pfile = null;
 		try {
-			Activator.log(LogService.LOG_DEBUG, "Creating fifo pipe for writing: " + pipe.getAbsolutePath());
+			Activator.logError("Creating fifo pipe for writing: " + pipe.getAbsolutePath());
 			pfile = createPipe();
 			BufferedWriter bw = null;
 			Iterator<String> contentIterator = null;
@@ -105,11 +105,11 @@ public class PipeWriterThread extends AbstractPipeThread {
 				bw = null;
 			}
 		} catch (IOException e) {
-			Activator.log(LogService.LOG_ERROR, "Error occured while writing to client on pipe: " + pipe.getAbsolutePath(), e);
+			Activator.logError("Error occured while writing to client on pipe: " + pipe.getAbsolutePath(), e);
 		} catch (InterruptedException e) {
 		} finally {
 			if (pfile != null) {
-				Activator.log(LogService.LOG_DEBUG, "Deleting pipe file: " + pipe.getAbsolutePath());
+				Activator.logError("Deleting pipe file: " + pipe.getAbsolutePath());
 				pfile.delete();
 			}
 		}

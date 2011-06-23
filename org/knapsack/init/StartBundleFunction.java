@@ -34,7 +34,7 @@ class StartBundleFunction implements Fn.Function<BundleJarWrapper, BundleJarWrap
 			element.getBundle().start();
 			return element;
 		} catch (Exception e) {
-			Activator.log(LogService.LOG_INFO, "Unable to start " + element.getJar() + ".", e);
+			Activator.logError("Unable to start " + element.getJar() + ".", e);
 			return null;
 		}			
 	}		

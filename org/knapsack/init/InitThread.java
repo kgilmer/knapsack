@@ -56,17 +56,17 @@ public class InitThread extends Thread {
 		for (File bundleDir : bundleDirs) {
 			//Verify and setup fs
 			if (bundleDir.isFile()) {
-				Activator.log(LogService.LOG_ERROR, "Bundle directory is a file, cannot start: " + bundleDir + ".");
+				Activator.logError("Bundle directory is a file, cannot start: " + bundleDir + ".");
 				return;
 			}
 				
 			if (!bundleDir.exists())
 				if (!bundleDir.mkdirs()) {
-					Activator.log(LogService.LOG_ERROR, "Bundle directory cannot be created: " + bundleDir + ".");
+					Activator.logError("Bundle directory cannot be created: " + bundleDir + ".");
 					return;
 				}
 			
-			Activator.log(LogService.LOG_INFO, "Scanning bundle directory: " + bundleDir);
+			Activator.logInfo("Scanning bundle directory: " + bundleDir);
 			//Install bundles
 			Collection<BundleJarWrapper> bundles = Fn.map(new InstallBundleFunction(installed), 
 					Fn.map(ReturnFilesFunction.GET_FILES_FN, bundleDir));		
@@ -87,16 +87,16 @@ public class InitThread extends Thread {
 				Fn.map(new UninstallBundleFilter(all), Activator.getBundleSizeMap().keySet())));
 	
 		if (installed != null && installed.size() > 0)
-			Activator.log(LogService.LOG_INFO, "Installed Bundles: " + installed);
+			Activator.logInfo("Installed Bundles: " + installed);
 		
 		if (started != null && started.size() > 0)
-			Activator.log(LogService.LOG_INFO, "Started Bundles: " + started);
+			Activator.logInfo("Started Bundles: " + started);
 		
 		if (stopped != null && stopped.size() > 0)
-			Activator.log(LogService.LOG_INFO, "Stopped Bundles: " + stopped);
+			Activator.logInfo("Stopped Bundles: " + stopped);
 		
 		if (uninstalled != null && uninstalled.size() > 0)
-			Activator.log(LogService.LOG_INFO, "Uninstalled Bundles: " + uninstalled);
+			Activator.logInfo("Uninstalled Bundles: " + uninstalled);
 	}
 
 }

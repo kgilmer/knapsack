@@ -25,7 +25,7 @@ public class UninstallBundleFunction implements Function<File, File> {
 				bundle.uninstall();
 				Activator.getBundleSizeMap().remove(element);
 			} catch (BundleException e) {
-				Activator.log(LogService.LOG_ERROR, "Unable to uninstall " + element + ".", e);
+				Activator.logError("Unable to uninstall " + element + ".", e);
 				return null;
 			}
 
