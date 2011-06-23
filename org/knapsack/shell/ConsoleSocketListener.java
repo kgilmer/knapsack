@@ -106,7 +106,8 @@ public class ConsoleSocketListener extends Thread {
 					
 					if (resp != null && resp.length() > 0) {
 						out.write(resp.getBytes());
-						out.write('\n');
+						if (!resp.endsWith("\n"))
+							out.write('\n');
 					}
 				}
 				
