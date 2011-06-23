@@ -89,7 +89,7 @@ public class Activator implements BundleActivator, FrameworkListener, ManagedSer
 		Activator.frameworkLogger = null;
 	}
 	
-	public Activator(Logger logger) throws IOException {
+	public Activator(Logger logger) throws IOException, InterruptedException {
 		ref = this;
 		Activator.frameworkLogger = logger;
 		embeddedMode  = true;

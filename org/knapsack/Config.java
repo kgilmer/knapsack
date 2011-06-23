@@ -116,20 +116,19 @@ public class Config extends Properties {
 	 */
 	private static Config ref;
 	
-	private final static String [] shellScripts = new String [] {
-			"ks-bundles.sh",  
-			"ks-log.sh",
-			"ks-rescan.sh",
-			"ks-get-all.sh",
-			"ks-properties.sh",
-			"ks-services.sh",
-			"ks-shutdown.sh"
+	private final static String baseScript = "knapsack-command.sh";
+	private final static String [] symlinks = {
+		"bundles",
+		"services",
+		"log",
+		"shutdown",
+		"update"
 	};
 
 	private static final String FELIX_CONFIGURATION = "/felix.conf";
 	private static final String KNAPSACK_CONFIGURATION = "/knapsack.conf";
 	
-	public static Config getRef() throws IOException {
+	public static Config getRef() throws IOException, InterruptedException {
 		if (ref == null)
 			ref = new Config();
 		
@@ -140,8 +139,9 @@ public class Config extends Properties {
 	 * Initialize state
 	 * 
 	 * @throws IOException
+	 * @throws InterruptedException 
 	 */
-	private Config() throws IOException {		
+	private Config() throws IOException, InterruptedException {		
 		File confFile = getConfigFile();
 		
 		if (confFile.isDirectory())
@@ -183,27 +183,34 @@ public class Config extends Properties {
 	 * Copy shell scripts from the Jar into the deployment directory.
 	 * @param parentFile
 	 * @throws IOException
+	 * @throws InterruptedException 
 	 */
-	private void copyScripts(File parentFile) throws IOException {
+	private void copyScripts(File parentFile) throws IOException, InterruptedException {
 		File scriptDir = new File(parentFile, "bin");
 		
 		if (!scriptDir.exists())
 			if (!scriptDir.mkdirs())
 				throw new IOException("Unable to create directories: " + scriptDir);
 		
-		for (String script : Arrays.asList(shellScripts)) {
-			File f = new File(scriptDir, script);
-			
-			if (f.exists())
-				continue;
-			
-			InputStream istream = Config.class.getResourceAsStream("/scripts/" + script);
+		File f = new File(scriptDir, baseScript);
+		
+		if (!f.exists()) {	
+			InputStream istream = Config.class.getResourceAsStream("/scripts/" + baseScript);
 			if (istream == null)
 				throw new IOException("Script file does not exist: " + f);
 			
 			writeToFile(f, istream);
 			f.setExecutable(true, true);
 		}
+		
+		for (String script : Arrays.asList(symlinks)) {
+			createSymlink(f.getAbsolutePath(), f.getParent() + File.separator + script);
+		}
+	}
+
+	private void createSymlink(String baseFile, String link) throws InterruptedException, IOException {
+		String [] cmd = {"ln", "-s", baseFile, link};
+		Runtime.getRuntime().exec(cmd).waitFor();
 	}
 
 	/**

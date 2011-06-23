@@ -45,8 +45,9 @@ public class BootStrap {
 	 * @param args
 	 * @throws IOException
 	 * @throws BundleException
+	 * @throws InterruptedException 
 	 */
-	public static void main(String[] args) throws IOException, BundleException {
+	public static void main(String[] args) throws IOException, BundleException, InterruptedException {
 		long time = System.currentTimeMillis();
 		FrameworkFactory frameworkFactory = new FrameworkFactory();
 
