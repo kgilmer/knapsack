@@ -37,12 +37,10 @@ import java.util.Map;
 import org.knapsack.Config;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.log.LogService;
-import org.sprinkles.Fn;
 
 /**
  * Parses console commands.
@@ -60,8 +58,6 @@ public class CommandParser implements ServiceListener {
 
 	private Config config;
 
-	private boolean commandsLoaded = false;
-
 	protected CommandParser(final BundleContext context, final LogService log) throws IOException {
 		this.context = context;
 		this.config = Config.getRef();
@@ -69,10 +65,7 @@ public class CommandParser implements ServiceListener {
 		commands = new Hashtable<String, IKnapsackCommand>();
 	}
 
-	protected IKnapsackCommand parse(String commandLine) throws IOException {
-		if (!commandsLoaded) 
-			loadCommands();
-		
+	protected IKnapsackCommand parse(String commandLine) throws IOException {	
 		String[] tokens = commandLine.split(" ");
 		boolean quoteMode = false;
 		String command = tokens[0];
@@ -122,34 +115,6 @@ public class CommandParser implements ServiceListener {
 		}
 
 		return null;
-	}
-
-	private void loadCommands() {
-		try {
-			Fn.map(new Fn.Function<ServiceReference, Object>() {
-
-				@Override
-				public Object apply(ServiceReference element) {
-					if (element == null)
-						return null;
-					
-					IKnapsackCommandProvider service = (IKnapsackCommandProvider) context.getService(element);
-					
-					for (IKnapsackCommand cmd : service.getCommands())
-						if (commands.containsKey(cmd.getName())) {
-							log.log(LogService.LOG_WARNING, "A shell command named " + cmd.getName() + " has already been registered.  Ignoring second registration.");
-						} else {
-							addCommand(cmd);
-						}
-					
-					return service;
-				}
-			}, context.getServiceReferences(IKnapsackCommandProvider.class.getName(), null));
-			
-			commandsLoaded = true;
-		} catch (InvalidSyntaxException e) {
-			log.log(LogService.LOG_ERROR, "OSGi Filter Syntax Error", e);
-		}
 	}
 
 	public void serviceChanged(ServiceEvent event) {
