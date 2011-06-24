@@ -22,7 +22,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Arrays;
 import java.util.Properties;
 
 /**
@@ -91,7 +90,7 @@ public class Config extends Properties {
 	 */
 	private static Config ref;
 	
-	private final static String baseScript = "knapsack-command.sh";
+	private final static String baseScript = ".knapsack-command.sh";
 
 	private static final String FELIX_CONFIGURATION = "/felix.conf";
 	
@@ -118,10 +117,14 @@ public class Config extends Properties {
 		if (confFile.isDirectory())
 			throw new IOException("Invalid start state, " + confFile + " is a directory.");
 		
+		String rootDir = getInitRootDirectory();
+		scriptDir = new File(rootDir, "bin");
+		baseScriptFile = new File(scriptDir, baseScript);
+		
 		if (!confFile.exists()) {
 			//Create a default configuration
 			copyDefaultConfiguration(FELIX_CONFIGURATION, confFile, true);
-			getCreateDefaultDir(getInitRootDirectory());			
+			getCreateDefaultDir(rootDir);			
 			
 			copyScripts(confFile.getParentFile());
 		}
@@ -154,13 +157,15 @@ public class Config extends Properties {
 	 * @throws InterruptedException 
 	 */
 	private void copyScripts(File parentFile) throws IOException {
-		scriptDir = new File(parentFile, "bin");
+		if (scriptDir == null)
+			scriptDir = new File(parentFile, "bin");
 		
 		if (!scriptDir.exists())
 			if (!scriptDir.mkdirs())
 				throw new IOException("Unable to create directories: " + scriptDir);
 		
-		baseScriptFile = new File(scriptDir, baseScript);
+		if (baseScriptFile == null)
+			baseScriptFile = new File(scriptDir, baseScript);
 		
 		if (!baseScriptFile.exists()) {	
 			InputStream istream = Config.class.getResourceAsStream("/scripts/" + baseScript);

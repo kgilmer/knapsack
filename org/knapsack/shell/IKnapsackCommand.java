@@ -50,6 +50,10 @@ public interface IKnapsackCommand {
 	public void initialize(List<String> arguments, BundleContext context);
 
 	/**
+	 * @return List of arguments passed to command.
+	 */
+	public List<String> getArguments();
+	/**
 	 * Execute the command
 	 * 
 	 * @throws Exception

@@ -55,6 +55,11 @@ public abstract class AbstractKnapsackCommand implements IKnapsackCommand {
 
 		this.context = context;
 	}	
+	
+	@Override
+	public List<String> getArguments() {
+		return arguments;
+	}
 
 	/* (non-Javadoc)
 	 * @see com.buglabs.osgi.shell.ICommand#isValid()

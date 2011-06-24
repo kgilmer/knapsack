@@ -177,7 +177,7 @@ public class CommandParser implements ServiceListener {
 		try {
 			config.createFilesystemCommand(command.getName());
 		} catch (IOException e) {
-			log.log(LogService.LOG_ERROR, "Error while registering command " + command.getName(), e);
+			//Ignore this error, the symlink was created by a pre-existing instance.
 		}
 	}
 	

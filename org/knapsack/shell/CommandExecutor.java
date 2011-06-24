@@ -62,7 +62,14 @@ public class CommandExecutor {
 		} else if (line.length() > 0) {		
 			IKnapsackCommand cmd = parser.parse(line);
 
-			if (cmd != null && cmd.isValid()) {
+			if (hasHelpParam(cmd)) {
+				String rs = "";
+				
+				if (cmd.getDescription() != null)
+					rs = cmd.getDescription();
+				
+				return rs + "\nUsage: " + cmd.getName() + " " + cmd.getUsage();
+			} else if (cmd != null && cmd.isValid()) {
 				try {
 					return cmd.execute();
 				} catch (Exception e) {
@@ -89,15 +96,20 @@ public class CommandExecutor {
 				} 
 			} else {
 				if (cmd == null) {
-					return "Unknown command: " + line.split(" ")[0] + "\n";
+					return "Unknown command: " + line.split(" ")[0];
 				} else {
 					String es = "Invalid usage of command " + cmd.getName() + "\n";
-					return es + "Usage: " + cmd.getName() + " " + cmd.getUsage() + "\n";
+					return es + "Usage: " + cmd.getName() + " " + cmd.getUsage();
 				}
 			}
 		} 
 		
 		//The input was empty
 		return "";
+	}
+
+
+	private boolean hasHelpParam(IKnapsackCommand cmd) {
+		return cmd.getArguments().contains("-h") || cmd.getArguments().contains("--help");
 	}
 }

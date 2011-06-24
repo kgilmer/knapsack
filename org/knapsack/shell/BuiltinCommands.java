@@ -25,7 +25,7 @@ public class BuiltinCommands implements IKnapsackCommandProvider {
 	
 	private final CommandParser parser;
 	private final LogService log;
-	private SimpleDateFormat dateFormatter = new SimpleDateFormat("MM.dd HH:mm:ss");;
+	private SimpleDateFormat dateFormatter = new SimpleDateFormat("MM.dd HH:mm:ss");
 
 	public BuiltinCommands(CommandParser parser, LogService log) {
 		this.parser = parser;
@@ -41,6 +41,7 @@ public class BuiltinCommands implements IKnapsackCommandProvider {
 		cmds.add(new ServicesCommand());
 		cmds.add(new LogCommand());
 		cmds.add(new UpdateCommand());
+		cmds.add(new PrintConfCommand());
 
 		return cmds;
 	}
@@ -60,6 +61,11 @@ public class BuiltinCommands implements IKnapsackCommandProvider {
 		@Override
 		public String getName() {
 			return "update";
+		}
+		
+		@Override
+		public String getDescription() {			
+			return "Rescan the bundle directory or directories and update bundlespace accordingly.";
 		}
 	}
 	
@@ -93,8 +99,17 @@ public class BuiltinCommands implements IKnapsackCommandProvider {
 
 		@Override
 		public String getName() {
-		
 			return "log";
+		}
+		
+		@Override
+		public String getUsage() {
+			return "[-v]";
+		}
+		
+		@Override
+		public String getDescription() {
+			return "Print OSGi log.";
 		}
 		
 	}
@@ -120,8 +135,55 @@ public class BuiltinCommands implements IKnapsackCommandProvider {
 
 		@Override
 		public String getName() {
-		
 			return "services";
+		}
+		
+		@Override
+		public String getUsage() {
+			return "[-v]";
+		}
+		
+		@Override
+		public String getDescription() {
+			return "Get list of OSGi services active in the framework.";
+		}
+		
+	}
+	
+	private class PrintConfCommand extends AbstractKnapsackCommand {
+
+		@Override
+		public String execute() throws Exception {
+			final StringBuffer sb = new StringBuffer();
+			
+			Fn.map(new Fn.Function<Entry<Object, Object>, Object>() {
+
+				@Override
+				public Object apply(Entry<Object, Object> e) {
+					sb.append(e.getKey());
+					sb.append(" = ");
+					sb.append(e.getValue());
+					sb.append('\n');
+					return e;
+				}
+			}, System.getProperties().entrySet());
+			
+			return sb.toString();
+		}
+
+		@Override
+		public String getName() {
+			return "printconfig";
+		}
+		
+		@Override
+		public String getUsage() {
+			return "";
+		}
+		
+		@Override
+		public String getDescription() {
+			return "Print the Java system configuration.";
 		}
 		
 	}
@@ -147,10 +209,18 @@ public class BuiltinCommands implements IKnapsackCommandProvider {
 
 		@Override
 		public String getName() {
-		
 			return "bundles";
 		}
 		
+		@Override
+		public String getUsage() {
+			return "[-v]";
+		}
+		
+		@Override
+		public String getDescription() {
+			return "Get list of OSGi bundles installed in the framework.";
+		}
 	}
 
 	/**
@@ -281,14 +351,6 @@ public class BuiltinCommands implements IKnapsackCommandProvider {
 		return sr.getProperty("service.id").toString();
 	}
 
-	private void addConfigEntry(Entry<Object, Object> e, List<String> l, boolean verbose) {
-		String line = "";
-
-		line = line + e.getKey() + " = " + e.getValue();
-
-		l.add(line);
-	}
-
 	/**
 	 * Add info for Bundle
 	 * 
@@ -363,7 +425,6 @@ public class BuiltinCommands implements IKnapsackCommandProvider {
 			return " STOP";
 		case 0x00000020:
 			return "ACTIV";
-
 		}
 
 		return "[UNKNOWN STATE: " + state + "]";
