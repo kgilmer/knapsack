@@ -35,7 +35,7 @@ public class BuiltinCommands implements IKnapsackCommandProvider {
 	public List<IKnapsackCommand> getCommands() {
 		List<IKnapsackCommand> cmds = new ArrayList<IKnapsackCommand>();
 
-		cmds.add(new ExitCommand());
+		cmds.add(new ShutdownCommand());
 		cmds.add(new HelpCommand());
 		cmds.add(new BundlesCommand());
 		cmds.add(new ServicesCommand());
@@ -229,7 +229,7 @@ public class BuiltinCommands implements IKnapsackCommandProvider {
 	 * @author kgilmer
 	 * 
 	 */
-	private class ExitCommand extends AbstractKnapsackCommand {
+	private class ShutdownCommand extends AbstractKnapsackCommand {
 
 		public String execute() throws Exception {
 			log.log(LogService.LOG_INFO, "OSGi framework is shutting down due to user request via shell.");
@@ -239,7 +239,7 @@ public class BuiltinCommands implements IKnapsackCommandProvider {
 		}
 
 		public String getName() {
-			return "exit";
+			return "shutdown";
 		}
 
 		public String getDescription() {
