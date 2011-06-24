@@ -120,7 +120,11 @@ public class ConsoleSocketListener extends Thread {
 			}
 		} finally {
 			socket = null;
-			context.removeServiceListener(parser);
+			try {
+				context.removeServiceListener(parser);
+			} catch (Exception e) {
+				//Ignore unregistration errors.
+			}
 		}
 	}
 
