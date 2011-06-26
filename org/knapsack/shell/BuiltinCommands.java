@@ -163,7 +163,7 @@ public class BuiltinCommands implements IKnapsackCommandProvider {
 					sb.append(e.getKey());
 					sb.append(" = ");
 					sb.append(e.getValue());
-					sb.append('\n');
+					sb.append(CRLF);
 					return e;
 				}
 			}, System.getProperties().entrySet());
@@ -262,7 +262,7 @@ public class BuiltinCommands implements IKnapsackCommandProvider {
 				
 				@Override
 				public IKnapsackCommand apply(IKnapsackCommand cmd) {
-					String sl = cmd.getName() + "\t" + cmd.getUsage() + "\t" + cmd.getDescription() + "\n";
+					String sl = cmd.getName() + "\t" + cmd.getUsage() + "\t" + cmd.getDescription() + CRLF;
 					
 					sb.append(sl);
 				
@@ -298,18 +298,18 @@ public class BuiltinCommands implements IKnapsackCommandProvider {
 			line = entry.getMessage();
 				
 		l.append(line);
-		l.append('\n');
+		l.append(AbstractKnapsackCommand.CRLF);
 		
 		//Check for an exception, if available display it.
 		if (entry.getException() != null) {
 			l.append(entry.getException().getMessage());
-			l.append('\n');
+			l.append(AbstractKnapsackCommand.CRLF);
 			
 			StringWriter sWriter = new StringWriter();
 			PrintWriter pw = new PrintWriter(sWriter);
 			entry.getException().printStackTrace(pw);
 			l.append(sWriter.toString());
-			l.append('\n');
+			l.append(AbstractKnapsackCommand.CRLF);
 		}
 	}
 
@@ -327,9 +327,9 @@ public class BuiltinCommands implements IKnapsackCommandProvider {
 
 	private void addServiceReference(ServiceReference sr, StringBuffer l, boolean verbose) {
 		if (verbose)
-			l.append(getServiceId(sr) + " \t" + getServiceName(sr) + "\n");
+			l.append(getServiceId(sr) + " \t" + getServiceName(sr) + AbstractKnapsackCommand.CRLF);
 		else
-			l.append(getServiceName(sr) + "\n");
+			l.append(getServiceName(sr) + AbstractKnapsackCommand.CRLF);
 	}
 
 	/**
@@ -360,9 +360,9 @@ public class BuiltinCommands implements IKnapsackCommandProvider {
 	 */
 	private void addBundle(Bundle b, StringBuffer l, boolean verbose) {
 		if (verbose)
-			l.append(getStateName(b.getState()) + " \t" + getBundleName(b) + " \t(" + getBundleVersion(b) + ") \t" + getBundleLocation(b) + "\n");
+			l.append(getStateName(b.getState()) + " \t" + getBundleName(b) + " \t(" + getBundleVersion(b) + ") \t" + getBundleLocation(b) + AbstractKnapsackCommand.CRLF);
 		else
-			l.append(getBundleName(b) + "\n");
+			l.append(getBundleName(b) + AbstractKnapsackCommand.CRLF);
 	}
 
 	/**

@@ -36,8 +36,10 @@ import java.util.Random;
  */
 public class Config extends Properties {
 	private static final long serialVersionUID = -5479563157788056552L;
+	private static final String CRLF = System.getProperty("line.separator");
 	private static final int PORT_START = 12288;
 	private static final int MAX_PORT_RANGE = 64;
+	private static final String LS = System.getProperty("line.separator");
 
 	/**
 	 * Properties that cause behavior changes to OSGi instance.
@@ -184,7 +186,7 @@ public class Config extends Properties {
 			if (istream == null)
 				throw new IOException("Script file does not exist: " + baseScriptFile);
 			
-			String scriptPrefix = "#!/bin/bash\n\nKNAPSACK_PORT=" + getShellSocketPort() + "\n";
+			String scriptPrefix = "#!/bin/bash" + LS + "KNAPSACK_PORT=" + getShellSocketPort() + LS;
 			
 			writeToFile(baseScriptFile, new ByteArrayInputStream(scriptPrefix.getBytes()));
 			writeToFile(baseScriptFile, istream);
@@ -302,7 +304,7 @@ public class Config extends Properties {
 		
 		if (addCmDir) {
 			//Since this property is not static, create dynamically.  If multiple properties need to be set dynamically in the future, consider using a template format.
-			fos.write(("\nfelix.cm.dir = " + getInitRootDirectory() + File.separator + Activator.CONFIGADMIN_FILENAME + "\n").getBytes());
+			fos.write((CRLF + "felix.cm.dir = " + getInitRootDirectory() + File.separator + Activator.CONFIGADMIN_FILENAME + CRLF).getBytes());
 		}
 		
 		istream.close();

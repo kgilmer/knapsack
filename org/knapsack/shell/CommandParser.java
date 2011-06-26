@@ -49,6 +49,7 @@ import org.osgi.service.log.LogService;
  * 
  */
 public class CommandParser implements ServiceListener {
+	private static final String CRLF = System.getProperty("line.separator");
 
 	private Map<String, IKnapsackCommand> commands;
 
@@ -80,14 +81,14 @@ public class CommandParser implements ServiceListener {
 					tokens[i] = tokens[i].substring(1, tokens[i].length() - 1);
 				} else if (tokens[i].startsWith("\"")) {
 					if (quoteMode) {
-						throw new IOException("Parse Error: Cannot nest quotes.\n");
+						throw new IOException("Parse Error: Cannot nest quotes.");
 					}
 					quoteMode = true;
 					quotedParam = new StringBuffer();
 					tokens[i] = tokens[i].substring(1);
 				} else if (tokens[i].endsWith("\"")) {
 					if (!quoteMode) {
-						throw new IOException("Parse Error: End quote with no starting quote.\n");
+						throw new IOException("Parse Error: End quote with no starting quote." + CRLF);
 					}
 					quoteMode = false;
 					quotedParam.append(tokens[i].substring(0, tokens[i].length() - 1));
@@ -106,7 +107,7 @@ public class CommandParser implements ServiceListener {
 		}
 
 		if (quoteMode)
-			throw new IOException("Parse Error: unclosed quotes.\n");
+			throw new IOException("Parse Error: unclosed quotes." + CRLF);
 
 		if (commands.containsKey(command)) {
 			IKnapsackCommand cmd = (IKnapsackCommand) commands.get(command);

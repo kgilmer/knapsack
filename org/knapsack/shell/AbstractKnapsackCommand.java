@@ -44,6 +44,8 @@ public abstract class AbstractKnapsackCommand implements IKnapsackCommand {
 	protected List<String> arguments;
 
 	protected BundleContext context;
+	
+	public static final String CRLF = System.getProperty("line.separator");
 
 	public void initialize(List<String> arguments, BundleContext context) {
 

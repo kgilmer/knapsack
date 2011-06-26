@@ -50,6 +50,7 @@ import org.osgi.service.log.LogService;
  * 
  */
 public class ConsoleSocketListener extends Thread {
+	private static final String CRLF = System.getProperty("line.separator");
 	/**
 	 * Default for the ServerSocket backlog.
 	 */
@@ -106,8 +107,8 @@ public class ConsoleSocketListener extends Thread {
 					
 					if (resp != null && resp.length() > 0) {
 						out.write(resp.getBytes());
-						if (!resp.endsWith("\n"))
-							out.write('\n');
+						if (!resp.endsWith(CRLF))
+							out.write(CRLF.getBytes());
 					}
 				}
 				
