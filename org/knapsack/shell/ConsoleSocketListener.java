@@ -32,7 +32,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
@@ -78,7 +77,6 @@ public class ConsoleSocketListener extends Thread {
 		context.addServiceListener(parser, "(" + Constants.OBJECTCLASS + "=" + IKnapsackCommandProvider.class.getName() + ")");
 		this.context = context;
 		this.log = log;
-		this.socket = createServerSocket();
 	}
 	
 	public void run() {
@@ -87,6 +85,7 @@ public class ConsoleSocketListener extends Thread {
 			if (commandProviderRegistration == null) {
 				commandProviderRegistration = context.registerService(IKnapsackCommandProvider.class.getName(), new BuiltinCommands(parser, log), null);
 			}
+			this.socket = createServerSocket();
 
 			while (running) {
 				Socket connection = socket.accept();
@@ -138,9 +137,9 @@ public class ConsoleSocketListener extends Thread {
 		ServerSocket s;
 		try {
 			s = new ServerSocket(port, SERVER_BACKLOG_DEFAULT, InetAddress.getLocalHost());
-		} catch (UnknownHostException e) {
+		} catch (UnknownHostException e) {		
 			// Name resolution error.
-			s = new ServerSocket(port, SERVER_BACKLOG_DEFAULT, InetAddress.getByAddress(new byte[]{127,0,0,1}));
+			s = new ServerSocket(port, SERVER_BACKLOG_DEFAULT, InetAddress.getByAddress(new byte[]{127,0,0,1}));		
 		}
 		
 		Activator.logInfo("Created shell socket on port " + port);
@@ -159,5 +158,4 @@ public class ConsoleSocketListener extends Thread {
 			} catch (IOException e) {				
 			}		
 	}
-
 }
