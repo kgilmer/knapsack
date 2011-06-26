@@ -124,8 +124,13 @@ public class Config extends Properties {
 		if (!confFile.exists()) {
 			//Create a default configuration
 			copyDefaultConfiguration(FELIX_CONFIGURATION, confFile, true);
-			getCreateDefaultDir(rootDir);			
+		}
 			
+		// Create the default dir if doesn't exist.
+		getCreateDefaultDir(rootDir);			
+			
+		if (!scriptDir.exists()) {
+			//Create script
 			copyScripts(confFile.getParentFile());
 		}
 		
@@ -190,6 +195,7 @@ public class Config extends Properties {
 		
 		try {
 			createSymlink(baseScriptFile.getAbsolutePath(), scriptDir + File.separator + commandName);
+			Activator.logDebug("Created symlink to " + commandName);
 		} catch (InterruptedException e) {
 			throw new IOException("Process was interrupted.", e);
 		}		
