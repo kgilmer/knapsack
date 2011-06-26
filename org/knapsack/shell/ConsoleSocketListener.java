@@ -37,6 +37,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
+import org.knapsack.Activator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
@@ -50,7 +51,6 @@ import org.osgi.service.log.LogService;
  * 
  */
 public class ConsoleSocketListener extends Thread {
-	private static final String LOOPBACK_IP_ADDRESS = "127.0.0.1";
 	/**
 	 * Default for the ServerSocket backlog.
 	 */
@@ -143,6 +143,7 @@ public class ConsoleSocketListener extends Thread {
 			s = new ServerSocket(port, SERVER_BACKLOG_DEFAULT, InetAddress.getByAddress(new byte[]{127,0,0,1}));
 		}
 		
+		Activator.logInfo("Created shell socket on port " + port);
 		return s;
 	}
 

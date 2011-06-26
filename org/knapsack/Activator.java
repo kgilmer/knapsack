@@ -254,8 +254,7 @@ public class Activator implements BundleActivator, FrameworkListener, ManagedSer
 
 	@Override
 	public void frameworkEvent(FrameworkEvent event) {
-		if (event.getType() == FrameworkEvent.STARTED) {
-			log(LogService.LOG_INFO, "Knapsack " + KNAPSACK_VERSION + " starting in " + config.get(Config.CONFIG_KEY_ROOT_DIR));
+		if (event.getType() == FrameworkEvent.STARTED) {			
 			if (config.getBoolean(Config.CONFIG_KEY_LOG_STDOUT))
 				new LogPrinter(context);
 			
@@ -270,7 +269,8 @@ public class Activator implements BundleActivator, FrameworkListener, ManagedSer
 				/*writer.start();
 				reader.start();*/
 				shell.start();
-				init.start();				
+				init.start();		
+				log(LogService.LOG_INFO, "Knapsack " + KNAPSACK_VERSION + " running in " + config.get(Config.CONFIG_KEY_ROOT_DIR));
 			} catch (Exception e) {
 				log(LogService.LOG_ERROR, "Failed to start knapsack.", e);
 			}
