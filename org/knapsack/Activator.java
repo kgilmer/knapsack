@@ -187,15 +187,15 @@ public class Activator implements BundleActivator, FrameworkListener, ManagedSer
 	 * (non-Javadoc)
 	 * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
 	 */
-	public void stop(BundleContext bundleContext) throws Exception {
-		/*if (writer != null) 
-			writer.shutdown();
-		
-		if (reader != null)
-			reader.shutdown();*/
-			
+	public void stop(BundleContext bundleContext) throws Exception {	
 		if (shell != null)
 			shell.shutdown();
+		
+		try {
+			config.deleteBinDir();
+		} catch (IOException e) {
+			// Ignore errors
+		}
 			
 		sr.unregister();
 	

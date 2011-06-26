@@ -22,6 +22,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Arrays;
 import java.util.Properties;
 
 /**
@@ -214,6 +215,19 @@ public class Config extends Properties {
 		
 		if (!cmd.delete())
 			throw new IOException("Failed to delete " + cmd);
+	}
+	
+	/**
+	 * Delete the /bin dir.
+	 * @throws IOException 
+	 */
+	public void deleteBinDir() throws IOException {
+		for (File f : Arrays.asList(scriptDir.listFiles()))
+			if (!f.delete())
+				throw new IOException("Unable to delete: " + f);
+		
+		if (!scriptDir.delete())
+			throw new IOException("Unable to delete: " + scriptDir);
 	}
 
 	private void createSymlink(String baseFile, String link) throws InterruptedException, IOException {
