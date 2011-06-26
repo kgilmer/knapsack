@@ -1,6 +1,7 @@
-#!/bin/bash
+
 if [ -z $KNAPSACK_PORT ]; then
-	KNAPSACK_PORT=8892
+	echo "KNAPSACK_PORT must be set."
+	exit 1
 fi
 
 nc -z localhost $KNAPSACK_PORT

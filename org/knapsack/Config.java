@@ -16,6 +16,7 @@
  */
 package org.knapsack;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -24,6 +25,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.Properties;
+import java.util.Random;
 
 /**
  * Class for knapsack and framework configuration.  
@@ -34,6 +36,8 @@ import java.util.Properties;
  */
 public class Config extends Properties {
 	private static final long serialVersionUID = -5479563157788056552L;
+	private static final int PORT_START = 12288;
+	private static final int MAX_PORT_RANGE = 64;
 
 	/**
 	 * Properties that cause behavior changes to OSGi instance.
@@ -105,6 +109,8 @@ public class Config extends Properties {
 	private File scriptDir;
 
 	private File baseScriptFile;
+
+	private int port = -1;
 
 	/**
 	 * Initialize state
@@ -178,6 +184,9 @@ public class Config extends Properties {
 			if (istream == null)
 				throw new IOException("Script file does not exist: " + baseScriptFile);
 			
+			String scriptPrefix = "#!/bin/bash\n\nKNAPSACK_PORT=" + getShellSocketPort() + "\n";
+			
+			writeToFile(baseScriptFile, new ByteArrayInputStream(scriptPrefix.getBytes()));
 			writeToFile(baseScriptFile, istream);
 			baseScriptFile.setExecutable(true, true);
 		}
@@ -243,7 +252,7 @@ public class Config extends Properties {
 	 * @throws IOException
 	 */
 	private void writeToFile(File outputFile, InputStream inputStream) throws IOException {
-		FileOutputStream fos = new FileOutputStream(outputFile);
+		FileOutputStream fos = new FileOutputStream(outputFile, true);
 		byte [] buff = new byte[4096];
 		
 		while (inputStream.available() > 0) {
@@ -337,5 +346,15 @@ public class Config extends Properties {
 			return this.get(key).toString();
 		
 		return null;
+	}
+
+	public int getShellSocketPort() {
+		if (port  == -1) {
+			//TODO: determine that random port is not already used.
+			Random r = new Random();
+			port = PORT_START + r.nextInt(MAX_PORT_RANGE);
+		}
+		
+		return port;
 	}
 }

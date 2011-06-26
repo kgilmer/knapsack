@@ -50,17 +50,6 @@ import org.sprinkles.functions.ReturnFilesFunction;
  *
  */
 public class Activator implements BundleActivator, FrameworkListener, ManagedService, LogService {
-	/**
-	 * Filename for read-only pipe.
-	 */
-	protected static final String INFO_FILENAME = "info";
-	/**
-	 * Filename for write-only pipe.
-	 */
-	protected static final String CONTROL_FILENAME = "control";
-	/**
-	 * Filename for defaults directory.
-	 */
 	protected static final String DEFAULT_FILENAME = "default";
 	
 	/**
@@ -76,11 +65,14 @@ public class Activator implements BundleActivator, FrameworkListener, ManagedSer
 	/**
 	 * This should be in sync with manifest version.
 	 */
-	public static final String KNAPSACK_VERSION = "0.4.0";
+	public static final String KNAPSACK_VERSION = "0.5.0";
 	public static final String KNAPSACK_PID = "org.knapsack";
 	
 	private static BundleContext context;
 	private static Config config;
+	/**
+	 * This is set to true by the BootStrap class.  This allows the knapsack bundle to know if it's part of the bootstrap or being started as a regular OSGi bundle.
+	 */
 	private boolean embeddedMode = false;
 	private static Activator ref;
 
@@ -94,8 +86,6 @@ public class Activator implements BundleActivator, FrameworkListener, ManagedSer
 		Activator.frameworkLogger = logger;
 		embeddedMode  = true;
 		config = Config.getRef();
-		if (getInfoFile().exists() || getControlFile().exists())
-			throw new IOException("Pipe already exists in " + config.getString(Config.CONFIG_KEY_ROOT_DIR) + ".  This means a framework is already running or has crashed in the same directory.  Shutdown existing framework or manually remove " + getInfoFile() + " and " +  getControlFile() + ", then run again.");	
 	}
 
 	public static BundleContext getContext() {
@@ -167,20 +157,6 @@ public class Activator implements BundleActivator, FrameworkListener, ManagedSer
 	private boolean defaultDirExists() {
 		File d = getDefaultDir();
 		return d != null && d.isDirectory();
-	}
-
-	/**
-	 * @return A file that represents the pipe file used for info (out) pipe.
-	 */
-	public static File getInfoFile() {
-		return new File(config.getString(Config.CONFIG_KEY_ROOT_DIR), INFO_FILENAME);
-	}
-	
-	/**
-	 * @return A file that represents the pipe file used for control (in) pipe.
-	 */
-	public static File getControlFile() {
-		return new File(config.getString(Config.CONFIG_KEY_ROOT_DIR), CONTROL_FILENAME);
 	}
 	
 	/*
@@ -263,7 +239,7 @@ public class Activator implements BundleActivator, FrameworkListener, ManagedSer
 			try {
 				/*writer = new PipeWriterThread(getInfoFile(), new KnapsackWriterInput());
 				reader = new PipeReaderThread(getControlFile(), new KnapsackReaderOutput());*/
-				shell = new ConsoleSocketListener(8892, context, this);
+				shell = new ConsoleSocketListener(config.getShellSocketPort(), context, this);
 				init = new InitThread(new File(config.getString(Config.CONFIG_KEY_ROOT_DIR)), Arrays.asList(config.getString(Config.CONFIG_KEY_BUNDLE_DIRS).split(",")));
 				
 				/*writer.start();
