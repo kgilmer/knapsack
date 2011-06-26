@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
@@ -134,7 +135,15 @@ public class ConsoleSocketListener extends Thread {
 	 * @throws UnknownHostException
 	 */
 	private ServerSocket createServerSocket() throws UnknownHostException, IOException {
-		return new ServerSocket(port, SERVER_BACKLOG_DEFAULT, InetAddress.getLocalHost());
+		ServerSocket s;
+		try {
+			s = new ServerSocket(port, SERVER_BACKLOG_DEFAULT, InetAddress.getLocalHost());
+		} catch (UnknownHostException e) {
+			// Name resolution error.
+			s = new ServerSocket(port, SERVER_BACKLOG_DEFAULT, InetAddress.getByAddress(new byte[]{127,0,0,1}));
+		}
+		
+		return s;
 	}
 
 	/**
