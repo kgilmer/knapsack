@@ -93,7 +93,8 @@ public class Config extends Properties {
 	 * @throws IOException
 	 * @throws InterruptedException 
 	 */
-	protected Config(File baseDirectory) throws IOException {		
+	protected Config(File baseDirectory) throws IOException {	
+		ref = this;
 		this.baseDirectory = baseDirectory;
 		load(new FileInputStream(getConfigFile()));
 		
