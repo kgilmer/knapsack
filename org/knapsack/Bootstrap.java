@@ -80,7 +80,7 @@ public class Bootstrap {
 		createKnapsackLayout(baseDirectory, logger, port);
 
 		// Create initial configuration, this will load some values with defaults.
-		Config config = Config.getRef();	
+		Config config = new Config(baseDirectory);
 
 		// Create activators that will start
 		List<BundleActivator> activators = new ArrayList<BundleActivator>();
