@@ -73,7 +73,7 @@ public class FSHelper {
 
 		try {
 			createSymlink(baseScriptFile.getAbsolutePath(), scriptDir + File.separator + commandName);
-			Activator.logDebug("Created symlink to " + commandName);
+			Activator.logDebug("Created symlink " + commandName);
 		} catch (InterruptedException e) {
 			throw new IOException("Process was interrupted.", e);
 		}
