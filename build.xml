@@ -88,7 +88,7 @@
 
 	<target name="compile" depends="stage" description="compile the Java source code to class files">
 		<mkdir dir="classes" />
-		<javac srcdir="." destdir="classes" source="1.6" target="1.6" encoding="utf-8" fork="true">
+		<javac srcdir="." destdir="classes" source="1.6" target="1.6" encoding="utf-8" fork="true" includeantruntime="false">
 			<include name="org/**" />
 			<exclude name="${external.dir}/**" />
 		</javac>
