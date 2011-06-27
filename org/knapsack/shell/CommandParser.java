@@ -35,6 +35,7 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
+import org.knapsack.Activator;
 import org.knapsack.FSHelper;
 import org.knapsack.shell.pub.IKnapsackCommand;
 import org.knapsack.shell.pub.IKnapsackCommandSet;
@@ -58,14 +59,11 @@ public class CommandParser implements ServiceListener {
 
 	private final BundleContext context;
 
-	private final LogService log;
-
 	private final File scriptDir;
 
-	public CommandParser(final BundleContext context, final LogService log, final File scriptDir) throws IOException {
+	public CommandParser(final BundleContext context, final File scriptDir) throws IOException {
 		this.context = context;
 		this.scriptDir = scriptDir;
-		this.log = log;
 		commands = new Hashtable<String, IKnapsackCommand>();
 	}
 
@@ -127,21 +125,21 @@ public class CommandParser implements ServiceListener {
 
 		if (type == ServiceEvent.REGISTERED) {
 			final IKnapsackCommandSet provider = (IKnapsackCommandSet) context.getService(ref);
-			log.log(LogService.LOG_INFO, "A new set of commands available: " + provider.getClass().toString());
+			Activator.logInfo("A new set of commands available: " + provider.getClass().toString());
 			for (IKnapsackCommand cmd : provider.getCommands()) {
 				if (commands.containsKey(cmd.getName())) {
-					log.log(LogService.LOG_WARNING, "A shell command named " + cmd.getName() + " has already been registered.  Ignoring second registration.");
+					Activator.logWarning("A shell command named " + cmd.getName() + " has already been registered.  Ignoring second registration.");
 				} else {
 					addCommand(cmd);				
 				}
 			}
 		} else if (type == ServiceEvent.UNREGISTERING) {
 			if (ref.getBundle().getState() != Bundle.UNINSTALLED && context.getBundle() != null) {
-				log.log(LogService.LOG_DEBUG, "Unregistering " + ref.getBundle().getLocation());
+				Activator.logDebug("Unregistering " + ref.getBundle().getLocation());
 				final IKnapsackCommandSet provider = (IKnapsackCommandSet) context.getService(ref);
 
 				for (IKnapsackCommand cmd : provider.getCommands()) {				
-					log.log(LogService.LOG_DEBUG, "Unregistering command " + cmd.getName());
+					Activator.logDebug("Unregistering command " + cmd.getName());
 					removeCommand(cmd);
 				}
 			}
@@ -166,7 +164,7 @@ public class CommandParser implements ServiceListener {
 		try {
 			FSHelper.deleteFilesystemCommand(scriptDir, command.getName());
 		} catch (IOException e) {
-			log.log(LogService.LOG_ERROR, "Error while unregistering command " + command.getName(), e);
+			Activator.logError("Error while unregistering command " + command.getName(), e);
 		}
 	}
 }

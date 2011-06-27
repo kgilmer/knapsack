@@ -272,7 +272,7 @@ public class Activator implements BundleActivator, FrameworkListener, ManagedSer
 				FSHelper.validateFile(baseDir, false, true, false, true);
 			
 				if (port != -1) {
-					shell = new ConsoleSocketListener(port, context, this, new CommandParser(context, logService, new File(baseDir, Config.SCRIPT_DIRECTORY_NAME)));
+					shell = new ConsoleSocketListener(port, context, this, new CommandParser(context, new File(baseDir, Config.SCRIPT_DIRECTORY_NAME)));
 					shell.start();
 				}
 				
