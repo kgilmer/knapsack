@@ -4,12 +4,22 @@ Bundle-Name: Knapsack for Apache Felix
 Bundle-SymbolicName: org.knapsack
 Bundle-Version: 0.5.0
 Bundle-Activator: org.knapsack.Activator
-Main-Class: org.knapsack.BootStrap
+Main-Class: org.knapsack.Bootstrap
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Export-Package: org.osgi.service.startlevel;uses:="org.osgi.framework"
- ;version="1.1",org.osgi.framework.launch;uses:="org.osgi.framework";v
- ersion="1.0",org.osgi.util.tracker;uses:="org.osgi.framework";version
- ="1.4",org.osgi.service.url;version="1.0",org.osgi.framework;version=
- "1.5",org.osgi.service.packageadmin;uses:="org.osgi.framework";versio
- n="1.2",org.osgi.framework.hooks.service;uses:="org.osgi.framework";v
- ersion="1.0"
+Export-Package: 
+ org.osgi.service.startlevel;uses:="org.osgi.framework";version="1.1",
+ org.osgi.framework.launch;uses:="org.osgi.framework";version="1.0",
+ org.osgi.util.tracker;uses:="org.osgi.framework";version="1.4",
+ org.osgi.service.url;version="1.0",
+ org.osgi.framework;version="1.5",
+ org.osgi.service.packageadmin;uses:="org.osgi.framework";version="1.2",
+ org.osgi.framework.hooks.service;uses:="org.osgi.framework";version="1.0",
+ org.knapsack.shell.pub; version="0.5.0",
+ org.apache.commons.io; version="2.0.1",
+ org.apache.commons.io.comparator; version="2.0.1",
+ org.apache.commons.io.filefilter; version="2.0.1",
+ org.apache.commons.io.input; version="2.0.1",
+ org.apache.commons.io.monitor; version="2.0.1",
+ org.apache.commons.io.output; version="2.0.1",
+ org.osgi.service.log; version="1.0.1",
+ org.osgi.service.cm; version="1.2.8"
