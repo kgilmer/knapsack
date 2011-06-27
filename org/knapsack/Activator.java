@@ -50,6 +50,9 @@ import org.sprinkles.functions.ReturnFilesFunction;
  *
  */
 public class Activator implements BundleActivator, FrameworkListener, ManagedService, LogService {
+	/**
+	 * Directory name where configadmin default property files are stored.
+	 */
 	protected static final String DEFAULT_FILENAME = "default";
 	
 	/**
@@ -68,19 +71,40 @@ public class Activator implements BundleActivator, FrameworkListener, ManagedSer
 	public static final String KNAPSACK_VERSION = "0.5.0";
 	public static final String KNAPSACK_PID = "org.knapsack";
 	
+	/**
+	 * Static reference to BundleContext
+	 */
 	private static BundleContext context;
+	/**
+	 * Static reference to Config
+	 */
 	private static Config config;
 	/**
 	 * This is set to true by the BootStrap class.  This allows the knapsack bundle to know if it's part of the bootstrap or being started as a regular OSGi bundle.
 	 */
 	private boolean embeddedMode = false;
+	/**
+	 * Static self reference for logging.
+	 */
 	private static Activator ref;
 
+	/**
+	 * Default constructor for running as a normal bundle.
+	 * 
+	 * @throws IOException
+	 */
 	public Activator() throws IOException {
 		ref = this;
 		Activator.frameworkLogger = null;
 	}
 	
+	/**
+	 * Constructor for running as an embedded bundle in the Knapsack bootstrap.
+	 * 
+	 * @param logger instance of framework logger.
+	 * @throws IOException Upon configuration error.
+	 * @throws InterruptedException Upon interruption.
+	 */
 	public Activator(Logger logger) throws IOException, InterruptedException {
 		ref = this;
 		Activator.frameworkLogger = logger;
@@ -88,26 +112,25 @@ public class Activator implements BundleActivator, FrameworkListener, ManagedSer
 		config = Config.getRef();
 	}
 
+	/**
+	 * @return BundleContext
+	 */
 	public static BundleContext getContext() {
 		return context;
 	}
 
+	private ServiceRegistration managedServiceRef;
 	/**
-	 * Thread for write-only pipe.
-	 *//*
-	private PipeWriterThread writer;
-
-	*//**
-	 * Thread for read-only pipe.
-	 *//*
-	private PipeReaderThread reader;*/
-	/**
-	 * Non-persistent thread for bundle initialization.
+	 * Socket for shell interface.
 	 */
-	private InitThread init;
-	private ServiceRegistration sr;
 	private ConsoleSocketListener shell;
+	/**
+	 * Instance of framework logger.
+	 */
 	private static Logger frameworkLogger;
+	/**
+	 * Instance of LogService from OSGi service registry.
+	 */
 	private static LogService logService;
 
 	/*
@@ -117,12 +140,17 @@ public class Activator implements BundleActivator, FrameworkListener, ManagedSer
 	public void start(BundleContext bundleContext) throws Exception {
 		Activator.context = bundleContext;
 		
+		//Load configuration
 		if (config == null)
 			config = Config.getRef();
 		
-		sr = bundleContext.registerService(ManagedService.class.getName(), this, getManagedServiceProperties());
+		//Register knapsack for configAdmin updates
+		managedServiceRef = bundleContext.registerService(ManagedService.class.getName(), this, getManagedServiceProperties());
+		
+		//Listen for FrameworkEvent.STARTED, upon fired, start up shell and initialize bundles.
 		context.addFrameworkListener(this);
 		
+		//Load configuration admin with defaults if no pre-existing state exists.
 		if (embeddedMode && defaultDirExists()) {
 			ServiceReference sr = bundleContext.getServiceReference(ConfigurationAdmin.class.getName());
 			if (sr != null) {
@@ -132,12 +160,21 @@ public class Activator implements BundleActivator, FrameworkListener, ManagedSer
 		}
 	}
 	
+	/**
+	 * @return The dictionary to bind Knapsack's configuration into configadmin.
+	 */
 	private Dictionary getManagedServiceProperties() {
 		Dictionary d = new Properties();
 		d.put(Constants.SERVICE_PID, KNAPSACK_PID);
 		return d;
 	}
 
+	/**
+	 * Load defaults for ConfigAdmin.
+	 * 
+	 * @param defaultDir Directory where default configurations are stored.
+	 * @param ca Instance of ConfigAdmin
+	 */
 	private void loadDefaults(File defaultDir, ConfigurationAdmin ca) {
 
 		Fn.map(new LoadDefaultsFunction(ca, frameworkLogger, config.getBoolean(Config.CONFIG_KEY_OVERWRITE_CONFIGADMIN)), Fn.map(
@@ -173,15 +210,11 @@ public class Activator implements BundleActivator, FrameworkListener, ManagedSer
 			// Ignore errors
 		}
 			
-		sr.unregister();
+		managedServiceRef.unregister();
 	
 		Activator.context = null;
 	}
 	
-	public static Config getConfig() {
-		return config;
-	}
-
 	@Override
 	public void log(int level, String message) {
 		if (logService == null) {
@@ -237,13 +270,9 @@ public class Activator implements BundleActivator, FrameworkListener, ManagedSer
 			sizeMap = new HashMap<File, Long>();
 			
 			try {
-				/*writer = new PipeWriterThread(getInfoFile(), new KnapsackWriterInput());
-				reader = new PipeReaderThread(getControlFile(), new KnapsackReaderOutput());*/
 				shell = new ConsoleSocketListener(config.getShellSocketPort(), context, this);
-				init = new InitThread(new File(config.getString(Config.CONFIG_KEY_ROOT_DIR)), Arrays.asList(config.getString(Config.CONFIG_KEY_BUNDLE_DIRS).split(",")));
+				InitThread init = new InitThread(new File(config.getString(Config.CONFIG_KEY_ROOT_DIR)), Arrays.asList(config.getString(Config.CONFIG_KEY_BUNDLE_DIRS).split(",")));
 				
-				/*writer.start();
-				reader.start();*/
 				shell.start();
 				init.start();		
 				log(LogService.LOG_INFO, "Knapsack " + KNAPSACK_VERSION + " running in " + config.get(Config.CONFIG_KEY_ROOT_DIR));
@@ -254,7 +283,7 @@ public class Activator implements BundleActivator, FrameworkListener, ManagedSer
 	}
 	
 	/**
-	 * @return
+	 * @return Map of cache of loaded bundle sizes.
 	 */
 	public static Map<File, Long> getBundleSizeMap() {
 		return sizeMap;
@@ -285,22 +314,47 @@ public class Activator implements BundleActivator, FrameworkListener, ManagedSer
 		log(level,message, exception);
 	}
 
+	/**
+	 * Convenience method to log a an error.
+	 * 
+	 * @param message
+	 */
 	public static void logError(String message) {
 		ref.log(LogService.LOG_ERROR, message);
 	}
 
+	/**
+	 * Convenience method to log a warning.
+	 * 
+	 * @param message
+	 */
 	public static void logInfo(String message) {
 		ref.log(LogService.LOG_INFO, message);
 	}
 
+	/**
+	 * Convenience method to log a warning.
+	 * 
+	 * @param message
+	 */
 	public static void logWarning(String message) {
 		ref.log(LogService.LOG_WARNING, message);
 	}
 
+	/**
+	 * Convenience method to log a debug message.
+	 * 
+	 * @param message
+	 */
 	public static void logDebug(String message) {
 		ref.log(LogService.LOG_DEBUG, message);
 	}
 
+	/**
+	 * Convenience method to log an error.
+	 * 
+	 * @param message
+	 */
 	public static void logError(String message, Exception e) {
 		ref.log(LogService.LOG_ERROR, message, e);
 	}

@@ -36,11 +36,21 @@ import org.osgi.service.log.LogService;
  * 
  */
 public class BootStrap {
+	/**
+	 * Felix property to specify the logger instance.
+	 */
+	private static final String FELIX_LOGGER_INSTANCE = "felix.log.logger";
+	
+	/**
+	 * Felix property to specify bundle instances to run with framework.
+	 */
+	private static final String FELIX_BUNDLE_INSTANCES = "felix.systembundle.activators";
 
 	/**
 	 * Entry point for the knapsack.  Creates a felix framework and attaches the Log, ConfigAdmin, and Knapsack bundles.  Registers a shutdown hook to cleanup.
 	 * 
-	 * See http://felix.apache.org/site/apache-felix-framework-launching-and-embedding.html
+	 * Based on the example provided at:
+	 * http://felix.apache.org/site/apache-felix-framework-launching-and-embedding.html
 	 * 
 	 * @param args
 	 * @throws IOException
@@ -48,6 +58,7 @@ public class BootStrap {
 	 * @throws InterruptedException 
 	 */
 	public static void main(String[] args) throws IOException, BundleException, InterruptedException {
+		//Record boot time.
 		long time = System.currentTimeMillis();
 		FrameworkFactory frameworkFactory = new FrameworkFactory();
 
@@ -68,8 +79,8 @@ public class BootStrap {
 		
 		activators.add(new org.knapsack.Activator(logger));
 
-		config.put("felix.log.logger", logger);
-		config.put("felix.systembundle.activators", activators);
+		config.put(FELIX_LOGGER_INSTANCE, logger);
+		config.put(FELIX_BUNDLE_INSTANCES, activators);
 
 		final Framework framework = frameworkFactory.newFramework(config);
 		Runtime.getRuntime().addShutdownHook(new Thread("Felix Shutdown Hook") {
