@@ -44,7 +44,7 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.log.LogService;
 
 /**
- * Listens for user entry on a socket.
+ * Listens for a command on a socket with an internally determined port number.
  * 
  * @author kgilmer
  * 
@@ -72,19 +72,19 @@ public class ConsoleSocketListener extends Thread {
 
 	private ServerSocket socket;
 
-	public ConsoleSocketListener(int port, BundleContext context, LogService log) throws UnknownHostException, IOException, InvalidSyntaxException {
-		this.port = port;
-		this.parser = new CommandParser(context, log);
-		context.addServiceListener(parser, "(" + Constants.OBJECTCLASS + "=" + IKnapsackCommandProvider.class.getName() + ")");
+	public ConsoleSocketListener(int port, BundleContext context, LogService log, CommandParser parser) throws UnknownHostException, IOException, InvalidSyntaxException {
+		this.parser = parser;
+		context.addServiceListener(parser, "(" + Constants.OBJECTCLASS + "=" + IKnapsackCommandSet.class.getName() + ")");
 		this.context = context;
 		this.log = log;
+		this.port = port;
 	}
 	
 	public void run() {
 		running = true;
 		try {
 			if (commandProviderRegistration == null) {
-				commandProviderRegistration = context.registerService(IKnapsackCommandProvider.class.getName(), new BuiltinCommands(parser, log), null);
+				commandProviderRegistration = context.registerService(IKnapsackCommandSet.class.getName(), new BuiltinCommands(parser, log), null);
 			}
 			this.socket = createServerSocket();
 
@@ -146,7 +146,14 @@ public class ConsoleSocketListener extends Thread {
 		Activator.logInfo("Created shell socket on port " + port);
 		return s;
 	}
-
+	
+	/**
+	 * @return the port that the socket listens on.
+	 */
+	public int getPort() {
+		return port;
+	}
+	
 	/**
 	 * Shutdown the listener. No new client connections will be accepted.
 	 */

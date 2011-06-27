@@ -35,7 +35,7 @@ import java.util.List;
  * @author kgilmer
  * 
  */
-public interface IKnapsackCommandProvider {
+public interface IKnapsackCommandSet {
 	/**
 	 * @return A list of type ICommand objects.
 	 */

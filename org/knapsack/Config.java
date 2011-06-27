@@ -16,16 +16,10 @@
  */
 package org.knapsack;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.Arrays;
 import java.util.Properties;
-import java.util.Random;
 
 /**
  * Class for knapsack and framework configuration.  
@@ -37,24 +31,7 @@ import java.util.Random;
 public class Config extends Properties {
 	private static final long serialVersionUID = -5479563157788056552L;
 	private static final String CRLF = System.getProperty("line.separator");
-	private static final int PORT_START = 12288;
-	private static final int MAX_PORT_RANGE = 64;
-	private static final String LS = System.getProperty("line.separator");
 
-	/**
-	 * Properties that cause behavior changes to OSGi instance.
-	 * @author kgilmer
-	 *
-	 */
-	public enum SpecialConfigKey {
-		SHUTDOWN,RESTART,BOUNCE,RESCAN
-	}
-	
-	/**
-	 * Optional system property that defines location of knapsack configuration file.
-	 */
-	public static final String CONFIG_KEY_CONFIG_FILE = "org.knapsack.configFile";
-	
 	/**
 	 * Optional system property that defines root directory where knapsack runs.
 	 */
@@ -68,7 +45,8 @@ public class Config extends Properties {
 	/**
 	 * Name of knapsack's configuration file
 	 */
-	private static final String CONFIGURATION_FILENAME = "felix.conf";
+	public static final String CONFIGURATION_FILENAME = "felix.conf";
+	public static final String CONFIGURATION_RESOURCE_FILENAME = "/" + CONFIGURATION_FILENAME;
 
 	public static final String CONFIG_KEY_OVERWRITE_CONFIGADMIN = "org.knapsack.configAdmin.overwrite";
 	
@@ -97,22 +75,17 @@ public class Config extends Properties {
 	 */
 	private static Config ref;
 	
-	private final static String baseScript = ".knapsack-command.sh";
+	public final static String BASE_SCRIPT_FILENAME = ".knapsack-command.sh";
+	public static final String SCRIPT_DIRECTORY_NAME = "bin";
 
-	private static final String FELIX_CONFIGURATION = "/felix.conf";
+	private final File baseDirectory;
 	
 	public static Config getRef() throws IOException {
 		if (ref == null)
-			ref = new Config();
+			throw new IOException("Config needs to be instantiated by bootstrap.");
 		
 		return ref;
 	}
-
-	private File scriptDir;
-
-	private File baseScriptFile;
-
-	private int port = -1;
 
 	/**
 	 * Initialize state
@@ -120,209 +93,27 @@ public class Config extends Properties {
 	 * @throws IOException
 	 * @throws InterruptedException 
 	 */
-	private Config() throws IOException {		
-		File confFile = getConfigFile();
-		
-		if (confFile.isDirectory())
-			throw new IOException("Invalid start state, " + confFile + " is a directory.");
-		
-		String rootDir = getInitRootDirectory();
-		scriptDir = new File(rootDir, "bin");
-		baseScriptFile = new File(scriptDir, baseScript);
-		
-		if (!confFile.exists()) {
-			//Create a default configuration
-			copyDefaultConfiguration(FELIX_CONFIGURATION, confFile, true);
-		}
-			
-		// Create the default dir if doesn't exist.
-		getCreateDefaultDir(rootDir);			
-			
-		if (!scriptDir.exists()) {
-			//Create script
-			copyScripts(confFile.getParentFile());
-		}
-		
-		load(new FileInputStream(confFile));
+	protected Config(File baseDirectory) throws IOException {		
+		this.baseDirectory = baseDirectory;
+		load(new FileInputStream(getConfigFile()));
 		
 		//Specify the root of the knapsack install if not explicitly defined.
 		if (!this.containsKey(CONFIG_KEY_ROOT_DIR))
-			this.put(CONFIG_KEY_ROOT_DIR, getInitRootDirectory());
+			this.put(CONFIG_KEY_ROOT_DIR, baseDirectory);
 		
 		//Specify a default bundle directory if not explicitly defined.
 		if (!this.containsKey(CONFIG_KEY_BUNDLE_DIRS))
 			this.put(CONFIG_KEY_BUNDLE_DIRS, DEFAULT_BUNDLE_DIRECTORY);
 	}
 	
-	private File getCreateDefaultDir(String initRootDirectory) throws IOException {
-		File defDir = new File(initRootDirectory, Activator.DEFAULT_FILENAME);
-		
-		if (!defDir.exists())
-			if (!defDir.mkdirs())
-				throw new IOException("Unable to create directory: " + defDir);
-		
-		return defDir;
-	}
-
-	/**
-	 * Copy shell scripts from the Jar into the deployment directory.
-	 * @param parentFile
-	 * @throws IOException
-	 * @throws InterruptedException 
-	 */
-	private void copyScripts(File parentFile) throws IOException {
-		if (scriptDir == null)
-			scriptDir = new File(parentFile, "bin");
-		
-		if (!scriptDir.exists())
-			if (!scriptDir.mkdirs())
-				throw new IOException("Unable to create directories: " + scriptDir);
-		
-		if (baseScriptFile == null)
-			baseScriptFile = new File(scriptDir, baseScript);
-		
-		if (!baseScriptFile.exists()) {	
-			InputStream istream = Config.class.getResourceAsStream("/scripts/" + baseScript);
-			if (istream == null)
-				throw new IOException("Script file does not exist: " + baseScriptFile);
-			
-			String scriptPrefix = "#!/bin/bash" + LS + "KNAPSACK_PORT=" + getShellSocketPort() + LS;
-			
-			writeToFile(baseScriptFile, new ByteArrayInputStream(scriptPrefix.getBytes()));
-			writeToFile(baseScriptFile, istream);
-			baseScriptFile.setExecutable(true, true);
-		}
-	}
-	
-	/**
-	 * Generate the filesystem symlink necessary to allow a command to be called from the shell environment.
-	 * @param commandName
-	 * @throws IOException
-	 */
-	public void createFilesystemCommand(String commandName) throws IOException {
-		File sf = new File(scriptDir, commandName);
-		
-		if (sf.exists())
-			throw new IOException(commandName + " already exists in " + scriptDir);
-		
-		try {
-			createSymlink(baseScriptFile.getAbsolutePath(), scriptDir + File.separator + commandName);
-			Activator.logDebug("Created symlink to " + commandName);
-		} catch (InterruptedException e) {
-			throw new IOException("Process was interrupted.", e);
-		}		
-	}
-	
-	/**
-	 * Delete the filesystem symlink for a command.
-	 * @param commandName
-	 * @throws IOException
-	 */
-	public void deleteFilesystemCommand(String commandName) throws IOException {
-		File cmd = new File(scriptDir, commandName);
-		
-		if (!cmd.exists() || !cmd.isFile())
-			throw new IOException("Invalid file: " + cmd);
-		
-		if (!cmd.delete())
-			throw new IOException("Failed to delete " + cmd);
-	}
-	
-	/**
-	 * Delete the /bin dir.
-	 * @throws IOException 
-	 */
-	public void deleteBinDir() throws IOException {
-		for (File f : Arrays.asList(scriptDir.listFiles()))
-			if (!f.delete())
-				throw new IOException("Unable to delete: " + f);
-		
-		if (!scriptDir.delete())
-			throw new IOException("Unable to delete: " + scriptDir);
-	}
-
-	private void createSymlink(String baseFile, String link) throws InterruptedException, IOException {
-		String [] cmd = {"ln", "-s", baseFile, link};
-		Runtime.getRuntime().exec(cmd).waitFor();
-	}
-
-	/**
-	 * Write an inputstream to a file.
-	 * 
-	 * @param outputFile
-	 * @param inputStream
-	 * @throws IOException
-	 */
-	private void writeToFile(File outputFile, InputStream inputStream) throws IOException {
-		FileOutputStream fos = new FileOutputStream(outputFile, true);
-		byte [] buff = new byte[4096];
-		
-		while (inputStream.available() > 0) {
-			inputStream.read(buff);
-			fos.write(buff);
-		}
-		
-		inputStream.close();
-		fos.close();
-	}
-		
-
 	/**
 	 * Get the knapsack configuration file.
 	 * 
 	 * @return
 	 * @throws IOException
 	 */
-	private File getConfigFile() throws IOException {
-		if (System.getProperty(CONFIG_KEY_CONFIG_FILE) != null) {
-			return new File(System.getProperty(CONFIG_KEY_CONFIG_FILE));
-		}
-		
-		return new File(getInitRootDirectory(), CONFIGURATION_FILENAME);
-	}
-
-	/**
-	 * Generate the default configuration.
-	 * 
-	 * @param confFile
-	 * @return
-	 * @throws IOException 
-	 */
-	private void copyDefaultConfiguration(String inFile, File confFile, boolean addCmDir) throws IOException {
-		byte [] buff = new byte[4096];
-		InputStream istream = Config.class.getResourceAsStream(inFile);
-		
-		if (istream == null)
-			throw new IOException("Configuration resource is not present: " + inFile);
-		
-		OutputStream fos = new FileOutputStream(confFile);
-		
-		int len = 0;
-		while ((len = istream.read(buff)) > -1) {
-			fos.write(buff, 0, len);
-		}
-		
-		if (addCmDir) {
-			//Since this property is not static, create dynamically.  If multiple properties need to be set dynamically in the future, consider using a template format.
-			fos.write((CRLF + "felix.cm.dir = " + getInitRootDirectory() + File.separator + Activator.CONFIGADMIN_FILENAME + CRLF).getBytes());
-		}
-		
-		istream.close();
-		fos.close();
-	}
-
-	/**
-	 * @return The root of the init folder system.
-	 * @throws IOException 
-	 * 
-	 */
-	private String getInitRootDirectory() throws IOException {
-
-		if (System.getProperty(CONFIG_KEY_ROOT_DIR) != null) {
-			return System.getProperty(CONFIG_KEY_ROOT_DIR);
-		}
-		
-		return System.getProperty("user.dir");
+	private File getConfigFile() throws IOException {	
+		return new File(baseDirectory, CONFIGURATION_FILENAME);
 	}
 
 	/**
@@ -348,15 +139,5 @@ public class Config extends Properties {
 			return this.get(key).toString();
 		
 		return null;
-	}
-
-	public int getShellSocketPort() {
-		if (port  == -1) {
-			//TODO: determine that random port is not already used.
-			Random r = new Random();
-			port = PORT_START + r.nextInt(MAX_PORT_RANGE);
-		}
-		
-		return port;
 	}
 }

@@ -27,6 +27,7 @@
  *******************************************************************************/
 package org.knapsack.shell;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -34,7 +35,7 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
-import org.knapsack.Config;
+import org.knapsack.FSHelper;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceEvent;
@@ -57,11 +58,11 @@ public class CommandParser implements ServiceListener {
 
 	private final LogService log;
 
-	private Config config;
+	private final File scriptDir;
 
-	protected CommandParser(final BundleContext context, final LogService log) throws IOException {
+	public CommandParser(final BundleContext context, final LogService log, final File scriptDir) throws IOException {
 		this.context = context;
-		this.config = Config.getRef();
+		this.scriptDir = scriptDir;
 		this.log = log;
 		commands = new Hashtable<String, IKnapsackCommand>();
 	}
@@ -123,7 +124,7 @@ public class CommandParser implements ServiceListener {
 		final int type = event.getType();
 
 		if (type == ServiceEvent.REGISTERED) {
-			final IKnapsackCommandProvider provider = (IKnapsackCommandProvider) context.getService(ref);
+			final IKnapsackCommandSet provider = (IKnapsackCommandSet) context.getService(ref);
 			log.log(LogService.LOG_INFO, "A new set of commands available: " + provider.getClass().toString());
 			for (IKnapsackCommand cmd : provider.getCommands()) {
 				if (commands.containsKey(cmd.getName())) {
@@ -135,7 +136,7 @@ public class CommandParser implements ServiceListener {
 		} else if (type == ServiceEvent.UNREGISTERING) {
 			if (ref.getBundle().getState() != Bundle.UNINSTALLED && context.getBundle() != null) {
 				log.log(LogService.LOG_DEBUG, "Unregistering " + ref.getBundle().getLocation());
-				final IKnapsackCommandProvider provider = (IKnapsackCommandProvider) context.getService(ref);
+				final IKnapsackCommandSet provider = (IKnapsackCommandSet) context.getService(ref);
 
 				for (IKnapsackCommand cmd : provider.getCommands()) {				
 					log.log(LogService.LOG_DEBUG, "Unregistering command " + cmd.getName());
@@ -152,7 +153,7 @@ public class CommandParser implements ServiceListener {
 	private void addCommand(IKnapsackCommand command) {
 		commands.put(command.getName(), command);
 		try {
-			config.createFilesystemCommand(command.getName());
+			FSHelper.createFilesystemCommand(scriptDir, command.getName());
 		} catch (IOException e) {
 			//Ignore this error, the symlink was created by a pre-existing instance.
 		}
@@ -161,7 +162,7 @@ public class CommandParser implements ServiceListener {
 	private void removeCommand(IKnapsackCommand command) {
 		commands.remove(command.getName());
 		try {
-			config.deleteFilesystemCommand(command.getName());
+			FSHelper.deleteFilesystemCommand(scriptDir, command.getName());
 		} catch (IOException e) {
 			log.log(LogService.LOG_ERROR, "Error while unregistering command " + command.getName(), e);
 		}

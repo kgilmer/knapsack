@@ -1,13 +1,12 @@
 package org.knapsack;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.felix.framework.Logger;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
@@ -57,11 +56,8 @@ public class LoadDefaultsFunction implements Function<File, File> {
 			return;
 		}
 		
-		BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(f)));
-		String line = null;
 		Dictionary<String, String> kvp = new Hashtable<String, String>();
-		
-		while ((line = br.readLine()) != null) {
+		for (String line : IOUtils.readLines(new FileInputStream(f))) {
 			line = line.trim();
 			
 			if (line.length() == 0 || line.startsWith("#"))
@@ -74,7 +70,6 @@ public class LoadDefaultsFunction implements Function<File, File> {
 			
 			kvp.put(elems[0].trim(), elems[1].trim());
 		}
-		br.close();
 		
 		if (kvp.size() > 0) {	
 			Configuration config = ca.getConfiguration(pid, null);

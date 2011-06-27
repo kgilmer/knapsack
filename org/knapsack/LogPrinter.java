@@ -57,7 +57,7 @@ public class LogPrinter implements ServiceTrackerCustomizer, LogListener {
 
 	@Override
 	public void removedService(ServiceReference reference, Object service) {
-		// Since the service is going away, assume unregistration is
+		// Since the service is going away, assume de-registration is
 		// unnecessary.
 	}
 

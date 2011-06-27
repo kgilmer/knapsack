@@ -27,6 +27,7 @@ import java.util.Properties;
 
 import org.apache.felix.framework.Logger;
 import org.knapsack.init.InitThread;
+import org.knapsack.shell.CommandParser;
 import org.knapsack.shell.ConsoleSocketListener;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -83,6 +84,8 @@ public class Activator implements BundleActivator, FrameworkListener, ManagedSer
 	 * This is set to true by the BootStrap class.  This allows the knapsack bundle to know if it's part of the bootstrap or being started as a regular OSGi bundle.
 	 */
 	private boolean embeddedMode = false;
+
+	private final int port;
 	/**
 	 * Static self reference for logging.
 	 */
@@ -96,6 +99,7 @@ public class Activator implements BundleActivator, FrameworkListener, ManagedSer
 	public Activator() throws IOException {
 		ref = this;
 		Activator.frameworkLogger = null;
+		this.port = -1;
 	}
 	
 	/**
@@ -105,8 +109,9 @@ public class Activator implements BundleActivator, FrameworkListener, ManagedSer
 	 * @throws IOException Upon configuration error.
 	 * @throws InterruptedException Upon interruption.
 	 */
-	public Activator(Logger logger) throws IOException, InterruptedException {
+	public Activator(Logger logger, int port) throws IOException, InterruptedException {
 		ref = this;
+		this.port = port;
 		Activator.frameworkLogger = logger;
 		embeddedMode  = true;
 		config = Config.getRef();
@@ -203,12 +208,6 @@ public class Activator implements BundleActivator, FrameworkListener, ManagedSer
 	public void stop(BundleContext bundleContext) throws Exception {	
 		if (shell != null)
 			shell.shutdown();
-		
-		try {
-			config.deleteBinDir();
-		} catch (IOException e) {
-			// Ignore errors
-		}
 			
 		managedServiceRef.unregister();
 	
@@ -268,13 +267,18 @@ public class Activator implements BundleActivator, FrameworkListener, ManagedSer
 				new LogPrinter(context);
 			
 			sizeMap = new HashMap<File, Long>();
-			
+			File baseDir = new File(config.getString(Config.CONFIG_KEY_ROOT_DIR));
 			try {
-				shell = new ConsoleSocketListener(config.getShellSocketPort(), context, this);
-				InitThread init = new InitThread(new File(config.getString(Config.CONFIG_KEY_ROOT_DIR)), Arrays.asList(config.getString(Config.CONFIG_KEY_BUNDLE_DIRS).split(",")));
+				FSHelper.validateFile(baseDir, false, true, false, true);
+			
+				if (port != -1) {
+					shell = new ConsoleSocketListener(port, context, this, new CommandParser(context, logService, new File(baseDir, Config.SCRIPT_DIRECTORY_NAME)));
+					shell.start();
+				}
 				
-				shell.start();
-				init.start();		
+				(new InitThread(baseDir, Arrays.asList(config.getString(Config.CONFIG_KEY_BUNDLE_DIRS).split(","))))
+					.start();					
+
 				log(LogService.LOG_INFO, "Knapsack " + KNAPSACK_VERSION + " running in " + config.get(Config.CONFIG_KEY_ROOT_DIR));
 			} catch (Exception e) {
 				log(LogService.LOG_ERROR, "Failed to start knapsack.", e);

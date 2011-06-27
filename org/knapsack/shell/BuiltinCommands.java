@@ -21,7 +21,7 @@ import org.osgi.service.log.LogReaderService;
 import org.osgi.service.log.LogService;
 import org.sprinkles.Fn;
 
-public class BuiltinCommands implements IKnapsackCommandProvider {
+public class BuiltinCommands implements IKnapsackCommandSet {
 	
 	private final CommandParser parser;
 	private final LogService log;

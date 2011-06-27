@@ -16,9 +16,11 @@
  */
 package org.knapsack;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import org.apache.felix.cm.impl.ConfigurationManager;
 import org.apache.felix.framework.FrameworkFactory;
@@ -45,6 +47,12 @@ public class BootStrap {
 	 * Felix property to specify bundle instances to run with framework.
 	 */
 	private static final String FELIX_BUNDLE_INSTANCES = "felix.systembundle.activators";
+	
+
+	private static final int PORT_START = 12288;
+	private static final int MAX_PORT_RANGE = 64;
+
+	private static File scriptDir;
 
 	/**
 	 * Entry point for the knapsack.  Creates a felix framework and attaches the Log, ConfigAdmin, and Knapsack bundles.  Registers a shutdown hook to cleanup.
@@ -60,7 +68,16 @@ public class BootStrap {
 	public static void main(String[] args) throws IOException, BundleException, InterruptedException {
 		//Record boot time.
 		long time = System.currentTimeMillis();
+		
 		FrameworkFactory frameworkFactory = new FrameworkFactory();
+		Logger logger = new Logger();
+		
+		Random r = new Random();
+		int port = PORT_START + r.nextInt(MAX_PORT_RANGE);
+		
+		final File baseDirectory = getBaseDirectory();
+		FSHelper.validateFile(baseDirectory, true, true, false, true);
+		createKnapsackLayout(baseDirectory, logger, port);
 
 		// Create initial configuration, this will load some values with defaults.
 		Config config = Config.getRef();	
@@ -75,9 +92,8 @@ public class BootStrap {
 			activators.add(new ConfigurationManager());
 
 		// Create an internal logger that will be used for log output before LogService takes over.
-		Logger logger = new Logger();
 		
-		activators.add(new org.knapsack.Activator(logger));
+		activators.add(new org.knapsack.Activator(logger, port));
 
 		config.put(FELIX_LOGGER_INSTANCE, logger);
 		config.put(FELIX_BUNDLE_INSTANCES, activators);
@@ -90,6 +106,8 @@ public class BootStrap {
 						framework.stop();
 						framework.waitForStop(0);
 					}
+					
+					FSHelper.deleteFilesInDir(scriptDir);
 				} catch (Exception ex) {
 					System.err.println("Error stopping framework: " + ex);
 				}
@@ -99,5 +117,29 @@ public class BootStrap {
 		framework.init();
 		framework.start();
 		logger.log(LogService.LOG_INFO, "Framework started in " + ((double) (System.currentTimeMillis() - time) / 1000) + " seconds with activators: " + activators);
+	}
+	
+	private static File getBaseDirectory() {
+		if (System.getProperty(Config.CONFIG_KEY_ROOT_DIR) != null)
+			return new File(System.getProperty(Config.CONFIG_KEY_ROOT_DIR));
+		
+		return new File(System.getProperty("user.dir"));
+	}
+
+	private static void createKnapsackLayout(File baseDirectory, Logger logger, int port) throws IOException {
+		File confFile = new File(baseDirectory, Config.CONFIGURATION_FILENAME);
+		scriptDir = new File(baseDirectory, Config.SCRIPT_DIRECTORY_NAME);
+		FSHelper.validateFile(scriptDir, true, true, false, true);
+		
+		if (!confFile.exists()) {
+			//Create a default configuration
+			logger.log(LogService.LOG_INFO, "Creating new default configuration file: " + confFile);
+			FSHelper.copyDefaultConfiguration(Config.CONFIGURATION_RESOURCE_FILENAME, confFile, baseDirectory);
+		}
+		
+		if (FSHelper.directoryHasFiles(scriptDir))
+			FSHelper.deleteFilesInDir(scriptDir);
+		
+		FSHelper.copyScripts(confFile.getParentFile(), port);
 	}
 }
