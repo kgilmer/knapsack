@@ -30,6 +30,7 @@ package org.knapsack.shell;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.knapsack.shell.pub.IKnapsackCommand;
 import org.osgi.framework.BundleContext;
 
 /**

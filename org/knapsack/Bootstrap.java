@@ -37,7 +37,7 @@ import org.osgi.service.log.LogService;
  * @author kgilmer
  * 
  */
-public class BootStrap {
+public class Bootstrap {
 	/**
 	 * Felix property to specify the logger instance.
 	 */

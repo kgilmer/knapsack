@@ -14,6 +14,8 @@ import java.util.Map.Entry;
 
 import org.knapsack.Config;
 import org.knapsack.init.InitThread;
+import org.knapsack.shell.pub.IKnapsackCommand;
+import org.knapsack.shell.pub.IKnapsackCommandSet;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.log.LogEntry;

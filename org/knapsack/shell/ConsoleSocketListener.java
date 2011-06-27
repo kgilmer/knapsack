@@ -37,6 +37,7 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 
 import org.knapsack.Activator;
+import org.knapsack.shell.pub.IKnapsackCommandSet;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;

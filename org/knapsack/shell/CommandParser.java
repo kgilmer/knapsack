@@ -36,6 +36,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.knapsack.FSHelper;
+import org.knapsack.shell.pub.IKnapsackCommand;
+import org.knapsack.shell.pub.IKnapsackCommandSet;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceEvent;

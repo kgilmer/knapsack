@@ -25,19 +25,58 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
-package org.knapsack.shell;
+package org.knapsack.shell.pub;
 
+import java.io.OutputStream;
 import java.util.List;
 
+import org.osgi.framework.BundleContext;
+
 /**
- * A container for shell commands.
+ * A command interface for the Bug Labs OSGi shell.
  * 
  * @author kgilmer
  * 
  */
-public interface IKnapsackCommandSet {
+public interface IKnapsackCommand {
 	/**
-	 * @return A list of type ICommand objects.
+	 * Command initialization.
+	 * 
+	 * @param arguments
+	 * @param out
+	 * @param err
+	 * @param context
 	 */
-	public List<IKnapsackCommand> getCommands();
+	public void initialize(List<String> arguments, BundleContext context);
+
+	/**
+	 * @return List of arguments passed to command.
+	 */
+	public List<String> getArguments();
+	/**
+	 * Execute the command
+	 * 
+	 * @throws Exception
+	 */
+	public String execute() throws Exception;
+
+	/**
+	 * @return true if the command and parameters are valid.
+	 */
+	public boolean isValid();
+
+	/**
+	 * @return Name of command.
+	 */
+	public String getName();
+
+	/**
+	 * @return A short textual description of command usage.
+	 */
+	public String getUsage();
+
+	/**
+	 * @return A description of what the command does.
+	 */
+	public String getDescription();
 }

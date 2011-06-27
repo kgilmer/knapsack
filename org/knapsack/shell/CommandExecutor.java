@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 
+import org.knapsack.shell.pub.IKnapsackCommand;
 import org.osgi.framework.BundleException;
 
 /**
