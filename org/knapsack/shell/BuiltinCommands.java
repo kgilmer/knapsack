@@ -12,6 +12,7 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Map.Entry;
 
+import org.knapsack.Activator;
 import org.knapsack.Config;
 import org.knapsack.init.InitThread;
 import org.knapsack.shell.pub.IKnapsackCommand;
@@ -52,7 +53,7 @@ public class BuiltinCommands implements IKnapsackCommandSet {
 
 		@Override
 		public String execute() throws Exception {
-			Config config = Config.getRef();
+			Config config = Activator.getConfig();
 			
 			InitThread init = new InitThread(new File(config.getString(Config.CONFIG_KEY_ROOT_DIR)), Arrays.asList(config.getString(Config.CONFIG_KEY_BUNDLE_DIRS).split(",")));
 			init.start();

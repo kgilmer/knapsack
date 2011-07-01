@@ -126,7 +126,7 @@ public class FSHelper {
 		
 		
 		if (baseDirectory != null) {
-			File configAdminDir = new File(baseDirectory, Activator.CONFIGADMIN_FILENAME);
+			File configAdminDir = new File(baseDirectory, Config.CONFIGADMIN_DIRECTORY_NAME);
 			validateFile(configAdminDir, true, true, false, true);
 			// Since this property is not static, create dynamically. If
 			// multiple properties need to be set dynamically in the future,

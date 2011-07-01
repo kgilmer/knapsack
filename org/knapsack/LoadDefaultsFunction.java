@@ -93,6 +93,6 @@ public class LoadDefaultsFunction implements Function<File, File> {
 	 * @return
 	 */
 	private boolean isDefaultFile(File f) {
-		return f.getParentFile().getName().equals(Activator.DEFAULT_FILENAME);
+		return f.getParentFile().getName().equals(Config.DEFAULT_DIRECTORY_NAME);
 	}
 }

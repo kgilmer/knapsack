@@ -77,15 +77,17 @@ public class Config extends Properties {
 	
 	public final static String BASE_SCRIPT_FILENAME = ".knapsack-command.sh";
 	public static final String SCRIPT_DIRECTORY_NAME = "bin";
+	/**
+	 * Directory name where configadmin default property files are stored.
+	 */
+	protected static final String DEFAULT_DIRECTORY_NAME = "default";
+	
+	/**
+	 * Filename for config admin directory.
+	 */
+	public static final String CONFIGADMIN_DIRECTORY_NAME = "configAdmin";
 
 	private final File baseDirectory;
-	
-	public static Config getRef() throws IOException {
-		if (ref == null)
-			throw new IOException("Config needs to be instantiated by bootstrap.");
-		
-		return ref;
-	}
 
 	/**
 	 * Initialize state

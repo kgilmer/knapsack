@@ -93,7 +93,7 @@ public class Bootstrap {
 
 		// Create an internal logger that will be used for log output before LogService takes over.
 		
-		activators.add(new org.knapsack.Activator(logger, port));
+		activators.add(new org.knapsack.Activator(config, logger, port));
 
 		config.put(FELIX_LOGGER_INSTANCE, logger);
 		config.put(FELIX_BUNDLE_INSTANCES, activators);
@@ -128,6 +128,7 @@ public class Bootstrap {
 
 	private static void createKnapsackLayout(File baseDirectory, Logger logger, int port) throws IOException {
 		File confFile = new File(baseDirectory, Config.CONFIGURATION_FILENAME);
+		
 		scriptDir = new File(baseDirectory, Config.SCRIPT_DIRECTORY_NAME);
 		FSHelper.validateFile(scriptDir, true, true, false, true);
 		
@@ -141,5 +142,11 @@ public class Bootstrap {
 			FSHelper.deleteFilesInDir(scriptDir);
 		
 		FSHelper.copyScripts(confFile.getParentFile(), port);
+		
+		File defaultDir = new File(baseDirectory, Config.DEFAULT_DIRECTORY_NAME);
+		FSHelper.validateFile(defaultDir, true, true, false, true);
+		
+		File configAdminDir = new File(baseDirectory, Config.CONFIGADMIN_DIRECTORY_NAME);
+		FSHelper.validateFile(configAdminDir, true, true, false, true);
 	}
 }

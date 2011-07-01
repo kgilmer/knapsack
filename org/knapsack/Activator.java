@@ -50,17 +50,7 @@ import org.sprinkles.functions.ReturnFilesFunction;
  * @author kgilmer
  *
  */
-public class Activator implements BundleActivator, FrameworkListener, ManagedService, LogService {
-	/**
-	 * Directory name where configadmin default property files are stored.
-	 */
-	protected static final String DEFAULT_FILENAME = "default";
-	
-	/**
-	 * Filename for config admin directory.
-	 */
-	public static final String CONFIGADMIN_FILENAME = "configAdmin";
-	
+public class Activator implements BundleActivator, FrameworkListener, ManagedService, LogService {	
 	/**
 	 * Store all the bundle sizes at time of install to compare later for updates.
 	 */
@@ -100,6 +90,7 @@ public class Activator implements BundleActivator, FrameworkListener, ManagedSer
 		ref = this;
 		Activator.frameworkLogger = null;
 		this.port = -1;
+		this.config = null;
 	}
 	
 	/**
@@ -109,12 +100,12 @@ public class Activator implements BundleActivator, FrameworkListener, ManagedSer
 	 * @throws IOException Upon configuration error.
 	 * @throws InterruptedException Upon interruption.
 	 */
-	public Activator(Logger logger, int port) throws IOException, InterruptedException {
+	public Activator(Config config, Logger logger, int port) throws IOException, InterruptedException {
 		ref = this;
 		this.port = port;
 		Activator.frameworkLogger = logger;
 		embeddedMode  = true;
-		config = Config.getRef();
+		this.config = config;
 	}
 
 	/**
@@ -145,10 +136,6 @@ public class Activator implements BundleActivator, FrameworkListener, ManagedSer
 	public void start(BundleContext bundleContext) throws Exception {
 		Activator.context = bundleContext;
 		
-		//Load configuration
-		if (config == null)
-			config = Config.getRef();
-		
 		//Register knapsack for configAdmin updates
 		managedServiceRef = bundleContext.registerService(ManagedService.class.getName(), this, getManagedServiceProperties());
 		
@@ -156,11 +143,11 @@ public class Activator implements BundleActivator, FrameworkListener, ManagedSer
 		context.addFrameworkListener(this);
 		
 		//Load configuration admin with defaults if no pre-existing state exists.
-		if (embeddedMode && defaultDirExists()) {
+		if (embeddedMode) {
 			ServiceReference sr = bundleContext.getServiceReference(ConfigurationAdmin.class.getName());
 			if (sr != null) {
 				ConfigurationAdmin ca = (ConfigurationAdmin) bundleContext.getService(sr);
-				loadDefaults(getDefaultDir(), ca);
+				loadDefaults(new File(config.get(Config.CONFIG_KEY_ROOT_DIR).toString(), Config.CONFIGADMIN_DIRECTORY_NAME), ca);
 			}
 		}
 	}
@@ -186,21 +173,7 @@ public class Activator implements BundleActivator, FrameworkListener, ManagedSer
 				ReturnFilesFunction.GET_FILES_FN, defaultDir));
 	}
 
-	/**
-	 * @return File (that may or may not exist) of default dir.
-	 */
-	private File getDefaultDir() {
-		return new File(config.getString(Config.CONFIG_KEY_ROOT_DIR), DEFAULT_FILENAME);
-	}
 
-	/**
-	 * @return true if 'default' directory exists
-	 */
-	private boolean defaultDirExists() {
-		File d = getDefaultDir();
-		return d != null && d.isDirectory();
-	}
-	
 	/*
 	 * (non-Javadoc)
 	 * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
@@ -361,5 +334,9 @@ public class Activator implements BundleActivator, FrameworkListener, ManagedSer
 	 */
 	public static void logError(String message, Exception e) {
 		ref.log(LogService.LOG_ERROR, message, e);
+	}
+
+	public static Config getConfig() {
+		return config;
 	}
 }
