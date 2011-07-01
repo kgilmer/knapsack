@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Map.Entry;
@@ -45,6 +46,7 @@ public class BuiltinCommands implements IKnapsackCommandSet {
 		cmds.add(new LogCommand());
 		cmds.add(new UpdateCommand());
 		cmds.add(new PrintConfCommand());
+		cmds.add(new HeadersCommand());
 
 		return cmds;
 	}
@@ -78,7 +80,7 @@ public class BuiltinCommands implements IKnapsackCommandSet {
 
 		@Override
 		public String execute() throws Exception {
-			final StringBuffer sb = new StringBuffer();
+			final StringBuilder sb = new StringBuilder();
 			final boolean verbose = arguments.contains("-v");
 			
 			ServiceReference ref = context.getServiceReference(LogReaderService.class.getName());
@@ -121,7 +123,7 @@ public class BuiltinCommands implements IKnapsackCommandSet {
 
 		@Override
 		public String execute() throws Exception {
-			final StringBuffer sb = new StringBuffer();
+			final StringBuilder sb = new StringBuilder();
 			final boolean verbose = arguments.contains("-v");
 			
 			Fn.map(new Fn.Function<ServiceReference, ServiceReference>() {
@@ -157,7 +159,7 @@ public class BuiltinCommands implements IKnapsackCommandSet {
 
 		@Override
 		public String execute() throws Exception {
-			final StringBuffer sb = new StringBuffer();
+			final StringBuilder sb = new StringBuilder();
 			
 			Fn.map(new Fn.Function<Entry<Object, Object>, Object>() {
 
@@ -195,17 +197,9 @@ public class BuiltinCommands implements IKnapsackCommandSet {
 
 		@Override
 		public String execute() throws Exception {
-			final StringBuffer sb = new StringBuffer();
-			final boolean verbose = arguments.contains("-v");
+			final StringBuilder sb = new StringBuilder();
 			
-			Fn.map(new Fn.Function<Bundle, Bundle>() {
-
-				@Override
-				public Bundle apply(Bundle element) {
-					addBundle(element, sb, verbose);
-					return element;
-				}
-			}, context.getBundles());
+			Fn.map(new PrintBundleFunction(sb, arguments.contains("-v")), context.getBundles());
 			
 			return sb.toString();
 		}
@@ -225,6 +219,47 @@ public class BuiltinCommands implements IKnapsackCommandSet {
 			return "Get list of OSGi bundles installed in the framework.";
 		}
 	}
+	
+
+	private class HeadersCommand extends AbstractKnapsackCommand {
+
+		@Override
+		public String execute() throws Exception {
+			final StringBuilder sb = new StringBuilder();
+			PrintHeadersFunction function = new PrintHeadersFunction(sb);
+			
+			if (arguments.size() == 1) {
+				int bundleId = Integer.parseInt(arguments.get(0));
+				function.setPrintBundle(false);
+				Bundle b = context.getBundle(bundleId);
+				
+				if (b != null)
+					function.apply(b);
+				
+			} else {
+				function.setPrintBundle(true);
+				Fn.map(function , context.getBundles());
+			}
+			
+			return sb.toString();
+		}
+
+		@Override
+		public String getName() {
+			return "headers";
+		}
+		
+		@Override
+		public String getUsage() {
+			return "[bundle id]";
+		}
+		
+		@Override
+		public String getDescription() {
+			return "Print bundle headers.";
+		}
+	}
+	
 
 	/**
 	 * Exit the framework.
@@ -259,20 +294,9 @@ public class BuiltinCommands implements IKnapsackCommandSet {
 	private class HelpCommand extends AbstractKnapsackCommand {
 
 		public String execute() throws Exception {
-			final StringBuffer sb = new StringBuffer();
+			final StringBuilder sb = new StringBuilder();
 			
-			Fn.map(new Fn.Function<IKnapsackCommand, IKnapsackCommand>() {
-				
-				@Override
-				public IKnapsackCommand apply(IKnapsackCommand cmd) {
-					String sl = cmd.getName() + "\t" + cmd.getUsage() + "\t" + cmd.getDescription() + CRLF;
-					
-					sb.append(sl);
-				
-					return cmd;
-				}
-				
-			}, parser.getCommands().values());
+			Fn.map(new PrintHelpFunction(sb), parser.getCommands().values());
 			
 			return sb.toString();
 		}
@@ -292,7 +316,7 @@ public class BuiltinCommands implements IKnapsackCommandSet {
 	}
 	
 
-	private void addLogEntry(LogEntry entry, StringBuffer l, boolean verbose) {
+	private void addLogEntry(LogEntry entry, StringBuilder l, boolean verbose) {
 		String line;
 		
 		if (verbose)
@@ -328,7 +352,7 @@ public class BuiltinCommands implements IKnapsackCommandSet {
 		l.add(line);
 	}
 
-	private void addServiceReference(ServiceReference sr, StringBuffer l, boolean verbose) {
+	private void addServiceReference(ServiceReference sr, StringBuilder l, boolean verbose) {
 		if (verbose)
 			l.append(getServiceId(sr) + " \t" + getServiceName(sr) + AbstractKnapsackCommand.CRLF);
 		else
@@ -354,19 +378,6 @@ public class BuiltinCommands implements IKnapsackCommandSet {
 		return sr.getProperty("service.id").toString();
 	}
 
-	/**
-	 * Add info for Bundle
-	 * 
-	 * @param b
-	 * @param l
-	 * @param verbose
-	 */
-	private void addBundle(Bundle b, StringBuffer l, boolean verbose) {
-		if (verbose)
-			l.append(getStateName(b.getState()) + " \t" + getBundleName(b) + " \t(" + getBundleVersion(b) + ") \t" + getBundleLocation(b) + AbstractKnapsackCommand.CRLF);
-		else
-			l.append(getBundleName(b) + AbstractKnapsackCommand.CRLF);
-	}
 
 	/**
 	 * @param b
@@ -498,6 +509,97 @@ public class BuiltinCommands implements IKnapsackCommandSet {
 			
 			return 0;
 		}
+	}
+	
+	private class PrintBundleFunction implements Fn.Function<Bundle, Bundle> {
 		
+		private final boolean verbose;
+		private final StringBuilder sb;
+
+		public PrintBundleFunction(StringBuilder sb, boolean verbose) {
+			this.sb = sb;
+			this.verbose = verbose;
+			
+		}
+
+		@Override
+		public Bundle apply(Bundle b) {
+			if (verbose)
+				sb.append(getStateName(b.getState()) + " \t[" + b.getBundleId() + "] " + getBundleName(b) + " \t(" + getBundleVersion(b) + ") \t" + getBundleLocation(b) + AbstractKnapsackCommand.CRLF);
+			else
+				sb.append(getBundleName(b) + AbstractKnapsackCommand.CRLF);
+			
+			return b;
+		}
+	}
+	
+	private class PrintHeadersFunction implements Fn.Function<Bundle, Bundle> {
+		
+		private final StringBuilder sb;
+		private boolean printBundle = false;
+		private PrintBundleFunction printBundleFunction;
+
+		public PrintHeadersFunction(StringBuilder sb) {
+			this.sb = sb;			
+			this.printBundleFunction = new PrintBundleFunction(sb, true);
+		}
+		
+		public void setPrintBundle(boolean b) {
+			this.printBundle  = b;
+		}
+
+		@Override
+		public Bundle apply(Bundle b) {
+			Dictionary headers = b.getHeaders();
+			Enumeration keys = headers.keys();
+			
+			if (printBundle) 
+				printBundleFunction.apply(b);	
+			
+			while (keys.hasMoreElements()) {
+				Object key = keys.nextElement();
+				sb.append(key.toString());
+				sb.append(": ");
+				sb.append(headers.get(key).toString());
+				sb.append(AbstractKnapsackCommand.CRLF);
+			}
+			
+			if (printBundle) 
+				sb.append(AbstractKnapsackCommand.CRLF);	
+			
+			return b;
+		}
+	}
+	
+	private class PrintHelpFunction implements Fn.Function<IKnapsackCommand, IKnapsackCommand> {
+		
+		private final StringBuilder sb;
+
+		public PrintHelpFunction(StringBuilder sb) {
+			this.sb = sb;
+		}
+
+		@Override
+		public IKnapsackCommand apply(IKnapsackCommand cmd) {
+			sb.append(pad(cmd.getName() + " " + cmd.getUsage(), 20));
+	
+			sb.append('\t');
+			sb.append(cmd.getDescription());
+			sb.append(AbstractKnapsackCommand.CRLF);
+					
+			return cmd;
+		}
+		
+		private String pad(String in, int len) {
+			if (in.length() >= len)
+				return in;
+			
+			int diff = len - in.length();
+			StringBuilder sb = new StringBuilder(in);
+			for (int i = 0; i < diff; i++)
+				sb.append(' ');
+			
+			return sb.toString();
+		}
 	}
 }
