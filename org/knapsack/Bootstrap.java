@@ -86,10 +86,9 @@ public class Bootstrap {
 			// Create initial configuration, this will load some values with defaults.
 			Config config = new Config(baseDirectory);
 			
-			if (config.containsKey(Config.CONFIG_DISABLE_SCRIPTS) && config.getBoolean(Config.CONFIG_DISABLE_SCRIPTS)) {
+			if (!config.containsKey(Config.CONFIG_DISABLE_SCRIPTS) || !config.getBoolean(Config.CONFIG_DISABLE_SCRIPTS)) {
 				Random r = new Random();
 				port = PORT_START + r.nextInt(MAX_PORT_RANGE);
-			} else {
 				createKnapsackScripts(baseDirectory, port);
 			}
 	

@@ -247,6 +247,8 @@ public class Activator implements BundleActivator, FrameworkListener, ManagedSer
 				if (port != Bootstrap.DISABLE_SCRIPTS_PORT) {
 					shell = new ConsoleSocketListener(port, context, this, new CommandParser(context, new File(baseDir, Config.SCRIPT_DIRECTORY_NAME)));
 					shell.start();
+				} else {
+					log(LogService.LOG_INFO, "Knapsack shell is disabled.");
 				}
 				
 				(new InitThread(baseDir, Arrays.asList(config.getString(Config.CONFIG_KEY_BUNDLE_DIRS).split(","))))
