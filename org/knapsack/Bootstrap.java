@@ -29,6 +29,8 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.launch.Framework;
 import org.osgi.service.log.LogService;
+import org.sprinkles.Fn;
+import org.sprinkles.functions.ReturnFilesFunction;
 
 /**
  * The bootstrap class for Knapsack. Creates and starts a framework with the
@@ -65,7 +67,7 @@ public class Bootstrap {
 	 * @throws BundleException
 	 * @throws InterruptedException 
 	 */
-	public static void main(String[] args) throws IOException, BundleException, InterruptedException {
+	public static void main(String[] args) {		
 		//Record boot time.
 		long time = System.currentTimeMillis();
 		
@@ -75,48 +77,53 @@ public class Bootstrap {
 		Random r = new Random();
 		int port = PORT_START + r.nextInt(MAX_PORT_RANGE);
 		
-		final File baseDirectory = getBaseDirectory();
-		FSHelper.validateFile(baseDirectory, true, true, false, true);
-		createKnapsackLayout(baseDirectory, logger, port);
-
-		// Create initial configuration, this will load some values with defaults.
-		Config config = new Config(baseDirectory);
-
-		// Create activators that will start
-		List<BundleActivator> activators = new ArrayList<BundleActivator>();
-
-		if (config.getBoolean(Config.CONFIG_KEY_BUILTIN_LOGGER))
-			activators.add(new org.apache.felix.log.Activator());
-
-		if (config.getBoolean(Config.CONFIG_KEY_BUILTIN_CONFIGADMIN))
-			activators.add(new ConfigurationManager());
-
-		// Create an internal logger that will be used for log output before LogService takes over.
-		
-		activators.add(new org.knapsack.Activator(config, logger, port));
-
-		config.put(FELIX_LOGGER_INSTANCE, logger);
-		config.put(FELIX_BUNDLE_INSTANCES, activators);
-
-		final Framework framework = frameworkFactory.newFramework(config);
-		Runtime.getRuntime().addShutdownHook(new Thread("Felix Shutdown Hook") {
-			public void run() {
-				try {
-					if (framework != null) {
-						framework.stop();
-						framework.waitForStop(0);
+		try {
+			final File baseDirectory = getBaseDirectory();
+			FSHelper.validateFile(baseDirectory, true, true, false, true);
+			createKnapsackLayout(baseDirectory, logger, port);
+	
+			// Create initial configuration, this will load some values with defaults.
+			Config config = new Config(baseDirectory);
+	
+			// Create activators that will start
+			List<BundleActivator> activators = new ArrayList<BundleActivator>();
+	
+			if (config.getBoolean(Config.CONFIG_KEY_BUILTIN_LOGGER))
+				activators.add(new org.apache.felix.log.Activator());
+	
+			if (config.getBoolean(Config.CONFIG_KEY_BUILTIN_CONFIGADMIN))
+				activators.add(new ConfigurationManager());
+	
+			// Create an internal logger that will be used for log output before LogService takes over.
+			
+			activators.add(new org.knapsack.Activator(config, logger, port));
+	
+			config.put(FELIX_LOGGER_INSTANCE, logger);
+			config.put(FELIX_BUNDLE_INSTANCES, activators);
+	
+			final Framework framework = frameworkFactory.newFramework(config);
+			Runtime.getRuntime().addShutdownHook(new Thread("Felix Shutdown Hook") {
+				public void run() {
+					try {
+						if (framework != null) {
+							framework.stop();
+							framework.waitForStop(0);
+						}
+						
+						FSHelper.deleteFilesInDir(scriptDir);
+					} catch (Exception ex) {
+						System.err.println("Error stopping framework: " + ex);
 					}
-					
-					FSHelper.deleteFilesInDir(scriptDir);
-				} catch (Exception ex) {
-					System.err.println("Error stopping framework: " + ex);
 				}
-			}
-		});
-		
-		framework.init();
-		framework.start();
-		logger.log(LogService.LOG_INFO, "Framework started in " + ((double) (System.currentTimeMillis() - time) / 1000) + " seconds with activators: " + activators);
+			});
+			
+			framework.init();
+			framework.start();
+			logger.log(LogService.LOG_INFO, "Framework started in " + ((double) (System.currentTimeMillis() - time) / 1000) + " seconds with activators: " + activators);
+		} catch (Exception e) {
+			logger.log(LogService.LOG_INFO, "Framework encountered a critical error and failed to start: ", e);
+			System.exit(1);
+		}
 	}
 	
 	private static File getBaseDirectory() {
@@ -132,7 +139,15 @@ public class Bootstrap {
 		scriptDir = new File(baseDirectory, Config.SCRIPT_DIRECTORY_NAME);
 		FSHelper.validateFile(scriptDir, true, true, false, true);
 		
+		File defaultDir = new File(baseDirectory, Config.DEFAULT_DIRECTORY_NAME);
+		FSHelper.validateFile(defaultDir, true, true, false, true);
+		
 		if (!confFile.exists()) {
+			//Load default properties before creating/loading global conf file.  This allows for simple modification by installers, bundles.
+			if (FSHelper.directoryHasFiles(defaultDir))
+				Fn.map(new LoadPropertiesFunction(logger), Fn.map(
+						ReturnFilesFunction.GET_FILES_FN, defaultDir));
+			
 			//Create a default configuration
 			logger.log(LogService.LOG_INFO, "Creating new default configuration file: " + confFile);
 			FSHelper.copyDefaultConfiguration(Config.CONFIGURATION_RESOURCE_FILENAME, confFile, baseDirectory);
@@ -142,10 +157,7 @@ public class Bootstrap {
 			FSHelper.deleteFilesInDir(scriptDir);
 		
 		FSHelper.copyScripts(confFile.getParentFile(), port);
-		
-		File defaultDir = new File(baseDirectory, Config.DEFAULT_DIRECTORY_NAME);
-		FSHelper.validateFile(defaultDir, true, true, false, true);
-		
+				
 		File configAdminDir = new File(baseDirectory, Config.CONFIGADMIN_DIRECTORY_NAME);
 		FSHelper.validateFile(configAdminDir, true, true, false, true);
 	}

@@ -1,6 +1,7 @@
 package org.knapsack;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -8,6 +9,8 @@ import java.io.OutputStream;
 import java.util.Arrays;
 
 import org.apache.commons.io.IOUtils;
+import org.osgi.service.cm.Configuration;
+import org.osgi.service.log.LogService;
 
 /**
  * Static methods that interface with the filesystem for specific Knapsack tasks.
@@ -121,21 +124,59 @@ public class FSHelper {
 			throw new IOException("Configuration resource is not present: " + sourceResourceFilename);
 
 		OutputStream fos = new FileOutputStream(targetConfFile);
+		
+		StringBuilder fullLine = new StringBuilder();
+		for (String line : IOUtils.readLines(istream)) {
+			if (line.length() == 0 || line.startsWith("#")) {
+				IOUtils.write(line, fos);
+				IOUtils.write(LS, fos);
+				continue;
+			}
+			
+			fullLine.append(line);
+			fullLine.append(LS);
+			
+			if (!line.endsWith("\\")) {
+				line = fullLine.toString();
+				String [] elems = line.split("=");
+				
+				if (elems.length < 2)
+					throw new IOException("Invalid line in config admin property file: " + line);
+				
+				String key = elems[0];
+				
+				String outLine = null;
+				if (System.getProperty(key.trim()) != null) {
+					outLine = key + "=" + System.getProperty(key.trim());
+				} else {
+					outLine = key + "=" + line.substring(key.length() + 1);
+				}
+				IOUtils.write(outLine, fos);
+				IOUtils.write(LS, fos);
+				fullLine = new StringBuilder();
+			} 		
+		}
 
-		IOUtils.copy(istream, fos);
-		
-		
 		if (baseDirectory != null) {
 			File configAdminDir = new File(baseDirectory, Config.CONFIGADMIN_DIRECTORY_NAME);
 			validateFile(configAdminDir, true, true, false, true);
 			// Since this property is not static, create dynamically. If
 			// multiple properties need to be set dynamically in the future,
 			// consider using a template format.
-			IOUtils.write(LS + "felix.cm.dir = " + configAdminDir, fos);
+			IOUtils.write(LS + "felix.cm.dir = " + configAdminDir + LS, fos);
 		}
 
 		istream.close();
 		fos.close();
+	}
+	
+	private static String appendElementsAsString(String[] elems, int start) {
+		StringBuilder sb = new StringBuilder();
+		
+		for (int i = start; i < elems.length; ++i)
+			sb.append(elems[i]);
+		
+		return sb.toString();
 	}
 
 	/**
