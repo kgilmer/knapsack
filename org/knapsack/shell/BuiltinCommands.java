@@ -81,7 +81,7 @@ public class BuiltinCommands implements IKnapsackCommandSet {
 		@Override
 		public String execute() throws Exception {
 			final StringBuilder sb = new StringBuilder();
-			final boolean verbose = arguments.contains("-v");
+			final boolean verbose = !arguments.contains("-b");
 			
 			ServiceReference ref = context.getServiceReference(LogReaderService.class.getName());
 			if (ref != null)
@@ -109,7 +109,7 @@ public class BuiltinCommands implements IKnapsackCommandSet {
 		
 		@Override
 		public String getUsage() {
-			return "[-v]";
+			return "[-b (brief)]";
 		}
 		
 		@Override
@@ -124,14 +124,18 @@ public class BuiltinCommands implements IKnapsackCommandSet {
 		@Override
 		public String execute() throws Exception {
 			final StringBuilder sb = new StringBuilder();
-			final boolean verbose = arguments.contains("-v");
+			final boolean verbose = !arguments.contains("-b");
 			
 			Fn.map(new Fn.Function<ServiceReference, ServiceReference>() {
 
 				@Override
-				public ServiceReference apply(ServiceReference element) {
-					addServiceReference(element, sb, verbose);
-					return element;
+				public ServiceReference apply(ServiceReference sr) {
+					if (verbose)
+						sb.append(getServiceId(sr) + " \t" + getServiceName(sr) + AbstractKnapsackCommand.CRLF);
+					else
+						sb.append(getServiceName(sr) + AbstractKnapsackCommand.CRLF);
+					
+					return sr;
 				}
 			}, context.getServiceReferences(null, null));
 			
@@ -145,7 +149,7 @@ public class BuiltinCommands implements IKnapsackCommandSet {
 		
 		@Override
 		public String getUsage() {
-			return "[-v]";
+			return "[-b (brief)]";
 		}
 		
 		@Override
@@ -199,7 +203,7 @@ public class BuiltinCommands implements IKnapsackCommandSet {
 		public String execute() throws Exception {
 			final StringBuilder sb = new StringBuilder();
 			
-			Fn.map(new PrintBundleFunction(sb, arguments.contains("-v")), context.getBundles());
+			Fn.map(new PrintBundleFunction(sb, !arguments.contains("-b")), context.getBundles());
 			
 			return sb.toString();
 		}
@@ -211,7 +215,7 @@ public class BuiltinCommands implements IKnapsackCommandSet {
 		
 		@Override
 		public String getUsage() {
-			return "[-v]";
+			return "[-b (brief)]";
 		}
 		
 		@Override
@@ -350,13 +354,6 @@ public class BuiltinCommands implements IKnapsackCommandSet {
 		line = line + e.getKey() + " = " + e.getValue();
 
 		l.add(line);
-	}
-
-	private void addServiceReference(ServiceReference sr, StringBuilder l, boolean verbose) {
-		if (verbose)
-			l.append(getServiceId(sr) + " \t" + getServiceName(sr) + AbstractKnapsackCommand.CRLF);
-		else
-			l.append(getServiceName(sr) + AbstractKnapsackCommand.CRLF);
 	}
 
 	/**
