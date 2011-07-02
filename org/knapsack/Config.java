@@ -30,7 +30,6 @@ import java.util.Properties;
  */
 public class Config extends Properties {
 	private static final long serialVersionUID = -5479563157788056552L;
-	private static final String CRLF = System.getProperty("line.separator");
 
 	/**
 	 * Optional system property that defines root directory where knapsack runs.
@@ -73,7 +72,6 @@ public class Config extends Properties {
 	/**
 	 * Only one instance of Config per runtime.
 	 */
-	private static Config ref;
 	
 	public final static String BASE_SCRIPT_FILENAME = ".knapsack-command.sh";
 	public static final String SCRIPT_DIRECTORY_NAME = "bin";
@@ -83,10 +81,17 @@ public class Config extends Properties {
 	protected static final String DEFAULT_DIRECTORY_NAME = "default";
 	
 	/**
-	 * Filename for config admin directory.
+	 * Filename for configadmin directory.
 	 */
 	public static final String CONFIGADMIN_DIRECTORY_NAME = "configAdmin";
+	/**
+	 * If true, the Knapsack script directory (/bin) will not be created and socket listener will not be started.
+	 */
+	public static final String CONFIG_DISABLE_SCRIPTS = "org.knapsack.scripts.disable";
 
+	/**
+	 * Base directory where knapsack instance is running.
+	 */
 	private final File baseDirectory;
 
 	/**
@@ -96,7 +101,6 @@ public class Config extends Properties {
 	 * @throws InterruptedException 
 	 */
 	protected Config(File baseDirectory) throws IOException {	
-		ref = this;
 		this.baseDirectory = baseDirectory;
 		load(new FileInputStream(getConfigFile()));
 		

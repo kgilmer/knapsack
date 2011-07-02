@@ -54,6 +54,8 @@ public class Bootstrap {
 	private static final int PORT_START = 12288;
 	private static final int MAX_PORT_RANGE = 64;
 
+	protected static final int DISABLE_SCRIPTS_PORT = -1;
+
 	private static File scriptDir;
 
 	/**
@@ -74,16 +76,22 @@ public class Bootstrap {
 		FrameworkFactory frameworkFactory = new FrameworkFactory();
 		Logger logger = new Logger();
 		
-		Random r = new Random();
-		int port = PORT_START + r.nextInt(MAX_PORT_RANGE);
+		int port = DISABLE_SCRIPTS_PORT;
 		
 		try {
 			final File baseDirectory = getBaseDirectory();
 			FSHelper.validateFile(baseDirectory, true, true, false, true);
-			createKnapsackLayout(baseDirectory, logger, port);
+			createKnapsackLayout(baseDirectory, logger);
 	
 			// Create initial configuration, this will load some values with defaults.
 			Config config = new Config(baseDirectory);
+			
+			if (config.containsKey(Config.CONFIG_DISABLE_SCRIPTS) && config.getBoolean(Config.CONFIG_DISABLE_SCRIPTS)) {
+				Random r = new Random();
+				port = PORT_START + r.nextInt(MAX_PORT_RANGE);
+			} else {
+				createKnapsackScripts(baseDirectory, port);
+			}
 	
 			// Create activators that will start
 			List<BundleActivator> activators = new ArrayList<BundleActivator>();
@@ -133,32 +141,48 @@ public class Bootstrap {
 		return new File(System.getProperty("user.dir"));
 	}
 
-	private static void createKnapsackLayout(File baseDirectory, Logger logger, int port) throws IOException {
+	/**
+	 * Create the directory layout for knapsack.
+	 * 
+	 * [root]/cache   	 - Default Bundle Cache directory
+	 * [root]/default 	 - Default system and ConfigAdmin properties
+	 * [root]/bundle  	 - Default bundle directory
+	 * [root]/bin 	  	 - Default script directory
+	 * [root]/felix.conf - Launch properties for Felix
+	 * 
+	 * @param baseDirectory
+	 * @param logger
+	 * @param port
+	 * @throws IOException
+	 */
+	private static void createKnapsackLayout(File baseDirectory, Logger logger) throws IOException {
 		File confFile = new File(baseDirectory, Config.CONFIGURATION_FILENAME);
-		
-		scriptDir = new File(baseDirectory, Config.SCRIPT_DIRECTORY_NAME);
-		FSHelper.validateFile(scriptDir, true, true, false, true);
 		
 		File defaultDir = new File(baseDirectory, Config.DEFAULT_DIRECTORY_NAME);
 		FSHelper.validateFile(defaultDir, true, true, false, true);
+		//Load default properties before creating/loading global conf file.  This allows for simple modification by installers, bundles.
+		if (FSHelper.directoryHasFiles(defaultDir)) 
+			Fn.map(new LoadPropertiesFunction(logger), Fn.map(
+					ReturnFilesFunction.GET_FILES_FN, defaultDir));
 		
 		if (!confFile.exists()) {
-			//Load default properties before creating/loading global conf file.  This allows for simple modification by installers, bundles.
-			if (FSHelper.directoryHasFiles(defaultDir))
-				Fn.map(new LoadPropertiesFunction(logger), Fn.map(
-						ReturnFilesFunction.GET_FILES_FN, defaultDir));
-			
 			//Create a default configuration
 			logger.log(LogService.LOG_INFO, "Creating new default configuration file: " + confFile);
 			FSHelper.copyDefaultConfiguration(Config.CONFIGURATION_RESOURCE_FILENAME, confFile, baseDirectory);
 		}
+				
+		File configAdminDir = new File(baseDirectory, Config.CONFIGADMIN_DIRECTORY_NAME);
+		FSHelper.validateFile(configAdminDir, true, true, false, true);
+	}
+	
+	private static void createKnapsackScripts(File baseDirectory, int port) throws IOException {
+		scriptDir = new File(baseDirectory, Config.SCRIPT_DIRECTORY_NAME);
+		FSHelper.validateFile(scriptDir, true, true, false, true);
 		
 		if (FSHelper.directoryHasFiles(scriptDir))
 			FSHelper.deleteFilesInDir(scriptDir);
 		
-		FSHelper.copyScripts(confFile.getParentFile(), port);
-				
-		File configAdminDir = new File(baseDirectory, Config.CONFIGADMIN_DIRECTORY_NAME);
-		FSHelper.validateFile(configAdminDir, true, true, false, true);
+		FSHelper.copyScripts(baseDirectory, port);
+		
 	}
 }

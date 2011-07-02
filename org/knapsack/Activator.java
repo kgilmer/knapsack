@@ -89,8 +89,8 @@ public class Activator implements BundleActivator, FrameworkListener, ManagedSer
 	public Activator() throws IOException {
 		ref = this;
 		Activator.frameworkLogger = null;
-		this.port = -1;
-		this.config = null;
+		this.port = Bootstrap.DISABLE_SCRIPTS_PORT;
+		Activator.config = null;
 	}
 	
 	/**
@@ -105,7 +105,7 @@ public class Activator implements BundleActivator, FrameworkListener, ManagedSer
 		this.port = port;
 		Activator.frameworkLogger = logger;
 		embeddedMode  = true;
-		this.config = config;
+		Activator.config = config;
 	}
 
 	/**
@@ -244,7 +244,7 @@ public class Activator implements BundleActivator, FrameworkListener, ManagedSer
 			try {
 				FSHelper.validateFile(baseDir, false, true, false, true);
 			
-				if (port != -1) {
+				if (port != Bootstrap.DISABLE_SCRIPTS_PORT) {
 					shell = new ConsoleSocketListener(port, context, this, new CommandParser(context, new File(baseDir, Config.SCRIPT_DIRECTORY_NAME)));
 					shell.start();
 				}
