@@ -25,11 +25,18 @@ import org.osgi.service.log.LogReaderService;
 import org.osgi.service.log.LogService;
 import org.sprinkles.Fn;
 
+/**
+ * A set of basic built-in commands for inspecting and changing OSGi instance.
+ * 
+ * @author kgilmer
+ *
+ */
 public class BuiltinCommands implements IKnapsackCommandSet {
 	
 	private final CommandParser parser;
 	private final LogService log;
 	private SimpleDateFormat dateFormatter = new SimpleDateFormat("MM.dd HH:mm:ss");
+	private static final String TAB = " \t";
 
 	public BuiltinCommands(CommandParser parser, LogService log) {
 		this.parser = parser;
@@ -125,20 +132,80 @@ public class BuiltinCommands implements IKnapsackCommandSet {
 		public String execute() throws Exception {
 			final StringBuilder sb = new StringBuilder();
 			final boolean verbose = !arguments.contains("-b");
+			final boolean dependencies = arguments.contains("-d");
+			final boolean properties = arguments.contains("-p");
 			
 			Fn.map(new Fn.Function<ServiceReference, ServiceReference>() {
 
 				@Override
 				public ServiceReference apply(ServiceReference sr) {
-					if (verbose)
-						sb.append(getServiceId(sr) + " \t" + getServiceName(sr) + AbstractKnapsackCommand.CRLF);
-					else
-						sb.append(getServiceName(sr) + AbstractKnapsackCommand.CRLF);
+					if (verbose) {
+						appendId(sb, getServiceId(sr));
+						sb.append(TAB);
+						sb.append(getServiceName(sr));
+						sb.append(TAB);
+						sb.append(getBundleLabel(sr.getBundle()));						
+						sb.append(AbstractKnapsackCommand.CRLF);
+					} else {
+						appendId(sb, getServiceId(sr));						
+						sb.append(TAB);
+						sb.append(getServiceName(sr));
+						sb.append(AbstractKnapsackCommand.CRLF);
+					}
+					
+					if (properties) {
+						sb.append(getServiceProperties(sr));
+					}
+					
+					if (dependencies) {
+						Bundle[] db = sr.getUsingBundles();
+						
+						if (db != null)
+							for (Bundle b : Arrays.asList(db)) {
+								sb.append("\tUsed by ");
+								sb.append(getBundleLabel(b));
+								sb.append(AbstractKnapsackCommand.CRLF);
+							}
+					}
 					
 					return sr;
 				}
 			}, context.getServiceReferences(null, null));
 			
+			return sb.toString();
+		}
+		
+		private String getServiceProperties(ServiceReference sr) {
+			StringBuffer sb = new StringBuffer();
+			
+			for (String key : Arrays.asList(sr.getPropertyKeys())) {
+				if (key.equals("service.id") || key.equals("objectClass"))
+					continue;
+				
+				sb.append(TAB);
+				sb.append(key);
+				sb.append(" = ");
+
+				Object o = sr.getProperty(key);
+
+				if (o instanceof String) {
+					sb.append((String) o);
+				} else if (o instanceof Object[]) {
+					Object[] oa = (Object[]) o;
+
+					sb.append("[");
+					for (int j = 0; j < oa.length; ++j) {
+						sb.append(oa[j].toString());
+
+						if (j != oa.length - 2) {
+							sb.append(", ");
+						}
+					}
+					sb.append("]");
+				}	
+				sb.append(AbstractKnapsackCommand.CRLF);
+			}		
+
 			return sb.toString();
 		}
 
@@ -149,12 +216,12 @@ public class BuiltinCommands implements IKnapsackCommandSet {
 		
 		@Override
 		public String getUsage() {
-			return "[-b (brief)]";
+			return "[-b (brief)] [-d (show dependencies)] [-p (show properties)]";
 		}
 		
 		@Override
 		public String getDescription() {
-			return "Get list of OSGi services active in the framework.";
+			return "Display OSGi services active in the framework.";
 		}
 		
 	}
@@ -320,40 +387,38 @@ public class BuiltinCommands implements IKnapsackCommandSet {
 	}
 	
 
-	private void addLogEntry(LogEntry entry, StringBuilder l, boolean verbose) {
-		String line;
-		
-		if (verbose)
-			line = formatDateTime(entry.getTime()) + " " + getLevelLabel(entry.getLevel()) + "\t " + entry.getMessage() + "\t " + getBundleName(entry.getBundle());
-		else 
-			line = entry.getMessage();
+	private void addLogEntry(LogEntry entry, StringBuilder sb, boolean verbose) {
+
+		if (verbose) {
+			sb.append(formatDateTime(entry.getTime()));
+			sb.append(TAB);
+			sb.append(getLevelLabel(entry.getLevel()));
+			sb.append(TAB);
+			sb.append(entry.getMessage());
+			sb.append(TAB);
+			sb.append(getBundleLabel(entry.getBundle()));	 
+		} else {
+			sb.append(formatDateTime(entry.getTime()));
+			sb.append(entry.getMessage());
+		}
 				
-		l.append(line);
-		l.append(AbstractKnapsackCommand.CRLF);
+		sb.append(AbstractKnapsackCommand.CRLF);
 		
 		//Check for an exception, if available display it.
 		if (entry.getException() != null) {
-			l.append(entry.getException().getMessage());
-			l.append(AbstractKnapsackCommand.CRLF);
+			sb.append(entry.getException().getMessage());
+			sb.append(AbstractKnapsackCommand.CRLF);
 			
 			StringWriter sWriter = new StringWriter();
 			PrintWriter pw = new PrintWriter(sWriter);
 			entry.getException().printStackTrace(pw);
-			l.append(sWriter.toString());
-			l.append(AbstractKnapsackCommand.CRLF);
+			sb.append(sWriter.toString());
+			sb.append(AbstractKnapsackCommand.CRLF);
 		}
 	}
 
 	private String formatDateTime(long time) {
 		return dateFormatter.format(new Date(time));
-	}
-
-	private void addProperty(Entry<Object, Object> e, List<String> l, boolean verbose) {
-		String line = "";
-
-		line = line + e.getKey() + " = " + e.getValue();
-
-		l.add(line);
 	}
 
 	/**
@@ -371,8 +436,8 @@ public class BuiltinCommands implements IKnapsackCommandSet {
 	 * @param sr
 	 * @return
 	 */
-	public static String getServiceId(ServiceReference sr) {		
-		return sr.getProperty("service.id").toString();
+	public static long getServiceId(ServiceReference sr) {		
+		return Long.parseLong(sr.getProperty("service.id").toString());
 	}
 
 
@@ -399,6 +464,27 @@ public class BuiltinCommands implements IKnapsackCommandSet {
 		return version;
 	}
 
+	public static String getBundleLabel(Bundle b) {
+		StringBuilder sb = new StringBuilder();
+		
+		appendId(sb, b.getBundleId());
+		sb.append(getBundleName(b));
+		sb.append(" (");
+		sb.append(getBundleVersion(b));
+		sb.append(")");
+
+		return sb.toString();
+	}
+	
+	public static void appendId(StringBuilder sb, long id) {
+		sb.append("[");
+		if (id < 10)
+			sb.append(" ");
+			
+		sb.append(id);
+		sb.append("]");
+	}
+	
 	public static String getBundleName(Bundle b) {
 		String name = (String) b.getHeaders().get("Bundle-SymbolicName");
 
@@ -509,7 +595,6 @@ public class BuiltinCommands implements IKnapsackCommandSet {
 	}
 	
 	private class PrintBundleFunction implements Fn.Function<Bundle, Bundle> {
-		
 		private final boolean verbose;
 		private final StringBuilder sb;
 
@@ -521,10 +606,16 @@ public class BuiltinCommands implements IKnapsackCommandSet {
 
 		@Override
 		public Bundle apply(Bundle b) {
-			if (verbose)
-				sb.append(getStateName(b.getState()) + " \t[" + b.getBundleId() + "] " + getBundleName(b) + " \t(" + getBundleVersion(b) + ") \t" + getBundleLocation(b) + AbstractKnapsackCommand.CRLF);
-			else
-				sb.append(getBundleName(b) + AbstractKnapsackCommand.CRLF);
+			if (verbose) {
+				sb.append(getStateName(b.getState()));
+				sb.append(TAB);
+				sb.append(getBundleLabel(b));
+				sb.append(TAB);
+				sb.append(getBundleLocation(b));				
+			} else {
+				sb.append(getBundleLabel(b));
+			}
+			sb.append(AbstractKnapsackCommand.CRLF);
 			
 			return b;
 		}
@@ -580,7 +671,7 @@ public class BuiltinCommands implements IKnapsackCommandSet {
 		public IKnapsackCommand apply(IKnapsackCommand cmd) {
 			sb.append(pad(cmd.getName() + " " + cmd.getUsage(), 20));
 	
-			sb.append('\t');
+			sb.append(TAB);
 			sb.append(cmd.getDescription());
 			sb.append(AbstractKnapsackCommand.CRLF);
 					

@@ -34,7 +34,7 @@ import org.knapsack.shell.pub.IKnapsackCommand;
 import org.osgi.framework.BundleContext;
 
 /**
- * A helper base class for commands for the command line. Refer to ICommand for
+ * A helper base class for commands for the command line. Refer to IKnapsackCommand for
  * details of how to write commands for OSGi shell.
  * 
  * @author kgilmer

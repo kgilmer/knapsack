@@ -30,7 +30,7 @@ package org.knapsack.shell.pub;
 import java.util.List;
 
 /**
- * A container for shell commands.
+ * A container for shell commands.  This interface should be registered in the OSGi service registery for new commands to be available.
  * 
  * @author kgilmer
  * 

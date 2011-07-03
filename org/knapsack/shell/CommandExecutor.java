@@ -36,7 +36,7 @@ import org.knapsack.shell.pub.IKnapsackCommand;
 import org.osgi.framework.BundleException;
 
 /**
- * Listens for user entry.
+ * Given an input String, find command to execute, execute, and return results.
  * 
  * @author kgilmer
  * 
@@ -78,7 +78,7 @@ public class CommandExecutor {
 					String es = "An error occurred while executing: " + cmd.getName();
 					
 					if (e.getCause() != null && e.getCause().getMessage() != null) {
-						es = es + CRLF+ "Message: " + e.getMessage() + CRLF + e.getCause().getMessage() + CRLF;
+						es = es + CRLF + "Message: " + e.getMessage() + CRLF + e.getCause().getMessage() + CRLF;
 					} else if (e.getMessage() != null) {
 						es = es + CRLF + "Message: " + e.getMessage() + CRLF;
 					} 

@@ -46,7 +46,7 @@ import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
 
 /**
- * Parses console commands.
+ * Parses Strings into IKnapSackCommand instances.
  * 
  * @author kgilmer
  * 
@@ -66,6 +66,11 @@ public class CommandParser implements ServiceListener {
 		commands = new Hashtable<String, IKnapsackCommand>();
 	}
 
+	/**
+	 * @param commandLine
+	 * @return
+	 * @throws IOException
+	 */
 	protected IKnapsackCommand parse(String commandLine) throws IOException {	
 		String[] tokens = commandLine.split(" ");
 		boolean quoteMode = false;

@@ -27,7 +27,6 @@
  *******************************************************************************/
 package org.knapsack.shell.pub;
 
-import java.io.OutputStream;
 import java.util.List;
 
 import org.osgi.framework.BundleContext;

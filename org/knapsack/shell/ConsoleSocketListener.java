@@ -45,7 +45,7 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.log.LogService;
 
 /**
- * Listens for a command on a socket with an internally determined port number.
+ * Listens for a command on a socket.
  * 
  * @author kgilmer
  * 
