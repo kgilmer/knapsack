@@ -47,7 +47,7 @@ public class LoadPropertiesFunction implements Function<File, File> {
 			String[] elems = line.split("=");
 
 			if (elems.length < 2)
-				throw new IOException("Invalid line in config admin property file: " + line);
+				throw new IOException("Invalid line in property file: " + line);
 
 			System.getProperties().put(elems[0].trim(), line.substring(elems[0].length() + 1).trim());
 		}
