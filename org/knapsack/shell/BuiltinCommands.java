@@ -340,15 +340,16 @@ public class BuiltinCommands implements IKnapsackCommandSet {
 	 */
 	private class ShutdownCommand extends AbstractKnapsackCommand {
 
+		private static final String MSG = "OSGi framework is shutting down due to user request via shell.";
 		public String execute() throws Exception {
-			log.log(LogService.LOG_INFO, "OSGi framework is shutting down due to user request via shell.");
+			log.log(LogService.LOG_INFO, MSG);
 			context.getBundle(0).stop();
 			
-			return "OSGi framework is shutting down.";
+			return MSG;
 		}
 
 		public String getName() {
-			return "shutdown";
+			return "shutdown-knapsack";
 		}
 
 		public String getDescription() {
