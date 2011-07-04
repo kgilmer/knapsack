@@ -39,6 +39,11 @@ public class InitThread extends Thread {
 		for (String bfn : filenames) 
 			bundleDirs.add(new File(rootDir, bfn.trim()));
 	}
+	
+	public InitThread(Collection<File> directories) {	
+		bundleDirs = new ArrayList<File>();
+		bundleDirs.addAll(directories);		
+	}
 
 	@Override
 	public void run() {		

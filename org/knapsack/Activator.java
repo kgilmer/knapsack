@@ -27,6 +27,7 @@ import java.util.Properties;
 
 import org.apache.felix.framework.Logger;
 import org.knapsack.init.InitThread;
+import org.knapsack.init.pub.KnapsackInitService;
 import org.knapsack.shell.CommandParser;
 import org.knapsack.shell.ConsoleSocketListener;
 import org.osgi.framework.BundleActivator;
@@ -59,7 +60,7 @@ public class Activator implements BundleActivator, FrameworkListener, ManagedSer
 	/**
 	 * This should be in sync with manifest version.
 	 */
-	public static final String KNAPSACK_VERSION = "0.5.0";
+	public static final String KNAPSACK_VERSION = "0.6.0";
 	public static final String KNAPSACK_PID = "org.knapsack";
 	
 	/**
@@ -120,6 +121,8 @@ public class Activator implements BundleActivator, FrameworkListener, ManagedSer
 	 * Socket for shell interface.
 	 */
 	private ConsoleSocketListener shell;
+
+	private ServiceRegistration initSR;
 	/**
 	 * Instance of framework logger.
 	 */
@@ -179,6 +182,9 @@ public class Activator implements BundleActivator, FrameworkListener, ManagedSer
 	 * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
 	 */
 	public void stop(BundleContext bundleContext) throws Exception {	
+		if (initSR != null)
+			initSR.unregister();
+		
 		if (shell != null)
 			shell.shutdown();
 			
@@ -251,8 +257,10 @@ public class Activator implements BundleActivator, FrameworkListener, ManagedSer
 					log(LogService.LOG_INFO, "Knapsack shell is disabled.");
 				}
 				
-				(new InitThread(baseDir, Arrays.asList(config.getString(Config.CONFIG_KEY_BUNDLE_DIRS).split(","))))
-					.start();					
+				KnapsackInitService serviceImpl = new KnapsackInitServiceImpl(baseDir, config);
+				serviceImpl.updateBundles();
+				
+				initSR = context.registerService(KnapsackInitService.class.getName(), serviceImpl, null);
 
 				log(LogService.LOG_INFO, "Knapsack " + KNAPSACK_VERSION + " running in " + config.get(Config.CONFIG_KEY_ROOT_DIR));
 			} catch (Exception e) {
