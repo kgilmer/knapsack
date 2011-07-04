@@ -30,12 +30,7 @@ public class KnapsackInitServiceImpl implements KnapsackInitService {
 
 				@Override
 				public File apply(String element) {
-					File f = new File(baseDir, element);
-
-					if (!f.exists() || !f.isDirectory())
-						return null;
-
-					return f;
+					return new File(baseDir, element.trim());
 				}
 			}, config.getString(Config.CONFIG_KEY_BUNDLE_DIRS).split(","));
 

@@ -83,7 +83,7 @@ public class Config extends Properties {
 	/**
 	 * Filename for configadmin directory.
 	 */
-	public static final String CONFIGADMIN_DIRECTORY_NAME = "configAdmin";
+	public static final String CONFIGADMIN_DIRECTORY_NAME = "configadmin";
 	/**
 	 * If true, the Knapsack script directory (/bin) will not be created and socket listener will not be started.
 	 */
@@ -101,6 +101,9 @@ public class Config extends Properties {
 	 * @throws InterruptedException 
 	 */
 	protected Config(File baseDirectory) throws IOException {	
+		for (Object key : System.getProperties().keySet())
+			this.put(key, System.getProperty(key.toString()));
+			
 		this.baseDirectory = baseDirectory;
 		load(new FileInputStream(getConfigFile()));
 		

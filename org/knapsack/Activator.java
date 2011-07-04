@@ -18,7 +18,6 @@ package org.knapsack;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -26,7 +25,6 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.apache.felix.framework.Logger;
-import org.knapsack.init.InitThread;
 import org.knapsack.init.pub.KnapsackInitService;
 import org.knapsack.shell.CommandParser;
 import org.knapsack.shell.ConsoleSocketListener;
