@@ -67,13 +67,16 @@ This is useful for build-time to have modular configuration that is loaded only 
 </p> 
  
 <h2><em>Some things are better have around from the get-go.</em></h2> 
-<p>OSGi, as a module system, is designed for extreme flexibility.  
+<p>When you run knapsack the first thing you see is:
+<pre><code>INFO: Framework started in 2.39 seconds with activators: [org.apache.felix.log.Activator@1112783, org.apache.felix.cm.impl.Configura
+tionManager@1394894, org.knapsack.Activator@1cbfe9d]</code></pre>
+This is showing that the Apache Log and ConfigAdmin services, along with Knapsack, are starting with the framework.  Why is this good?  OSGi, as a module system, is designed for extreme flexibility.  
 Almost all services are optional.  
 However when focusing on application development is a lot easier if you have a few services around.   
 <a href="http://felix.apache.org/site/apache-felix-log.html">LogService, LogReader</a>, and <a href="http://felix.apache.org/site/apache-felix-config-admin.html">ConfigAdmin</a> are immediately available.  
 These services start with the framework, so from a bundle's perspective they will always exist.  
 In this regard, Knapsack is similar to <a href="http://karaf.apache.org/">Apache Karaf</a>, in that it adds a set of bundles to provide an application platform.  
-The difference is Karaf has more of a enterprise-oriented platform design, and as a result has more features and a larger footprint.</p> 
+However Karaf has more of an enterprise-oriented platform design, and as a result has more features and a larger footprint.</p> 
  
 <h2><em>Well-known filesystem operations are best for configuration storage and state modification.</em></h2>
 <p>By overloading the concept of an executable file, bundles become executables or libraries.  
