@@ -49,7 +49,7 @@ import org.sprinkles.functions.ReturnFilesFunction;
  * @author kgilmer
  *
  */
-public class Activator implements BundleActivator, FrameworkListener, ManagedService, LogService {	
+public class Activator implements BundleActivator, ManagedService, LogService {	
 	/**
 	 * Store all the bundle sizes at time of install to compare later for updates.
 	 */
@@ -139,10 +139,7 @@ public class Activator implements BundleActivator, FrameworkListener, ManagedSer
 		
 		//Register knapsack for configAdmin updates
 		managedServiceRef = bundleContext.registerService(ManagedService.class.getName(), this, getManagedServiceProperties());
-		
-		//Listen for FrameworkEvent.STARTED, upon fired, start up shell and initialize bundles.
-		context.addFrameworkListener(this);
-		
+			
 		//Load configuration admin with defaults if no pre-existing state exists.
 		if (embeddedMode) {
 			ServiceReference sr = bundleContext.getServiceReference(ConfigurationAdmin.class.getName());
@@ -151,6 +148,29 @@ public class Activator implements BundleActivator, FrameworkListener, ManagedSer
 				loadDefaults(new File(config.get(Config.CONFIG_KEY_ROOT_DIR).toString(), Config.CONFIGADMIN_DIRECTORY_NAME), ca);
 			}
 		}
+		
+		if (config.getBoolean(Config.CONFIG_KEY_LOG_STDOUT))
+			new LogPrinter(context);
+		
+		sizeMap = new HashMap<File, Long>();
+		File baseDir = new File(config.getString(Config.CONFIG_KEY_ROOT_DIR));
+		
+		FSHelper.validateFile(baseDir, false, true, false, true);
+	
+		if (port != Bootstrap.DISABLE_SCRIPTS_PORT) {
+			shell = new ConsoleSocketListener(port, context, this, new CommandParser(context, new File(baseDir, Config.SCRIPT_DIRECTORY_NAME)));
+			shell.start();
+		} else {
+			log(LogService.LOG_INFO, "Knapsack shell is disabled.");
+		}
+		
+		KnapsackInitServiceImpl serviceImpl = new KnapsackInitServiceImpl(baseDir, config);
+		serviceImpl.updateBundlesSync();
+		
+		initSR = context.registerService(KnapsackInitService.class.getName(), serviceImpl, null);
+
+		log(LogService.LOG_INFO, "Knapsack " + KNAPSACK_VERSION + " running in " + config.get(Config.CONFIG_KEY_ROOT_DIR));
+	
 	}
 	
 	/**
@@ -235,36 +255,6 @@ public class Activator implements BundleActivator, FrameworkListener, ManagedSer
 
 	public void setLogger(Logger logger) {
 		Activator.frameworkLogger = logger;
-	}
-
-	@Override
-	public void frameworkEvent(FrameworkEvent event) {
-		if (event.getType() == FrameworkEvent.STARTED) {			
-			if (config.getBoolean(Config.CONFIG_KEY_LOG_STDOUT))
-				new LogPrinter(context);
-			
-			sizeMap = new HashMap<File, Long>();
-			File baseDir = new File(config.getString(Config.CONFIG_KEY_ROOT_DIR));
-			try {
-				FSHelper.validateFile(baseDir, false, true, false, true);
-			
-				if (port != Bootstrap.DISABLE_SCRIPTS_PORT) {
-					shell = new ConsoleSocketListener(port, context, this, new CommandParser(context, new File(baseDir, Config.SCRIPT_DIRECTORY_NAME)));
-					shell.start();
-				} else {
-					log(LogService.LOG_INFO, "Knapsack shell is disabled.");
-				}
-				
-				KnapsackInitService serviceImpl = new KnapsackInitServiceImpl(baseDir, config);
-				serviceImpl.updateBundles();
-				
-				initSR = context.registerService(KnapsackInitService.class.getName(), serviceImpl, null);
-
-				log(LogService.LOG_INFO, "Knapsack " + KNAPSACK_VERSION + " running in " + config.get(Config.CONFIG_KEY_ROOT_DIR));
-			} catch (Exception e) {
-				log(LogService.LOG_ERROR, "Failed to start knapsack.", e);
-			}
-		}
 	}
 	
 	/**

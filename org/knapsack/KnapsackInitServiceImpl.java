@@ -22,6 +22,14 @@ public class KnapsackInitServiceImpl implements KnapsackInitService {
 	public void updateBundles() {
 		(new InitThread(getBundleDirectories())).start();
 	}
+	
+	
+	/**
+	 * Called by knapsack Activator synchronously so that all bundles are resolved before framework start event is fired.
+	 */
+	protected void updateBundlesSync() {
+		(new InitThread(getBundleDirectories())).run();
+	}
 
 	@Override
 	public Collection<File> getBundleDirectories() {
