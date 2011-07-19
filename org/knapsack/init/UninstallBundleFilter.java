@@ -20,14 +20,14 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import org.sprinkles.Fn;
+import org.sprinkles.Applier;
 
 /**
  * Return only BundleJars that are designated to be set to the START state by the filesystem.
  * @author kgilmer
  *
  */
-class UninstallBundleFilter implements Fn.Function<File, File> {
+class UninstallBundleFilter implements Applier.Fn<File, File> {
 
 	private ArrayList<String> bundleLocations;
 

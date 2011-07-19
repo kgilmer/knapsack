@@ -5,7 +5,7 @@ import java.util.Collection;
 
 import org.knapsack.init.InitThread;
 import org.knapsack.init.pub.KnapsackInitService;
-import org.sprinkles.Fn;
+import org.sprinkles.Applier;
 
 public class KnapsackInitServiceImpl implements KnapsackInitService {
 
@@ -34,13 +34,14 @@ public class KnapsackInitServiceImpl implements KnapsackInitService {
 	@Override
 	public Collection<File> getBundleDirectories() {
 		if (bundleDirs == null)
-			bundleDirs = Fn.map(new Fn.Function<String, File>() {
+			bundleDirs = Applier.map(
+					config.getString(Config.CONFIG_KEY_BUNDLE_DIRS).split(","), new Applier.Fn<String, File>() {
 
 				@Override
 				public File apply(String element) {
 					return new File(baseDir, element.trim());
 				}
-			}, config.getString(Config.CONFIG_KEY_BUNDLE_DIRS).split(","));
+			});
 
 		return bundleDirs;
 	}

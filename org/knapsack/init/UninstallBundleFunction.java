@@ -6,10 +6,9 @@ import java.util.Map;
 import org.knapsack.Activator;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
-import org.osgi.service.log.LogService;
-import org.sprinkles.Fn.Function;
+import org.sprinkles.Applier;
 
-public class UninstallBundleFunction implements Function<File, File> {
+public class UninstallBundleFunction implements Applier.Fn<File, File> {
 	private Map<String, Bundle> bundleMap;
 
 	public UninstallBundleFunction() {

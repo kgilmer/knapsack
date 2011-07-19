@@ -18,14 +18,14 @@ package org.knapsack.init;
 
 import org.knapsack.Activator;
 import org.osgi.service.log.LogService;
-import org.sprinkles.Fn;
+import org.sprinkles.Applier;
 
 /**
  * Start a bundle.
  * @author kgilmer
  *
  */
-class StopBundleFunction implements Fn.Function<BundleJarWrapper, BundleJarWrapper> {
+class StopBundleFunction implements Applier.Fn<BundleJarWrapper, BundleJarWrapper> {
 
 	@Override
 	public BundleJarWrapper apply(BundleJarWrapper element) {

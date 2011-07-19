@@ -29,8 +29,8 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.launch.Framework;
 import org.osgi.service.log.LogService;
-import org.sprinkles.Fn;
-import org.sprinkles.functions.ReturnFilesFunction;
+import org.sprinkles.Applier;
+import org.sprinkles.functions.FileFunctions;
 
 /**
  * The bootstrap class for Knapsack. Creates and starts a framework with the
@@ -161,8 +161,7 @@ public class Bootstrap {
 		FSHelper.validateFile(defaultDir, true, true, false, true);
 		//Load default properties before creating/loading global conf file.  This allows for simple modification by installers, bundles.
 		if (FSHelper.directoryHasFiles(defaultDir)) 
-			Fn.map(new LoadPropertiesFunction(logger), Fn.map(
-					ReturnFilesFunction.GET_FILES_FN, defaultDir));
+			Applier.map(Applier.map(defaultDir, FileFunctions.GET_FILES_FN), new LoadPropertiesFunction(logger));
 		
 		if (!confFile.exists()) {
 			//Create a default configuration

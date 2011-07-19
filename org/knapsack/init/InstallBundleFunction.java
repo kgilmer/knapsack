@@ -25,8 +25,7 @@ import java.util.Map;
 import org.knapsack.Activator;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
-import org.osgi.service.log.LogService;
-import org.sprinkles.Fn;
+import org.sprinkles.Applier;
 
 /**
  * Install a file as an OSGi bundle.
@@ -34,7 +33,7 @@ import org.sprinkles.Fn;
  * @author kgilmer
  *
  */
-class InstallBundleFunction implements Fn.Function<File, BundleJarWrapper> {
+class InstallBundleFunction implements Applier.Fn<File, BundleJarWrapper> {
 
 	private Map<String, Bundle> installedBundleMap;
 	private final Collection<BundleJarWrapper> installed;

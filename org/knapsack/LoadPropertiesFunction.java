@@ -7,7 +7,7 @@ import java.io.IOException;
 import org.apache.commons.io.IOUtils;
 import org.apache.felix.framework.Logger;
 import org.osgi.service.log.LogService;
-import org.sprinkles.Fn.Function;
+import org.sprinkles.Applier.Fn;
 
 /**
  * A function that loads properties files into System properties dictionary.
@@ -15,7 +15,7 @@ import org.sprinkles.Fn.Function;
  * @author kgilmer
  * 
  */
-public class LoadPropertiesFunction implements Function<File, File> {
+public class LoadPropertiesFunction implements Fn<File, File> {
 	private final Logger logger;
 
 	public LoadPropertiesFunction(Logger logger) {

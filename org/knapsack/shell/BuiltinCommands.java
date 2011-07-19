@@ -23,7 +23,7 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.service.log.LogEntry;
 import org.osgi.service.log.LogReaderService;
 import org.osgi.service.log.LogService;
-import org.sprinkles.Fn;
+import org.sprinkles.Applier;
 
 /**
  * A set of basic built-in commands for inspecting and changing OSGi instance.
@@ -135,7 +135,8 @@ public class BuiltinCommands implements IKnapsackCommandSet {
 			final boolean dependencies = arguments.contains("-d");
 			final boolean properties = arguments.contains("-p");
 			
-			Fn.map(new Fn.Function<ServiceReference, ServiceReference>() {
+			Applier.map(context.getServiceReferences(null, null), 
+					new Applier.Fn<ServiceReference, ServiceReference>() {
 
 				@Override
 				public ServiceReference apply(ServiceReference sr) {
@@ -170,7 +171,7 @@ public class BuiltinCommands implements IKnapsackCommandSet {
 					
 					return sr;
 				}
-			}, context.getServiceReferences(null, null));
+			});
 			
 			return sb.toString();
 		}
@@ -232,7 +233,7 @@ public class BuiltinCommands implements IKnapsackCommandSet {
 		public String execute() throws Exception {
 			final StringBuilder sb = new StringBuilder();
 			
-			Fn.map(new Fn.Function<Entry<Object, Object>, Object>() {
+			Applier.map(System.getProperties().entrySet(), new Applier.Fn<Entry<Object, Object>, Object>() {
 
 				@Override
 				public Object apply(Entry<Object, Object> e) {
@@ -242,7 +243,7 @@ public class BuiltinCommands implements IKnapsackCommandSet {
 					sb.append(CRLF);
 					return e;
 				}
-			}, System.getProperties().entrySet());
+			});
 			
 			return sb.toString();
 		}
@@ -270,7 +271,7 @@ public class BuiltinCommands implements IKnapsackCommandSet {
 		public String execute() throws Exception {
 			final StringBuilder sb = new StringBuilder();
 			
-			Fn.map(new PrintBundleFunction(sb, !arguments.contains("-b")), context.getBundles());
+			Applier.map(context.getBundles(), new PrintBundleFunction(sb, !arguments.contains("-b")));
 			
 			return sb.toString();
 		}
@@ -309,7 +310,7 @@ public class BuiltinCommands implements IKnapsackCommandSet {
 				
 			} else {
 				function.setPrintBundle(true);
-				Fn.map(function , context.getBundles());
+				Applier.map(context.getBundles(), function);
 			}
 			
 			return sb.toString();
@@ -386,7 +387,7 @@ public class BuiltinCommands implements IKnapsackCommandSet {
 		public String execute() throws Exception {
 			final StringBuilder sb = new StringBuilder();
 			
-			Fn.map(new PrintHelpFunction(sb), parser.getCommands().values());
+			Applier.map(parser.getCommands().values(), new PrintHelpFunction(sb));
 			
 			return sb.toString();
 		}
@@ -613,7 +614,7 @@ public class BuiltinCommands implements IKnapsackCommandSet {
 		}
 	}
 	
-	private class PrintBundleFunction implements Fn.Function<Bundle, Bundle> {
+	private class PrintBundleFunction implements Applier.Fn<Bundle, Bundle> {
 		private final boolean verbose;
 		private final StringBuilder sb;
 
@@ -640,7 +641,7 @@ public class BuiltinCommands implements IKnapsackCommandSet {
 		}
 	}
 	
-	private class PrintHeadersFunction implements Fn.Function<Bundle, Bundle> {
+	private class PrintHeadersFunction implements Applier.Fn<Bundle, Bundle> {
 		
 		private final StringBuilder sb;
 		private boolean printBundle = false;
@@ -678,7 +679,7 @@ public class BuiltinCommands implements IKnapsackCommandSet {
 		}
 	}
 	
-	private class PrintHelpFunction implements Fn.Function<IKnapsackCommand, IKnapsackCommand> {
+	private class PrintHelpFunction implements Applier.Fn<IKnapsackCommand, IKnapsackCommand> {
 		
 		private final StringBuilder sb;
 

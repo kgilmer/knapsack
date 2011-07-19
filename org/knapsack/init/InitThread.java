@@ -22,9 +22,8 @@ import java.util.Collection;
 import java.util.List;
 
 import org.knapsack.Activator;
-import org.osgi.service.log.LogService;
-import org.sprinkles.Fn;
-import org.sprinkles.functions.ReturnFilesFunction;
+import org.sprinkles.Applier;
+import org.sprinkles.functions.FileFunctions;
 
 /**
  * A short-lived thread that scans a set of directories for files, and installs/starts/stops bundles in the framework.
@@ -73,23 +72,28 @@ public class InitThread extends Thread {
 			
 			Activator.logInfo("Scanning bundle directory: " + bundleDir);
 			//Install bundles
-			Collection<BundleJarWrapper> bundles = Fn.map(new InstallBundleFunction(installed), 
-					Fn.map(ReturnFilesFunction.GET_FILES_FN, bundleDir));		
+			Collection<BundleJarWrapper> bundles = Applier.map(
+					Applier.map(bundleDir, FileFunctions.GET_FILES_FN),
+					new InstallBundleFunction(installed));		
 			
 			all.addAll(bundles);
 			
 			//Start bundles
-			started.addAll(Fn.map(new StartBundleFunction(), 
-					Fn.map(new StartableBundleFilter(), bundles)));
+			started.addAll(Applier.map(
+					Applier.map(
+							bundles, new StartableBundleFilter()), new StartBundleFunction()));
 			
 			//Stop bundles
-			stopped.addAll(Fn.map(new StopBundleFunction(), 
-					Fn.map(new StoppableBundleFilter(), bundles)));			
+			stopped.addAll(Applier.map( 
+					Applier.map(
+							bundles, new StoppableBundleFilter()), new StopBundleFunction()));			
 		}
 		
 		//Uninstall bundles
-		uninstalled.addAll(Fn.map(new UninstallBundleFunction(), 
-				Fn.map(new UninstallBundleFilter(all), Activator.getBundleSizeMap().keySet())));
+		uninstalled.addAll(Applier.map(
+				Applier.map(
+						Activator.getBundleSizeMap().keySet(), new UninstallBundleFilter(all)), 
+						new UninstallBundleFunction()));
 	
 		if (installed != null && installed.size() > 0)
 			Activator.logInfo("Installed Bundles: " + installed);

@@ -39,8 +39,8 @@ import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
 import org.osgi.service.log.LogService;
-import org.sprinkles.Fn;
-import org.sprinkles.functions.ReturnFilesFunction;
+import org.sprinkles.Applier;
+import org.sprinkles.functions.FileFunctions;
 
 /**
  * Activator for Knapsack.  Is not typically called as a regular bundle but via the BootStrap
@@ -190,8 +190,9 @@ public class Activator implements BundleActivator, ManagedService, LogService {
 	 */
 	private void loadDefaults(File defaultDir, ConfigurationAdmin ca) {
 
-		Fn.map(new LoadDefaultsFunction(ca, frameworkLogger, config.getBoolean(Config.CONFIG_KEY_OVERWRITE_CONFIGADMIN)), Fn.map(
-				ReturnFilesFunction.GET_FILES_FN, defaultDir));
+		Applier.map(
+				Applier.map(defaultDir, FileFunctions.GET_FILES_FN)
+				, new LoadDefaultsFunction(ca, frameworkLogger, config.getBoolean(Config.CONFIG_KEY_OVERWRITE_CONFIGADMIN)));
 	}
 
 

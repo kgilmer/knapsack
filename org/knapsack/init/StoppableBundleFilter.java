@@ -17,14 +17,14 @@
 package org.knapsack.init;
 
 import org.osgi.framework.Bundle;
-import org.sprinkles.Fn;
+import org.sprinkles.Applier;
 
 /**
  * Return only BundleJars that are designated to be set to the START state by the filesystem.
  * @author kgilmer
  *
  */
-class StoppableBundleFilter implements Fn.Function<BundleJarWrapper, BundleJarWrapper> {
+class StoppableBundleFilter implements Applier.Fn<BundleJarWrapper, BundleJarWrapper> {
 
 	@Override
 	public BundleJarWrapper apply(BundleJarWrapper element) {

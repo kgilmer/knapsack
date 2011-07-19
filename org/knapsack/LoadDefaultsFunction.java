@@ -11,7 +11,7 @@ import org.apache.felix.framework.Logger;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.log.LogService;
-import org.sprinkles.Fn.Function;
+import org.sprinkles.Applier.Fn;
 
 /**
  * A function that loads property files into configuration admin.
@@ -19,7 +19,7 @@ import org.sprinkles.Fn.Function;
  * @author kgilmer
  *
  */
-public class LoadDefaultsFunction implements Function<File, File> {
+public class LoadDefaultsFunction implements Fn<File, File> {
 
 	private final ConfigurationAdmin ca;
 	private final Logger log;
