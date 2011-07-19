@@ -9,7 +9,7 @@
 	<property name="rm.bin" location="/bin/rm" />
 
 	<property name="knapsack.version" value="0.2.0" />
-	<property name="framework.version" value="3.2.1" />
+	<property name="framework.version" value="3.2.2" />
 	<property name="log.version" value="1.0.1" />
 	<property name="configadmin.version" value="1.2.8" />
 	<property name="compendium.version" value="1.4.0" />
