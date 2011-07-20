@@ -1,1 +1,164 @@
-My GitHub Page
+<html>
+<head></head>
+<body>
+<h1>Knapsack for Apache Felix</h1> 
+ 
+<h2>Knapsack is a launcher for the <a href="http://felix.apache.org/site/index.html">Apache Felix OSGi Framework</a> for Linux-like systems.</h2>
+
+<p>Knapsack was born out the desire to remove some of the end-user complexities with more full-featured launchers, 
+and is designed for interactive use.  
+The problem that knapsack addresses is; <strong>get an OSGi framework up and running with a minimum of fiddling.</strong></p>
+<h3>Design Motivations</h3>
+<ul>
+<li>Native integration with host system.</li>
+<li>Simple configuration using native filesystem semantics.</li>
+<li>Log and ConfigAdmin services available on start.</li>
+<li>Modular default configuration.</li>
+<li>Follow native OS conventions over Java or OSGi conventions where pragmatic.</li>
+<li>Keep it light and simple, as it's intended for embedded use on small systems.</li>
+</ul>
+<p>Knapsack is both a little less and a little more than Felix's built-in launcher.  
+It's less in that it does not use runlevels and all bundle install/start configuration is done via the filesystem, and it does 
+not allow for specifying bundle start configuration via property files.
+It is a little more because a few bundles are started by default, and knapsack includes a built-in shell mechanism (see below)
+so it is functionally complete for interactive work.  Knapsack's design is a result of the following opinions:</p> 
+ 
+<h2><em>OSGi Shells are overkill for basic administrative tasks.</em></h2> 
+<p> Most of the time, we ask <strong>"Is my bundle running?"</strong> or <strong>"is the HTTP service available?"</strong>.  
+ OSGi shells are a way of answering that question, but are worlds into themselves and the source of unnecessary complexity.  
+ Based on work from the <a href="http://kgilmersden.wordpress.com/2010/12/14/a-shell-less-osgi-shell/">OSGiFS prototype</a>, 
+ Knapsack uses <a href="http://www.openbsd.org/cgi-bin/cvsweb/src/usr.bin/nc/">netcat</a>, <a href="https://github.com/kgilmer/knapsack/blob/master/scripts/.knapsack-command.sh">a simple shell script</a>, and a socket to expose OSGi shell functions to the native shell.  For example, to see running bundles
+ <pre><code>$ bin/bundles 
+ACTIV 	[ 0]org.apache.felix.framework (0.0.0) 	Bundle
+INSTL 	[ 1]b1 (1.0.0.201107041019) 	/tmp/eclipse-knapsack/bundle/b1_1.0.0.201107041019.jar</code></pre>
+ Is all that's required.  Grep, pipe, and xargs your heart out.  All OSGi state information is exposed via the native shell in a similar manner.  To get all available commands, run: <pre>bin/help</pre>
+ Like other shell systems, Knapsack uses the service registry so new commands can be added dynamically by other bundles.
+ 
+<h2><em>Native file metadata and operations are sufficient for bundle management.</em></h2>
+<p>Typically OSGi launchers will have a set of properties that can be used to configure where bundles start from, in which order, if they
+should be installed or started, and at what run-level.  This ends up to be a headache to configure and change when you end up
+setting up a framework by hand.  Knapsack's solution is to:
+<ol>
+<li>In properties, specify the set of "bundle" directories.</li>
+<li>Scan the directories in alpha order, installing them into the framework.</li>
+<li>If the execution bit is set on the file, start the bundle.</li>
+</ol>
+
+In this manner, start levels can be simulated based on alpha order (like the Linux init system), but more importantly,
+the bundle storage mechanism is just the filesystem, so no need to read and edit complex lists of properties.  
+Essentially the workflow to start a new bundle is to copy it into a directory and run: 
+<pre><code>$ bin/update 
+Rescanning and updating bundles from configured directories.</code></pre>
+</p>
+
+<h2><em>The storage dir is a source of pain when debugging bundles.</em></h2>
+<p>By default Knapsack will not keep bundles from pre-existing runtime sessions.  
+Non-executable state is stored in <code>/configadmin</code> so that it doesn't get clobbered every time the framework restarts.  As a result, there is one place that bundle code comes from, <code>/bundle</code>.  (This is configurable)</p> 
+ 
+<h2><em>Setup of an OSGi-based application is too hard.</em></h2>
+<p>Typically, running a program goes something like <code>$ myprogram &lt;enter&gt;</code>.  
+Knapsack strives for this level of simplicity by creating default configuration, and exposing the OSGi environment to the user via the system shell.  
+On start, knapsack will create it's configuration if it does not already exist, and by relying on filesystem the configuration remains simple.
+<br/>
+Additionally, it is easy to setup modular defaults for system properties and ConfigAdmin Managed Services.  Modular in the sense that properties for a given bundle can be isolated from other properties, rather than having one global configuration file.
+Knapsack will scan files in /defaults and load them as either
+system properties (if the file has a '.properties') file extension, or as a managed service (filename being the <code>PID</code>).  It will not overwrite existing ConfigAdmin configurations.
+This is useful for build-time to have modular configuration that is loaded only once.  
+</p> 
+ 
+<h2><em>Some things are better have around from the get-go.</em></h2> 
+<p>When you run knapsack the first thing you see is:
+<pre><code>INFO: Framework started in 2.39 seconds with activators: [org.apache.felix.log.Activator@1112783, org.apache.felix.cm.impl.Configura
+tionManager@1394894, org.knapsack.Activator@1cbfe9d]</code></pre>
+This is showing that the Apache Log and ConfigAdmin services, along with Knapsack, are starting with the framework.  Why is this good?  OSGi, as a module system, is designed for extreme flexibility.  
+Almost all services are optional.  
+However when focusing on application development is a lot easier if you have a few services around.   
+<a href="http://felix.apache.org/site/apache-felix-log.html">LogService, LogReader</a>, and <a href="http://felix.apache.org/site/apache-felix-config-admin.html">ConfigAdmin</a> are immediately available.  
+These services start with the framework, so from a bundle's perspective they will always exist.  
+In this regard, Knapsack is similar to <a href="http://karaf.apache.org/">Apache Karaf</a>, in that it adds a set of bundles to provide an application platform.  
+However Karaf has more of an enterprise-oriented platform design, and as a result has more features and a larger footprint.</p> 
+ 
+<h2><em>Well-known filesystem operations are best for configuration storage and state modification.</em></h2>
+<p>By overloading the concept of an executable file, bundles become executables or libraries.  
+Output is grep-friendly and accessing OSGi runtime state info from scripts is straight-forward.  
+The framework admin does not need to learn a new tool.</p> 
+
+<h1>Getting Started</h1> 
+
+<h3>Install knapsack</h3>
+<p>
+Build it from source using Ant (yes, Maven is not required), or <a href="https://leafcutter.ci.cloudbees.com/job/knapsack/lastSuccessfulBuild/artifact/knapsack.jar">download a knapsack binary</a> from the Cloudbees Jenkins server.
+<br/>Run <code>knapsack.jar</code> from a designated directory.
+<br/><pre>
+<code>$ mkdir test &amp;&amp; cp knapsack.jar test/ &amp;&amp; cd test
+$ java -jar knapsack.jar &amp;
+[1] 5513
+INFO: Framework started in 0.144 seconds with activators: [org.apache.felix.log.Activator@44bd928a, org.apache.felix.cm.impl.ConfigurationManager@79dfc547, org.knapsack.Activator@5210f6d3]
+</code></pre> 
+ 
+<br/>That's it, you're up and running.  You'll probably want to install some bundles.  Here's how:<br/>
+<pre><code>$ cp /tmp/mybundle.jar bundle/
+$ bin/update 
+Rescanning and updating bundles from configured directories.
+</code></pre> 
+ 
+<p>Knapsack will create it's preferred configuration environment if it's not already provided.  After running the directory should look something like this:</p> 
+ 
+<pre><code>$ ls
+bin  bundle  cache  configadmin  default  felix.conf  knapsack.jar
+</code></pre> 
+ 
+<h3>Check the log with:</h3> 
+ 
+<pre><code>$ bin/log 
+07.04 14:09:52 	INFO    	ServiceEvent REGISTERED 	[ 0]org.apache.felix.framework (0.0.0)
+07.04 14:09:52 	INFO    	ServiceEvent REGISTERED 	[ 0]org.apache.felix.framework (0.0.0)
+07.04 14:09:52 	INFO    	ServiceEvent REGISTERED 	[ 0]org.apache.felix.framework (0.0.0)
+07.04 14:09:52 	INFO    	ServiceEvent REGISTERED 	[ 0]org.apache.felix.framework (0.0.0)
+07.04 14:09:52 	INFO    	ServiceEvent REGISTERED 	[ 0]org.apache.felix.framework (0.0.0)
+07.04 14:09:52 	INFO    	BundleEvent STARTED 	[ 0]org.apache.felix.framework (0.0.0)
+07.04 14:09:52 	INFO    	ServiceEvent REGISTERED 	[ 0]org.apache.felix.framework (0.0.0)
+07.04 14:09:52 	INFO    	Scanning bundle directory: /tmp/eclipse-knapsack/bundle 	[ 0]org.apache.felix.framework (0.0.0)
+07.04 14:09:52 	INFO    	FrameworkEvent STARTED 	[ 0]org.apache.felix.framework (0.0.0)
+07.04 14:09:52 	INFO    	Knapsack 0.6.0 running in /tmp/eclipse-knapsack 	[ 0]org.apache.felix.framework (0.0.0)
+07.04 14:09:52 	INFO    	A new set of commands available: class org.knapsack.shell.BuiltinCommands 	[ 0]org.apache.felix.framework (0.0.0)
+07.04 14:09:52 	INFO    	ServiceEvent REGISTERED 	[ 0]org.apache.felix.framework (0.0.0)
+07.04 14:09:52 	INFO    	Created shell socket on port 12329 	[ 0]org.apache.felix.framework (0.0.0)
+
+</code></pre> 
+ 
+<h3>See which bundles are running with:</h3> 
+ 
+<pre><code>$ bin/bundles 
+ACTIV 	[ 0]org.apache.felix.framework (0.0.0) 	Bundle
+</code></pre> 
+ 
+<h3>Shut the framework down with:</h3> 
+<pre><code>$ bin/shutdown-knapsack 
+OSGi framework is shutting down due to user request via shell.</code></pre> 
+
+<h3>List all the available commands</h3>
+<pre><code>$ bin/help 
+bundles [-b (brief)] 	Get list of OSGi bundles installed in the framework.
+printconfig          	Print the Java system configuration.
+help                 	Print table of currently available commands.
+shutdown-knapsack -f (force) 	Stop all bundles and shutdown OSGi runtime.
+services [-b (brief)] [-d (show dependencies)] [-p (show properties)] 	Display OSGi services active in the framework.
+log [-b (brief)]     	Print OSGi log.
+headers [bundle id]  	Print bundle headers.
+update               	Rescan the bundle directory or directories and update bundlespace accordingly.
+</code></pre>
+Note: Commands provided by other bundles will appear in help and be executable in the same manner.
+</p>
+<h2>Configuration</h2>
+<p>
+To modify properties, edit the /felix.conf file, and then restart the framework.  To setup properties on start (if, for example, you are installing a framework and application) add files to the <code>/default</code> directory.  Files ending with <code>.properties</code> will be available via the system properties, otherwise the file will be loaded into <code>ConfigAdmin</code>.
+</p>
+<h1>Source</h1>
+<p>The source is hosted at github: <a href="https://github.com/kgilmer/knapsack">https://github.com/kgilmer/knapsack</a></p>
+<p>A public Jenkins instance provided by <a href="http://www.cloudbees.com/">Cloudbees</a> provides a <a href="https://leafcutter.ci.cloudbees.com/job/knapsack/">binary</a>.</p>
+<h1>License</h1> 
+<p>Knapsack is Apache 2.0 licensed.  Portions of pre-existing dependent code are BSD 3-clause.</p>
+<h1>Project Status</h1>
+<p>Knapsack has been in active development for the past few months and is intended to have a first production release in July 2011.</p>
+</body></html>
