@@ -57,6 +57,8 @@ ACTIV 	[ 6]org.apache.felix.http.bundle (2.2.0) 	/tmp/kt/bundle/org.apache.felix
 ```
 If you direct your web browser to `http://localhost/system/console` you should see the admin interface.  Log in with admin/admin to inspect your runtime environment.
 
+![Felix Web Console](http://kgilmer.github.com/knapsack/images/screenshot1.png)
+
 # Directory Layout
 
 Knapsack will create it's preferred configuration environment if it's not already provided.  After running knapsack the directory should look something like this:
