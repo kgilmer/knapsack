@@ -3,12 +3,13 @@
 
 Knapsack is a custom launcher for the [Apache Felix OSGi Framework](http://felix.apache.org/site/index.html) with native shell integration and a few default services that run out of the box.  See [http://kgilmer.github.com/knapsack/](http://kgilmer.github.com/knapsack/) for more information about its design.
 
-# Setting up an OSGi-based application in 5 minutes or less
-- [Download the knapsack binary](https://github.com/downloads/kgilmer/knapsack/knapsack.jar) from Github.
+# Setting up an OSGi-based application
+- [Download the knapsack binary](https://leafcutter.ci.cloudbees.com/job/knapsack/lastSuccessfulBuild/artifact/knapsack.jar) from the Jenkins instance running at Cloudbees.
 - Run `knapsack.jar` from a designated directory.
 
 ```
 $ mkdir test && cp knapsack.jar test/ && cd test
+$ wget https://leafcutter.ci.cloudbees.com/job/knapsack/lastSuccessfulBuild/artifact/knapsack.jar
 $ java -jar knapsack.jar &
 [1] 5513
 ...
