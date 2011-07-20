@@ -56,7 +56,8 @@ Rescanning and updating bundles from configured directories.</code></pre>
 Non-executable state is stored in <code>/configadmin</code> so that it doesn't get clobbered every time the framework restarts.  As a result, there is one place that bundle code comes from, <code>/bundle</code>.  (This is configurable)</p> 
  
 <h2><em>Setup of an OSGi-based application is too hard.</em></h2>
-<p>Typically, running a program goes something like <code>$ myprogram &lt;enter&gt;</code>.  
+<p>Most often, we rely on tooling to create and configure a framework instance, but what if you want more control or don't want to use Eclipse?</p>
+<p>From a terminal, running a program goes something like <code>$ myprogram &lt;enter&gt;</code>.  
 Knapsack strives for this level of simplicity by creating default configuration, and exposing the OSGi environment to the user via the system shell.  
 On start, knapsack will create it's configuration if it does not already exist, and by relying on filesystem the configuration remains simple.
 <br/>
