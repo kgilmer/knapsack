@@ -29,11 +29,13 @@ $ java -jar knapsack.jar &
 INFO: Framework started in 0.144 seconds with activators: [org.apache.felix.log.Activator@44bd928a, org.apache.felix.cm.impl.ConfigurationManager@79dfc547, org.knapsack.Activator@5210f6d3]
 ```
 - The core framework, Knapsack, the Log Service, and the Configuration Admin are now running.  However, they do not show up as seperate bundles because they are run at startup with the framework itself.  Take a look:
+
 ```
 $ bin/bundles 
 ACTIV 	[ 0]org.apache.felix.framework (0.0.0) 	Bundle
 ```
 - Now let's add some bundles to our running instance to add services and functionality.  Knapsack automatically creates a directory for us to add bundles to:
+
 ```
 $ cd bundle
 $ wget http://ftp.jaist.ac.jp/pub/apache//felix/org.apache.felix.http.bundle-2.2.0.jar
@@ -43,18 +45,21 @@ $ wget http://ftp.jaist.ac.jp/pub/apache//felix/org.apache.felix.metatype-1.0.4.
 $ wget http://ftp.jaist.ac.jp/pub/apache//felix/org.apache.felix.http.jetty-2.2.0.jar
 ```
 This set of bundles will let us run servlets and expose the running framework via a web console.  We need to tell knapsack to start the bundles, not just install them.  We do this by setting the execution bit on the file:
+
 ```
 $ chmod u+x *
 ```
 
-Now we tell knapsack to rescan the bundle directory:
+- Now we tell knapsack to rescan the bundle directory:
+
 ```
 $ cd ..
 $ bin/update
 ...
 ```
 
-You will see some exceptions in the output, but these are not critical and refer to some missing optional dependencies.  You can confirm that the http server and web console are running with:
+- You will see some exceptions in the output, but these are not critical and refer to some missing optional dependencies.  You can confirm that the http server and web console are running with:
+
 ```
 $ bin/bundles | grep ACT
 ACTIV 	[ 0]org.apache.felix.framework (0.0.0) 	Bundle
@@ -112,6 +117,7 @@ $ bin/log
 ```
 
 Grep for errors:
+
 ```
 $ bin/log | grep ERR
 07.20 09:29:49 	ERROR   	FrameworkEvent ERROR 	[ 3]org.apache.felix.deploymentadmin (0.9.0)
@@ -138,6 +144,7 @@ INFO: Bundle org.apache.felix.framework [0] OSGi framework is shutting down due 
 ```
 
 Show the OSGi available services and binding relationships:
+
 ```
 $ bin/services -d
 [23] 	javax.servlet.http.HttpServlet 	[ 6]org.apache.felix.http.bundle (2.2.0)
@@ -147,6 +154,7 @@ $ bin/services -d
 ```
 
 Get help on available commands and parameters:
+
 ```
 $ bin/help 
 bundles [-b (brief)] 	Get list of OSGi bundles installed in the framework.
