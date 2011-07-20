@@ -1,21 +1,7 @@
 
 # Knapsack for Apache Felix
 
-Knapsack is a custom launcher for the [Apache Felix OSGi Framework](http://felix.apache.org/site/index.html) with a filesystem-based management library, and a few default services that run out of the box.  Knapsack was born out the desire to remove some of the complexities with more full-featured launchers, and is designed for smaller projects and experiments.  The problem that knapsack addresses is; **get an OSGi framework up and running with a minimum of fiddling.**  Knapsack is both a little less and a little more than Felix's built-in launcher.  It's less in that it does not use runlevels and all bundle install/start configuration is done via the filesystem.  It is a little more because a few bundles are started by default.  Knapsack's design is a result of the following opinions.
-
-*OSGi Shells are overkill for basic administrative tasks.*  Most of the time, we ask **"Is my bundle running?"** or **"is the HTTP service available?"**.  OSGi shells are a way of answering that question, but are worlds into themselves and the source of unnecessary complexity.  Based on ideas from the [OSGiFS prototype](http://kgilmersden.wordpress.com/2010/12/14/a-shell-less-osgi-shell/), Knapsack creates two filesystem pipes, one for reading and one for writing.  To see service or bundle state, simply cat the contents of `/info`.  To shutdown the framework, simply write `shutdown` to `/control`.  Bouncing a bundle or restarting the framework work similarly.  To install a bundle, just put it in `/bundle`.  Want it started by default?  Set the execution bit on the bundle file.  Done.
-
-*The storage dir is a source of pain when debugging bundles.*  By default Knapsack will not keep bundles from pre-existing runtime sessions.  Non-executable state (ConfigAdmin) is stored elsewhere (/configAdmin) so that it doesn't get clobbered every time the framework starts.  As a result, there is always only one place that bundle code comes from, /bundle.
-
-*Setup of an OSGi-based application is too hard.*  Typically, running a program goes something like `$ myprogram <enter>` Knapsack strives for this level of simplicity via conventions and default behavior.  On start, knapsack will create it's configuration if it does not already exist, and by relying on filesystem the configuration remains simple.
-
-*Some things are better have around from the get-go.*  OSGi, as a module system, is designed for extreme flexibility.  Almost all services are optional.  However life is a lot easier if you have a few services around.   [LogService, LogReader](http://felix.apache.org/site/apache-felix-log.html), and [ConfigAdmin](http://felix.apache.org/site/apache-felix-config-admin.html) are immediately available.  These services start with the framework, so from a bundle's perspective they will always exist.  In this regard, Knapsack is similar to [Apache Karaf](http://karaf.apache.org/), in that it adds a set of bundles to provide an application platform.  The difference is Karaf has more of a enterprise-oriented platform design, and as a result has more features and is more complex.
-
-*Well-known filesystem operations are best for configuration storage and state modification.*  By overloading the concept of an executable file, bundles become executables or libraries.  Output is grep-friendly and accessing OSGi runtime state info from scripts is straight-forward.
-
-*Filesystem polling is more trouble than it's worth.*  In OSGiFS I experimented with automatic ways of syncing the filesystem state with the bundle state.  However it turned out that this caused confusion in debugging sessions, and more explicit control is better.  After making changes in the `/bundle` directory, run `/bin/knapsack-rescan.sh` or `echo rescan > control`.
-
-Most of the above behavior is the default behavior.  As Knapsack is just a minimal facade to Felix, adding bundles (shell, webadmin, etc.) and changing the configuration (`onFirstInit`, etc.) allows for much flexibility if a default behavior is undesired.  
+Knapsack is a custom launcher for the [Apache Felix OSGi Framework](http://felix.apache.org/site/index.html) with native shell integration and a few default services that run out of the box.  See [http://kgilmer.github.com/knapsack/](http://kgilmer.github.com/knapsack/) for more information about its design.
 
 # Setting up an OSGi-based application in 5 minutes or less
 - [Download the knapsack binary](https://github.com/downloads/kgilmer/knapsack/knapsack.jar) from Github.
@@ -80,26 +66,26 @@ $ ls
 bin  bundle  cache  configAdmin default felix.conf  knapsack.jar
 ```
 
-## bin
+## /bin
 This is where the 'native' scripts are stored that can be executed via the system terminal.  There is a hidden file `.knapsack-command.sh` which does the work of storing the randomly generated active port number (so that multiple knapsack instances do not collide), and passing the command line to knapsack via netcat.
 
-## bundle
+## /bundle
 This is the default location where bundles are stored.  As mentioned in `felix.conf`, you can set `org.knapsack.bundleDirs` to be any set of directories, scanned in the order they are specified.
 
-Organizing an application is into logical areas of functionality, a web application could have `core`, `database`, and `http` directories, each with relevant bundles, making deployment a bit easier.
+Organizing an application is into logical areas of functionality, for example a web application could have `core`, `database`, and `http` directories, each with relevant bundles, making deployment a bit easier.
 
-## cache
+## /cache
 This is where the Felix bundle cache goes.  It is an exploded form of the bundle jars.  By default, this directory is deleted each time Knapsack runs, to ensure that the latest code from bundle directories is always getting executed.
 
-## configAdmin
+## /configAdmin
 Configuration Admin typically keeps its state in the bundle cache.  We want to preserve configuration state across knapsack instances so we store it seperately.
 
-## default
+## /default
 Startup state can be set in Felix via system properties or Configuration Admin.  Knapsack will load property files and Configuration Admin dictionaries from the default directory.  Any file ending with ".properties" will be treated as a properties file, otherwise the filename will be assumed a PID and a Configuration will be created with its name/value pairs.
 
 Since all files in this directory are properties, one can have different files for different services or bundles, rather than one giant property file.  This also is nice for installers, when a set of properties corresponds to a bundle or aspect of functionality.
 
-## felix.conf
+## /felix.conf
 A default felix configuration is generated if it doesn't already exist.  This lets the user tune the startup settings that are related to the framework internals.  Some knapsack settings are also available.
 
 # System shell features
