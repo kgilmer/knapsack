@@ -37,6 +37,7 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 
 import org.knapsack.Activator;
+import org.knapsack.Config;
 import org.knapsack.shell.pub.IKnapsackCommandSet;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -72,8 +73,10 @@ public class ConsoleSocketListener extends Thread {
 	private ServiceRegistration commandProviderRegistration;
 
 	private ServerSocket socket;
+	private final Config config;
 
-	public ConsoleSocketListener(int port, BundleContext context, LogService log, CommandParser parser) throws UnknownHostException, IOException, InvalidSyntaxException {
+	public ConsoleSocketListener(Config config, int port, BundleContext context, LogService log, CommandParser parser) throws UnknownHostException, IOException, InvalidSyntaxException {
+		this.config = config;
 		this.parser = parser;
 		context.addServiceListener(parser, "(" + Constants.OBJECTCLASS + "=" + IKnapsackCommandSet.class.getName() + ")");
 		this.context = context;
@@ -137,11 +140,13 @@ public class ConsoleSocketListener extends Thread {
 	 */
 	private ServerSocket createServerSocket() throws UnknownHostException, IOException {
 		ServerSocket s;
-		try {
-			s = new ServerSocket(port, SERVER_BACKLOG_DEFAULT, InetAddress.getLocalHost());
-		} catch (UnknownHostException e) {		
-			// Name resolution error.
+		
+		if (config.getBoolean(Config.CONFIG_KEY_ACCEPT_ANY_HOST)) {
+			s = new ServerSocket(port, SERVER_BACKLOG_DEFAULT, null);
+			log.log(LogService.LOG_INFO, "Accepting socket connections from any host.");
+		} else {
 			s = new ServerSocket(port, SERVER_BACKLOG_DEFAULT, InetAddress.getByAddress(new byte[]{127,0,0,1}));		
+			log.log(LogService.LOG_INFO, "Accepting socket connections from " +  InetAddress.getByAddress(new byte[]{127,0,0,1}));			
 		}
 		
 		Activator.logInfo("Created shell socket on port " + port);

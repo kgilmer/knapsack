@@ -89,6 +89,8 @@ public class Config extends Properties {
 	 */
 	public static final String CONFIG_DISABLE_SCRIPTS = "org.knapsack.scripts.disable";
 
+	public static final String CONFIG_KEY_ACCEPT_ANY_HOST = "org.knapsack.scripts.acceptAnyHost";
+
 	/**
 	 * Base directory where knapsack instance is running.
 	 */

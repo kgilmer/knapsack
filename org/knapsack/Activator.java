@@ -158,7 +158,7 @@ public class Activator implements BundleActivator, ManagedService, LogService {
 		FSHelper.validateFile(baseDir, false, true, false, true);
 	
 		if (port != Bootstrap.DISABLE_SCRIPTS_PORT) {
-			shell = new ConsoleSocketListener(port, context, this, new CommandParser(context, new File(baseDir, Config.SCRIPT_DIRECTORY_NAME)));
+			shell = new ConsoleSocketListener(config, port, context, this, new CommandParser(context, new File(baseDir, Config.SCRIPT_DIRECTORY_NAME)));
 			shell.start();
 		} else {
 			log(LogService.LOG_INFO, "Knapsack shell is disabled.");
