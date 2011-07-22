@@ -17,7 +17,6 @@
 package org.knapsack.init;
 
 import org.knapsack.Activator;
-import org.osgi.service.log.LogService;
 import org.sprinkles.Applier;
 
 /**

@@ -2,7 +2,6 @@ package org.knapsack.init.pub;
 
 import java.io.File;
 import java.util.Collection;
-import java.util.List;
 
 /**
  * Service for accessing Knapsack's bundle management facilities.

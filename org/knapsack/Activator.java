@@ -31,8 +31,6 @@ import org.knapsack.shell.ConsoleSocketListener;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
-import org.osgi.framework.FrameworkEvent;
-import org.osgi.framework.FrameworkListener;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.cm.ConfigurationAdmin;
@@ -58,7 +56,7 @@ public class Activator implements BundleActivator, ManagedService, LogService {
 	/**
 	 * This should be in sync with manifest version.
 	 */
-	public static final String KNAPSACK_VERSION = "0.6.0";
+	public static final String KNAPSACK_VERSION = "0.7.0";
 	public static final String KNAPSACK_PID = "org.knapsack";
 	
 	/**
