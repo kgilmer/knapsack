@@ -105,11 +105,19 @@ public class Config extends Properties {
 	 * @throws InterruptedException 
 	 */
 	protected Config(File baseDirectory) throws IOException {	
+		Properties originalProperties = new Properties();
 		for (Object key : System.getProperties().keySet())
-			this.put(key, System.getProperty(key.toString()));
-			
+			originalProperties.put(key, System.getProperty(key.toString()));
+		
+					
 		this.baseDirectory = baseDirectory;
 		load(new FileInputStream(getConfigFile()));
+		
+		// Overwrite any pre-existing properties that may have been reset by load().  
+		// This makes the default/*.properties property files take precedence over felix.conf, 
+		// allowing for simple overrides.
+		for (Object key : originalProperties.keySet())
+			this.put(key, originalProperties.get(key.toString()));
 		
 		//Specify the root of the knapsack install if not explicitly defined.
 		if (!this.containsKey(CONFIG_KEY_ROOT_DIR))

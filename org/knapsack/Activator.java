@@ -56,7 +56,7 @@ public class Activator implements BundleActivator, ManagedService, LogService {
 	/**
 	 * This should be in sync with manifest version.
 	 */
-	public static final String KNAPSACK_VERSION = "0.8.0";
+	public static final String KNAPSACK_VERSION = "0.8.1";
 	public static final String KNAPSACK_PID = "org.knapsack";
 	
 	/**
