@@ -64,6 +64,9 @@ public class CommandExecutor {
 		} else if (line.length() > 0) {		
 			IKnapsackCommand cmd = parser.parse(line);
 
+			if (cmd == null) 
+				return "Unknown command: " + line;
+				
 			if (hasHelpParam(cmd)) {
 				String rs = "";
 				
@@ -111,7 +114,14 @@ public class CommandExecutor {
 	}
 
 
+	/**
+	 * @param cmd input command
+	 * @return true if input command has the "-h" or "--help" option, false otherwise
+	 */
 	private boolean hasHelpParam(IKnapsackCommand cmd) {
+		if (cmd == null || cmd.getArguments() == null)
+			return false;		
+		
 		return cmd.getArguments().contains("-h") || cmd.getArguments().contains("--help");
 	}
 }

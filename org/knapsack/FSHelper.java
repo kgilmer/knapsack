@@ -5,6 +5,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URISyntaxException;
 import java.util.Arrays;
 
 import org.apache.commons.io.IOUtils;
@@ -29,9 +30,10 @@ public class FSHelper {
 	 * 
 	 * @param baseDirectory
 	 * @throws IOException
+	 * @throws URISyntaxException 
 	 * @throws InterruptedException
 	 */
-	public static void copyScripts(File baseDirectory, int shellPort) throws IOException {
+	public static void copyScripts(File baseDirectory, int shellPort, String command) throws IOException, URISyntaxException {
 		File scriptDir = new File(baseDirectory, "bin");
 
 		if (!scriptDir.exists())
@@ -41,14 +43,27 @@ public class FSHelper {
 		File baseScriptFile = new File(scriptDir, Config.BASE_SCRIPT_FILENAME);
 
 		if (!baseScriptFile.exists()) {
-			String scriptPrefix = "#!/bin/bash" + LS + "KNAPSACK_PORT=" + shellPort + LS;
+			StringBuilder sb = new StringBuilder();
+			sb.append("#!/bin/sh");
+			sb.append(LS);
+			sb.append("KNAPSACK_PORT=");
+			sb.append(shellPort);
+			sb.append(LS);
+			sb.append("KNAPSACK_JAR=");
+			sb.append(FSHelper.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
+			sb.append(LS);
+			sb.append("COMMAND=\"");
+			sb.append(command);
+			sb.append("\"");
+			sb.append(LS);
+		
 			InputStream istream = Config.class.getResourceAsStream("/scripts/" + Config.BASE_SCRIPT_FILENAME);
 			if (istream == null)
 				throw new IOException("Jar resource does not exist: " + baseScriptFile);
 
 			FileOutputStream fos = new FileOutputStream(baseScriptFile);
 			
-			IOUtils.write(scriptPrefix, fos);
+			IOUtils.write(sb.toString(), fos);
 			IOUtils.copy(istream, fos);
 
 			fos.close();

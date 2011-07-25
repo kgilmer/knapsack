@@ -91,6 +91,8 @@ public class Config extends Properties {
 
 	public static final String CONFIG_KEY_ACCEPT_ANY_HOST = "org.knapsack.scripts.acceptAnyHost";
 
+	public static final String CONFIG_KEY_SHELL_COMMAND = "org.knapsack.shell.command";
+
 	/**
 	 * Base directory where knapsack instance is running.
 	 */

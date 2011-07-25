@@ -75,7 +75,8 @@ public class ConsoleSocketListener extends Thread {
 	private ServerSocket socket;
 	private final Config config;
 
-	public ConsoleSocketListener(Config config, int port, BundleContext context, LogService log, CommandParser parser) throws UnknownHostException, IOException, InvalidSyntaxException {
+	public ConsoleSocketListener(Config config, int port, BundleContext context, LogService log, CommandParser parser)
+			throws UnknownHostException, IOException, InvalidSyntaxException {
 		this.config = config;
 		this.parser = parser;
 		context.addServiceListener(parser, "(" + Constants.OBJECTCLASS + "=" + IKnapsackCommandSet.class.getName() + ")");
@@ -83,40 +84,45 @@ public class ConsoleSocketListener extends Thread {
 		this.log = log;
 		this.port = port;
 	}
-	
+
 	public void run() {
 		running = true;
 		try {
 			if (commandProviderRegistration == null) {
-				commandProviderRegistration = context.registerService(IKnapsackCommandSet.class.getName(), new BuiltinCommands(parser, log), null);
+				commandProviderRegistration = context.registerService(IKnapsackCommandSet.class.getName(),
+						new BuiltinCommands(parser, log), null);
 			}
 			this.socket = createServerSocket();
 
 			while (running) {
-				Socket connection = socket.accept();
-				
-				if (!running)
-					return;
-				
-				if (executor == null)
-					executor = new CommandExecutor(parser);
+				try {
+					Socket connection = socket.accept();
 
-				BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-				OutputStream out = connection.getOutputStream();
-				
-				String sl = in.readLine();
-				
-				if (sl != null) {
-					String resp = executor.executeCommand(sl.trim());		
-					
-					if (resp != null && resp.length() > 0) {
-						out.write(resp.getBytes());
-						if (!resp.endsWith(CRLF))
-							out.write(CRLF.getBytes());
+					if (!running)
+						return;
+
+					if (executor == null)
+						executor = new CommandExecutor(parser);
+
+					BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+					OutputStream out = connection.getOutputStream();
+
+					String sl = in.readLine();
+
+					if (sl != null) {
+						String resp = executor.executeCommand(sl.trim());
+
+						if (resp != null && resp.length() > 0) {
+							out.write(resp.getBytes());
+							if (!resp.endsWith(CRLF))
+								out.write(CRLF.getBytes());
+						}
 					}
+
+					connection.close();
+				} catch (Exception e) {
+					log.log(LogService.LOG_ERROR, "An Error occurred while while processing command.", e);					
 				}
-				
-				connection.close();
 			}
 		} catch (Exception e) {
 			log.log(LogService.LOG_ERROR, "An Error occurred while while processing command.", e);
@@ -128,7 +134,7 @@ public class ConsoleSocketListener extends Thread {
 			try {
 				context.removeServiceListener(parser);
 			} catch (Exception e) {
-				//Ignore unregistration errors.
+				// Ignore unregistration errors.
 			}
 		}
 	}
@@ -140,36 +146,36 @@ public class ConsoleSocketListener extends Thread {
 	 */
 	private ServerSocket createServerSocket() throws UnknownHostException, IOException {
 		ServerSocket s;
-		
+
 		if (config.getBoolean(Config.CONFIG_KEY_ACCEPT_ANY_HOST)) {
 			s = new ServerSocket(port, SERVER_BACKLOG_DEFAULT, null);
 			log.log(LogService.LOG_INFO, "Accepting socket connections from any host.");
 		} else {
-			s = new ServerSocket(port, SERVER_BACKLOG_DEFAULT, InetAddress.getByAddress(new byte[]{127,0,0,1}));		
-			log.log(LogService.LOG_INFO, "Accepting socket connections from " +  InetAddress.getByAddress(new byte[]{127,0,0,1}));			
+			s = new ServerSocket(port, SERVER_BACKLOG_DEFAULT, InetAddress.getByAddress(new byte[] { 127, 0, 0, 1 }));
+			log.log(LogService.LOG_INFO, "Accepting socket connections from " + InetAddress.getByAddress(new byte[] { 127, 0, 0, 1 }));
 		}
-		
+
 		Activator.logInfo("Created shell socket on port " + port);
 		return s;
 	}
-	
+
 	/**
 	 * @return the port that the socket listens on.
 	 */
 	public int getPort() {
 		return port;
 	}
-	
+
 	/**
 	 * Shutdown the listener. No new client connections will be accepted.
 	 */
-	public void shutdown() {		
+	public void shutdown() {
 		running = false;
 		this.interrupt();
 		if (socket != null)
 			try {
 				socket.close();
-			} catch (IOException e) {				
-			}		
+			} catch (IOException e) {
+			}
 	}
 }

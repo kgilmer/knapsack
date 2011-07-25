@@ -18,6 +18,7 @@ package org.knapsack;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -89,7 +90,7 @@ public class Bootstrap {
 			if (!config.containsKey(Config.CONFIG_DISABLE_SCRIPTS) || !config.getBoolean(Config.CONFIG_DISABLE_SCRIPTS)) {
 				Random r = new Random();
 				port = PORT_START + r.nextInt(MAX_PORT_RANGE);
-				createKnapsackScripts(baseDirectory, port);
+				createKnapsackScripts(baseDirectory, port, config);
 			}
 	
 			// Create activators that will start
@@ -173,14 +174,13 @@ public class Bootstrap {
 		FSHelper.validateFile(configAdminDir, true, true, false, true);
 	}
 	
-	private static void createKnapsackScripts(File baseDirectory, int port) throws IOException {
+	private static void createKnapsackScripts(File baseDirectory, int port, Config config) throws IOException, URISyntaxException {
 		scriptDir = new File(baseDirectory, Config.SCRIPT_DIRECTORY_NAME);
 		FSHelper.validateFile(scriptDir, true, true, false, true);
 		
 		if (FSHelper.directoryHasFiles(scriptDir))
 			FSHelper.deleteFilesInDir(scriptDir);
 		
-		FSHelper.copyScripts(baseDirectory, port);
-		
+		FSHelper.copyScripts(baseDirectory, port, config.getProperty(Config.CONFIG_KEY_SHELL_COMMAND));
 	}
 }
