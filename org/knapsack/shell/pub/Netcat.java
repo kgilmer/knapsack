@@ -1,4 +1,4 @@
-package org.knapsack.shell;
+package org.knapsack.shell.pub;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -30,18 +30,28 @@ public class Netcat {
 			System.exit(1);
 		}
 		
-		//Load parameters
-		String host = args[0];
-		int port = Integer.parseInt(args[1]);
-		
+		run(args[0], Integer.parseInt(args[1]), System.in, System.out);		
+	}
+	
+	/**
+	 * Execute a shell command by connecting to socket, sending command, and reading response.
+	 * 
+	 * @param host host name
+	 * @param port port
+	 * @param input input stream to read command from
+	 * @param output output stream to send response to
+	 * @throws UnknownHostException on name resolution error
+	 * @throws IOException on I/O error
+	 */
+	public static void run(String host, int port, InputStream input, OutputStream output) throws UnknownHostException, IOException {			
 		//Create and open socket
 		Socket socket = new Socket(host, port);
 		OutputStream out = socket.getOutputStream();
 		InputStream in = socket.getInputStream();
 		
 		//Push, pull, close.
-		IOUtils.copy(System.in, out);
-		IOUtils.copy(in, System.out);		
+		IOUtils.copy(input, out);
+		IOUtils.copy(in, output);		
 		IOUtils.closeQuietly(socket);
 	}
 }
