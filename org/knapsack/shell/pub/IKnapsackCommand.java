@@ -30,10 +30,8 @@ public interface IKnapsackCommand {
 	/**
 	 * Command initialization.
 	 * 
-	 * @param arguments
-	 * @param out
-	 * @param err
-	 * @param context
+	 * @param arguments list of arguments passed to command.  Command name not included.
+	 * @param context BundleContext
 	 */
 	public void initialize(List<String> arguments, BundleContext context);
 
@@ -41,6 +39,7 @@ public interface IKnapsackCommand {
 	 * @return List of arguments passed to command.
 	 */
 	public List<String> getArguments();
+	
 	/**
 	 * Execute the command
 	 * 
