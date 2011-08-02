@@ -92,6 +92,7 @@ public class Bootstrap {
 				port = PORT_START + r.nextInt(MAX_PORT_RANGE);
 				createKnapsackScripts(baseDirectory, port, config);
 			}
+			System.setProperty(Config.SYSTEM_PROPERTY_KEY_SHELL_PORT, Integer.toString(port));
 	
 			// Create activators that will start
 			List<BundleActivator> activators = new ArrayList<BundleActivator>();
@@ -103,7 +104,6 @@ public class Bootstrap {
 				activators.add(new ConfigurationManager());
 	
 			// Create an internal logger that will be used for log output before LogService takes over.
-			
 			activators.add(new org.knapsack.Activator(config, logger, port));
 	
 			config.put(FELIX_LOGGER_INSTANCE, logger);
@@ -134,6 +134,9 @@ public class Bootstrap {
 		}
 	}
 	
+	/**
+	 * @return root directory that this instance of knapsack runs in.
+	 */
 	private static File getBaseDirectory() {
 		if (System.getProperty(Config.CONFIG_KEY_ROOT_DIR) != null)
 			return new File(System.getProperty(Config.CONFIG_KEY_ROOT_DIR));
@@ -174,6 +177,15 @@ public class Bootstrap {
 		FSHelper.validateFile(configAdminDir, true, true, false, true);
 	}
 	
+	/**
+	 * Create the transient script symlinks used to access the knapsack shell from the native environment.
+	 * 
+	 * @param baseDirectory
+	 * @param port
+	 * @param config
+	 * @throws IOException
+	 * @throws URISyntaxException
+	 */
 	private static void createKnapsackScripts(File baseDirectory, int port, Config config) throws IOException, URISyntaxException {
 		scriptDir = new File(baseDirectory, Config.SCRIPT_DIRECTORY_NAME);
 		FSHelper.validateFile(scriptDir, true, true, false, true);

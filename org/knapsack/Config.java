@@ -94,6 +94,11 @@ public class Config extends Properties {
 	public static final String CONFIG_KEY_SHELL_COMMAND = "org.knapsack.shell.command";
 
 	/**
+	 * Port that the shell is listening on for commands, or -1 if shell is disabled.
+	 */
+	public static final String SYSTEM_PROPERTY_KEY_SHELL_PORT = "org.knapsack.shell.port";
+
+	/**
 	 * Base directory where knapsack instance is running.
 	 */
 	private final File baseDirectory;
