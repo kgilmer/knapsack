@@ -18,7 +18,7 @@ package org.knapsack.init;
 
 import java.io.File;
 
-import org.knapsack.shell.BuiltinCommands;
+import org.knapsack.shell.commands.BundlesCommand;
 import org.osgi.framework.Bundle;
 
 /**
@@ -31,21 +31,31 @@ class BundleJarWrapper {
 	private final File jar;
 	private final Bundle bundle;
 
+	/**
+	 * @param jar
+	 * @param bundle
+	 */
 	public BundleJarWrapper(File jar, Bundle bundle) {
 		this.jar = jar;
 		this.bundle = bundle;			
 	}
 	
+	/**
+	 * @return jar of bundle
+	 */
 	public File getJar() {
 		return jar;
 	}
 	
+	/**
+	 * @return bundle reference
+	 */
 	public Bundle getBundle() {
 		return bundle;
 	}
 	
 	@Override
 	public String toString() {
-		return BuiltinCommands.getBundleName(bundle);
+		return BundlesCommand.getBundleName(bundle);
 	}
 }

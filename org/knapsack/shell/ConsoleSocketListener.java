@@ -35,10 +35,21 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.knapsack.Activator;
 import org.knapsack.Config;
-import org.knapsack.shell.pub.IKnapsackCommandSet;
+import org.knapsack.shell.commands.BundlesCommand;
+import org.knapsack.shell.commands.HeadersCommand;
+import org.knapsack.shell.commands.HelpCommand;
+import org.knapsack.shell.commands.LogCommand;
+import org.knapsack.shell.commands.PackagesCommand;
+import org.knapsack.shell.commands.PrintConfCommand;
+import org.knapsack.shell.commands.ServicesCommand;
+import org.knapsack.shell.commands.ShutdownCommand;
+import org.knapsack.shell.commands.UpdateCommand;
+import org.knapsack.shell.pub.IKnapsackCommand;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
@@ -52,7 +63,6 @@ import org.osgi.service.log.LogService;
  * 
  */
 public class ConsoleSocketListener extends Thread {
-	private static final String CRLF = System.getProperty("line.separator");
 	/**
 	 * Default for the ServerSocket backlog.
 	 */
@@ -70,7 +80,7 @@ public class ConsoleSocketListener extends Thread {
 
 	private final LogService log;
 
-	private ServiceRegistration commandProviderRegistration;
+	private List<ServiceRegistration> commandRegistrations;
 
 	private ServerSocket socket;
 	private final Config config;
@@ -79,7 +89,7 @@ public class ConsoleSocketListener extends Thread {
 			throws UnknownHostException, IOException, InvalidSyntaxException {
 		this.config = config;
 		this.parser = parser;
-		context.addServiceListener(parser, "(" + Constants.OBJECTCLASS + "=" + IKnapsackCommandSet.class.getName() + ")");
+		context.addServiceListener(parser, "(" + Constants.OBJECTCLASS + "=" + IKnapsackCommand.class.getName() + ")");
 		this.context = context;
 		this.log = log;
 		this.port = port;
@@ -88,10 +98,10 @@ public class ConsoleSocketListener extends Thread {
 	public void run() {
 		running = true;
 		try {
-			if (commandProviderRegistration == null) {
-				commandProviderRegistration = context.registerService(IKnapsackCommandSet.class.getName(),
-						new BuiltinCommands(parser, log), null);
+			if (commandRegistrations == null) {
+				commandRegistrations = registerCommands();
 			}
+			
 			this.socket = createServerSocket();
 
 			while (running) {
@@ -114,8 +124,8 @@ public class ConsoleSocketListener extends Thread {
 
 						if (resp != null && resp.length() > 0) {
 							out.write(resp.getBytes());
-							if (!resp.endsWith(CRLF))
-								out.write(CRLF.getBytes());
+							if (!resp.endsWith(StringConstants.CRLF))
+								out.write(StringConstants.CRLF.getBytes());
 						}
 					}
 
@@ -126,8 +136,9 @@ public class ConsoleSocketListener extends Thread {
 			}
 		} catch (Exception e) {
 			log.log(LogService.LOG_ERROR, "An Error occurred while while processing command.", e);
-			if (commandProviderRegistration != null) {
-				commandProviderRegistration.unregister();
+			if (commandRegistrations != null) {
+				for (ServiceRegistration sr : commandRegistrations)
+					sr.unregister();
 			}
 		} finally {
 			socket = null;
@@ -137,6 +148,22 @@ public class ConsoleSocketListener extends Thread {
 				// Ignore unregistration errors.
 			}
 		}
+	}
+
+	private List<ServiceRegistration> registerCommands() {
+		List<ServiceRegistration> cr = new ArrayList<ServiceRegistration>();
+		
+		cr.add(context.registerService(IKnapsackCommand.class.getName(), new ShutdownCommand(log), null));
+		cr.add(context.registerService(IKnapsackCommand.class.getName(), new HelpCommand(parser), null));
+		cr.add(context.registerService(IKnapsackCommand.class.getName(), new BundlesCommand(), null));
+		cr.add(context.registerService(IKnapsackCommand.class.getName(), new ServicesCommand(), null));
+		cr.add(context.registerService(IKnapsackCommand.class.getName(), new LogCommand(), null));
+		cr.add(context.registerService(IKnapsackCommand.class.getName(), new UpdateCommand(), null));
+		cr.add(context.registerService(IKnapsackCommand.class.getName(), new PrintConfCommand(), null));
+		cr.add(context.registerService(IKnapsackCommand.class.getName(), new HeadersCommand(), null));
+		cr.add(context.registerService(IKnapsackCommand.class.getName(), new PackagesCommand(), null));
+		
+		return commandRegistrations;
 	}
 
 	/**

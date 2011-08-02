@@ -9,6 +9,7 @@ import java.net.URISyntaxException;
 import java.util.Arrays;
 
 import org.apache.commons.io.IOUtils;
+import org.knapsack.shell.StringConstants;
 
 /**
  * Static methods that interface with the filesystem for specific Knapsack tasks.
@@ -16,9 +17,6 @@ import org.apache.commons.io.IOUtils;
  *
  */
 public class FSHelper {
-
-	private static final String LS = System.getProperty("line.separator");
-
 	/**
 	 * Static class
 	 */
@@ -45,17 +43,17 @@ public class FSHelper {
 		if (!baseScriptFile.exists()) {
 			StringBuilder sb = new StringBuilder();
 			sb.append("#!/bin/sh");
-			sb.append(LS);
+			sb.append(StringConstants.CRLF);
 			sb.append("KNAPSACK_PORT=");
 			sb.append(shellPort);
-			sb.append(LS);
+			sb.append(StringConstants.CRLF);
 			sb.append("KNAPSACK_JAR=");
 			sb.append(FSHelper.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
-			sb.append(LS);
+			sb.append(StringConstants.CRLF);
 			sb.append("COMMAND=\"");
 			sb.append(command);
 			sb.append("\"");
-			sb.append(LS);
+			sb.append(StringConstants.CRLF);
 		
 			InputStream istream = Config.class.getResourceAsStream("/scripts/" + Config.BASE_SCRIPT_FILENAME);
 			if (istream == null)
@@ -141,12 +139,12 @@ public class FSHelper {
 		for (String line : IOUtils.readLines(istream)) {
 			if (line.length() == 0 || line.startsWith("#")) {
 				IOUtils.write(line, fos);
-				IOUtils.write(LS, fos);
+				IOUtils.write(StringConstants.CRLF, fos);
 				continue;
 			}
 			
 			fullLine.append(line);
-			fullLine.append(LS);
+			fullLine.append(StringConstants.CRLF);
 			
 			if (!line.endsWith("\\")) {
 				line = fullLine.toString();
@@ -164,7 +162,7 @@ public class FSHelper {
 					outLine = key + "=" + line.substring(key.length() + 1);
 				}
 				IOUtils.write(outLine, fos);
-				IOUtils.write(LS, fos);
+				IOUtils.write(StringConstants.CRLF, fos);
 				fullLine = new StringBuilder();
 			} 		
 		}
@@ -175,7 +173,7 @@ public class FSHelper {
 			// Since this property is not static, create dynamically. If
 			// multiple properties need to be set dynamically in the future,
 			// consider using a template format.
-			IOUtils.write(LS + "felix.cm.dir = " + configAdminDir + LS, fos);
+			IOUtils.write(StringConstants.CRLF + "felix.cm.dir = " + configAdminDir + StringConstants.CRLF, fos);
 		}
 
 		istream.close();

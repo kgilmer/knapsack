@@ -74,6 +74,10 @@ public class Config extends Properties {
 	 */
 	
 	public final static String BASE_SCRIPT_FILENAME = ".knapsack-command.sh";
+	
+	/**
+	 * Directory for scripts
+	 */
 	public static final String SCRIPT_DIRECTORY_NAME = "bin";
 	/**
 	 * Directory name where configadmin default property files are stored.
@@ -89,8 +93,14 @@ public class Config extends Properties {
 	 */
 	public static final String CONFIG_DISABLE_SCRIPTS = "org.knapsack.scripts.disable";
 
+	/**
+	 * If true, a remote client can execute shell commands.  
+	 */
 	public static final String CONFIG_KEY_ACCEPT_ANY_HOST = "org.knapsack.scripts.acceptAnyHost";
 
+	/**
+	 * Native command to be called to proxy shell command to knapsack and get response.
+	 */
 	public static final String CONFIG_KEY_SHELL_COMMAND = "org.knapsack.shell.command";
 
 	/**

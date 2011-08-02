@@ -16,8 +16,15 @@ import org.sprinkles.Applier.Fn;
  * 
  */
 public class LoadPropertiesFunction implements Fn<File, File> {
+	/**
+	 * Extension that property files must have to be handled.  Example "http.properties".
+	 */
+	private static final String PROPERTY_FILE_EXTENSION = ".properties";
 	private final Logger logger;
 
+	/**
+	 * @param logger Logger
+	 */
 	public LoadPropertiesFunction(Logger logger) {
 		this.logger = logger;
 	}
@@ -38,9 +45,15 @@ public class LoadPropertiesFunction implements Fn<File, File> {
 		return null;
 	}
 
-	private void loadPropertyFile(File f) throws IOException {
+	/**
+	 * Parse a property file and load values into the System property dictionary.
+	 * 
+	 * @param file input file
+	 * @throws IOException on I/O error
+	 */
+	private void loadPropertyFile(File file) throws IOException {
 		
-		for (String line : IOUtils.readLines(new FileInputStream(f))) {
+		for (String line : IOUtils.readLines(new FileInputStream(file))) {
 			if (line.length() == 0 || line.trim().startsWith("#"))
 				continue;
 
@@ -66,6 +79,6 @@ public class LoadPropertiesFunction implements Fn<File, File> {
 	 * @return
 	 */
 	private boolean isPropertiesFile(File f) {
-		return f.getName().endsWith(".properties");
+		return f.getName().endsWith(PROPERTY_FILE_EXTENSION);
 	}
 }

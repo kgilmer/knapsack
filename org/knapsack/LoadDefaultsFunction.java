@@ -25,6 +25,11 @@ public class LoadDefaultsFunction implements Fn<File, File> {
 	private final Logger log;
 	private final boolean overwriteConfiguration;
 
+	/**
+	 * @param ca ConfigurationAdmin
+	 * @param frameworkLogger Logger
+	 * @param overwriteConfiguration if true, pre-existing Configurations will be overwritten
+	 */
 	public LoadDefaultsFunction(ConfigurationAdmin ca, Logger frameworkLogger, boolean overwriteConfiguration) {
 		this.ca = ca;
 		this.log = frameworkLogger;
@@ -47,8 +52,14 @@ public class LoadDefaultsFunction implements Fn<File, File> {
 		return null;
 	}
 
-	private void loadDefaultFile(File f) throws IOException {
-		String pid = f.getName();
+	/**
+	 * Load a config admin property file, save as a ConfigAdmin Configuration.
+	 * 
+	 * @param file File
+	 * @throws IOException on I/O error
+	 */
+	private void loadDefaultFile(File file) throws IOException {
+		String pid = file.getName();
 		
 		//Only set the configuration if it does not already exist.
 		if (!overwriteConfiguration && !isPIDEmpty(pid)) {
@@ -57,7 +68,7 @@ public class LoadDefaultsFunction implements Fn<File, File> {
 		}
 		
 		Dictionary<String, String> kvp = new Hashtable<String, String>();
-		for (String line : IOUtils.readLines(new FileInputStream(f))) {
+		for (String line : IOUtils.readLines(new FileInputStream(file))) {
 			line = line.trim();
 			
 			if (line.length() == 0 || line.startsWith("#"))
@@ -79,6 +90,11 @@ public class LoadDefaultsFunction implements Fn<File, File> {
 		}
 	}
 	
+	/**
+	 * @param pid PID of Configuration
+	 * @return true if PID is null 
+	 * @throws IOException on I/O error
+	 */
 	private boolean isPIDEmpty(String pid) throws IOException {	
 		Configuration config = ca.getConfiguration(pid, null);
 		

@@ -7,12 +7,22 @@ import org.knapsack.init.InitThread;
 import org.knapsack.init.pub.KnapsackInitService;
 import org.sprinkles.Applier;
 
+/**
+ * The native service implementation for KnapsackInitService.
+ * 
+ * @author kgilmer
+ *
+ */
 public class KnapsackInitServiceImpl implements KnapsackInitService {
 
 	private final Config config;
 	private final File baseDir;
 	private Collection<File> bundleDirs = null;
 
+	/**
+	 * @param baseDir
+	 * @param config
+	 */
 	public KnapsackInitServiceImpl(File baseDir, Config config) {
 		this.baseDir = baseDir;
 		this.config = config;

@@ -43,8 +43,6 @@ import org.osgi.framework.BundleException;
  */
 public class CommandExecutor {
 	private final CommandParser parser;
-	private static final String CRLF = System.getProperty("line.separator");
-
 	protected CommandExecutor(CommandParser parser) {	
 		this.parser = parser;
 	}
@@ -73,7 +71,7 @@ public class CommandExecutor {
 				if (cmd.getDescription() != null)
 					rs = cmd.getDescription();
 				
-				return rs + CRLF + "Usage: " + cmd.getName() + " " + cmd.getUsage();
+				return rs + StringConstants.CRLF + "Usage: " + cmd.getName() + " " + cmd.getUsage();
 			} else if (cmd != null && cmd.isValid()) {
 				try {
 					return cmd.execute();
@@ -81,9 +79,9 @@ public class CommandExecutor {
 					String es = "An error occurred while executing: " + cmd.getName();
 					
 					if (e.getCause() != null && e.getCause().getMessage() != null) {
-						es = es + CRLF + "Message: " + e.getMessage() + CRLF + e.getCause().getMessage() + CRLF;
+						es = es + StringConstants.CRLF + "Message: " + e.getMessage() + StringConstants.CRLF + e.getCause().getMessage() + StringConstants.CRLF;
 					} else if (e.getMessage() != null) {
-						es = es + CRLF + "Message: " + e.getMessage() + CRLF;
+						es = es + StringConstants.CRLF + "Message: " + e.getMessage() + StringConstants.CRLF;
 					} 
 					ByteArrayOutputStream baos = new ByteArrayOutputStream();
 					PrintWriter pw = new PrintWriter(new OutputStreamWriter(baos));
@@ -103,7 +101,7 @@ public class CommandExecutor {
 				if (cmd == null) {
 					return "Unknown command: " + line.split(" ")[0];
 				} else {
-					String es = "Invalid usage of command " + cmd.getName() + CRLF;
+					String es = "Invalid usage of command " + cmd.getName() + StringConstants.CRLF;
 					return es + "Usage: " + cmd.getName() + " " + cmd.getUsage();
 				}
 			}

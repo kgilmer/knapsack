@@ -38,7 +38,6 @@ import java.util.Map;
 import org.knapsack.Activator;
 import org.knapsack.FSHelper;
 import org.knapsack.shell.pub.IKnapsackCommand;
-import org.knapsack.shell.pub.IKnapsackCommandSet;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceEvent;
@@ -52,8 +51,6 @@ import org.osgi.framework.ServiceReference;
  * 
  */
 public class CommandParser implements ServiceListener {
-	private static final String CRLF = System.getProperty("line.separator");
-
 	private Map<String, IKnapsackCommand> commands;
 
 	private final BundleContext context;
@@ -93,7 +90,7 @@ public class CommandParser implements ServiceListener {
 					tokens[i] = tokens[i].substring(1);
 				} else if (tokens[i].endsWith("\"")) {
 					if (!quoteMode) {
-						throw new IOException("Parse Error: End quote with no starting quote." + CRLF);
+						throw new IOException("Parse Error: End quote with no starting quote." + StringConstants.CRLF);
 					}
 					quoteMode = false;
 					quotedParam.append(tokens[i].substring(0, tokens[i].length() - 1));
@@ -112,7 +109,7 @@ public class CommandParser implements ServiceListener {
 		}
 
 		if (quoteMode)
-			throw new IOException("Parse Error: unclosed quotes." + CRLF);
+			throw new IOException("Parse Error: unclosed quotes." + StringConstants.CRLF);
 
 		if (commands.containsKey(command)) {
 			IKnapsackCommand cmd = (IKnapsackCommand) commands.get(command);
@@ -123,34 +120,34 @@ public class CommandParser implements ServiceListener {
 		return null;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.osgi.framework.ServiceListener#serviceChanged(org.osgi.framework.ServiceEvent)
+	 */
 	public void serviceChanged(ServiceEvent event) {
 		final ServiceReference ref = event.getServiceReference();
 		final int type = event.getType();
 
 		if (type == ServiceEvent.REGISTERED) {
-			final IKnapsackCommandSet provider = (IKnapsackCommandSet) context.getService(ref);
-			Activator.logInfo("A new set of commands available: " + provider.getClass().toString());
-			for (IKnapsackCommand cmd : provider.getCommands()) {
-				if (commands.containsKey(cmd.getName())) {
-					Activator.logWarning("A shell command named " + cmd.getName() + " has already been registered.  Ignoring second registration.");
-				} else {
-					addCommand(cmd);				
-				}
+			final IKnapsackCommand cmd = (IKnapsackCommand) context.getService(ref);
+			Activator.logInfo("A new command is available: " + cmd.getClass().toString());
+			
+			if (commands.containsKey(cmd.getName())) {
+				Activator.logWarning("A shell command named " + cmd.getName() + " has already been registered.  Ignoring second registration.");
+			} else {
+				addCommand(cmd);				
 			}
 		} else if (type == ServiceEvent.UNREGISTERING) {
 			if (ref.getBundle().getState() != Bundle.UNINSTALLED && context.getBundle() != null) {
 				Activator.logDebug("Unregistering " + ref.getBundle().getLocation());
-				final IKnapsackCommandSet provider = (IKnapsackCommandSet) context.getService(ref);
-
-				for (IKnapsackCommand cmd : provider.getCommands()) {				
-					Activator.logDebug("Unregistering command " + cmd.getName());
-					removeCommand(cmd);
-				}
+				final IKnapsackCommand cmd = (IKnapsackCommand) context.getService(ref);
+		
+				Activator.logDebug("Unregistering command " + cmd.getName());
+				removeCommand(cmd);
 			}
 		}
 	}
 	
-	protected Map<String, IKnapsackCommand> getCommands() {
+	public Map<String, IKnapsackCommand> getCommands() {
 		return Collections.unmodifiableMap(commands);
 	}
 	
