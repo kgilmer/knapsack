@@ -177,4 +177,12 @@ public class Config extends Properties {
 		
 		return null;
 	}
+	
+	/* (non-Javadoc)
+	 * @see java.util.Hashtable#contains(java.lang.Object)
+	 */
+	public boolean contains(Object key) {
+		return this.get(key) != null;
+	}
+	
 }

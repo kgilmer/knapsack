@@ -147,8 +147,14 @@ public class Activator implements BundleActivator, ManagedService, LogService {
 			}
 		}
 		
-		if (config.getBoolean(Config.CONFIG_KEY_LOG_STDOUT))
-			new LogPrinter(context);
+		if (config.getBoolean(Config.CONFIG_KEY_LOG_STDOUT)) {
+			int logLevel = 4;
+			if (config.contains("felix.log.level"))
+				logLevel = Integer.parseInt(config.getProperty("felix.log.level"));
+			
+			new LogPrinter(context, logLevel);
+			
+		}
 		
 		sizeMap = new HashMap<File, Long>();
 		File baseDir = new File(config.getString(Config.CONFIG_KEY_ROOT_DIR));

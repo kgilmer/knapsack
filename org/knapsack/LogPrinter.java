@@ -46,9 +46,11 @@ public class LogPrinter implements ServiceTrackerCustomizer, LogListener {
 
 	private final BundleContext bundleContext;
 	private final List<LogReaderService> logListeners;
+	private final int logLevel;
 
-	public LogPrinter(BundleContext bundleContext) {
+	public LogPrinter(BundleContext bundleContext, int logLevel) {
 		this.bundleContext = bundleContext;
+		this.logLevel = logLevel;
 		logListeners = new ArrayList<LogReaderService>();
 		ServiceTracker st = new ServiceTracker(bundleContext, LogReaderService.class.getName(), this);
 		st.open();
@@ -79,7 +81,8 @@ public class LogPrinter implements ServiceTrackerCustomizer, LogListener {
 
 	@Override
 	public void logged(LogEntry logentry) {
-		doLog(logentry.getBundle(), logentry.getServiceReference(), logentry.getLevel(), logentry.getMessage(), logentry.getException());
+		if (logentry.getLevel() <= logLevel)
+			doLog(logentry.getBundle(), logentry.getServiceReference(), logentry.getLevel(), logentry.getMessage(), logentry.getException());
 	}
 
 	/**

@@ -87,6 +87,10 @@ public class Bootstrap {
 			// Create initial configuration, this will load some values with defaults.
 			Config config = new Config(baseDirectory);
 			
+			// Set the logger output level if configured
+			if (config.contains("felix.log.level"))
+				logger.setLogLevel(Integer.parseInt(config.getProperty("felix.log.level")));
+			
 			if (!config.containsKey(Config.CONFIG_DISABLE_SCRIPTS) || !config.getBoolean(Config.CONFIG_DISABLE_SCRIPTS)) {
 				Random r = new Random();
 				port = PORT_START + r.nextInt(MAX_PORT_RANGE);

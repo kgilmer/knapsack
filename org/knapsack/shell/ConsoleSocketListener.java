@@ -171,7 +171,7 @@ public class ConsoleSocketListener extends Thread {
 			log.log(LogService.LOG_INFO, "Accepting socket connections from " + InetAddress.getByAddress(new byte[] { 127, 0, 0, 1 }));
 		}
 
-		Activator.logInfo("Created shell socket on port " + port);
+		Activator.logDebug("Created shell socket on port " + port);
 		return s;
 	}
 
