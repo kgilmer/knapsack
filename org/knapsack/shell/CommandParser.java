@@ -117,8 +117,7 @@ public class CommandParser implements ServiceListener {
 		final int type = event.getType();
 
 		if (type == ServiceEvent.REGISTERED) {
-			final IKnapsackCommand cmd = (IKnapsackCommand) context.getService(ref);
-			Activator.logInfo("A new command is available: " + cmd.getClass().toString());
+			final IKnapsackCommand cmd = (IKnapsackCommand) context.getService(ref);		
 			
 			if (commands.containsKey(cmd.getName())) {
 				Activator.logWarning("A shell command named " + cmd.getName() + " has already been registered.  Ignoring second registration.");
@@ -127,10 +126,7 @@ public class CommandParser implements ServiceListener {
 			}
 		} else if (type == ServiceEvent.UNREGISTERING) {
 			if (ref.getBundle().getState() != Bundle.UNINSTALLED && context.getBundle() != null) {
-				Activator.logDebug("Unregistering " + ref.getBundle().getLocation());
-				final IKnapsackCommand cmd = (IKnapsackCommand) context.getService(ref);
-		
-				Activator.logDebug("Unregistering command " + cmd.getName());
+				final IKnapsackCommand cmd = (IKnapsackCommand) context.getService(ref);				
 				removeCommand(cmd);
 			}
 		}
