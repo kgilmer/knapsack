@@ -2,13 +2,14 @@
 <project name="knapsack" default="jar">
 	<property name="project.description" value="Knapsack for Apache Felix" />
 	<property name="external.dir" location="external" />
+	<property name="doc.dir" location="${basedir}/docs" />
+	<property name="build.dir" location="${basedir}/classes" />
 
 	<property name="wget.bin" location="/usr/bin/wget" />
 	<property name="svn.bin" location="/usr/bin/svn" />
 	<property name="git.bin" location="/usr/bin/git" />
 	<property name="rm.bin" location="/bin/rm" />
 
-	<property name="knapsack.version" value="0.2.0" />
 	<property name="framework.version" value="3.2.2" />
 	<property name="log.version" value="1.0.1" />
 	<property name="configadmin.version" value="1.2.8" />
@@ -27,8 +28,9 @@
 
 
 	<target name="clean" description="remove intermediate files">
-		<delete dir="classes" />
-		<delete dir="external" />
+		<delete dir="${build.dir}" />
+		<delete dir="${external.dir}" />
+		<delete dir="${doc.dir}" />
 	</target>
 
 	<target name="clobber" depends="clean" description="remove all artifact files">
@@ -87,20 +89,19 @@
 	</target>
 
 	<target name="compile" depends="stage" description="compile the Java source code to class files">
-		<mkdir dir="classes" />
-		<javac srcdir="." destdir="classes" source="1.6" target="1.6" encoding="utf-8" fork="true" includeantruntime="false">
+		<mkdir dir="${build.dir}" />
+		<javac srcdir="." destdir="${build.dir}" source="1.6" target="1.6" encoding="utf-8" fork="true" includeantruntime="false">
 			<include name="org/**" />
 			<exclude name="${external.dir}/**" />
 		</javac>
 	</target>
 
 	<target name="jar" depends="compile" description="create a Jar file for the application">
-		<mkdir dir="classes/scripts" />
-		<copy toDir="classes/scripts/">
+		<mkdir dir="${build.dir}/scripts" />
+		<copy toDir="${build.dir}/scripts/">
 			<fileset dir="scripts" />
 		</copy>
 		<manifest file="META-INF/MANIFEST.MF" mode="update">
-			<attribute name="Bundle-Version" value="${knapsack.version}" />
 			<attribute name="Felix-Framework-Version" value="${framework.version}" />
 			<attribute name="OSGi-Compendium-Version" value="${compendium.version}" />
 			<attribute name="Felix-ConfigAdmin-Version" value="${configadmin.version}" />
@@ -109,13 +110,13 @@
 			<attribute name="Built-Date" value="${TS_NOW}" />
 		</manifest>
 		<jar destfile="${ant.project.name}.jar" manifest="META-INF/MANIFEST.MF">
-			<fileset dir="classes" includes="**/*.class,**/*.sh" />
+			<fileset dir="${build.dir}" includes="**/*.class,**/*.sh" />
 			<fileset dir="." includes="felix.conf,LICENSE-2.0.txt" />
 		</jar>
 	</target>
 
 	<target name="javadoc" depends="jar">
-		<javadoc sourcepath="." packagenames="org.knapsack*, org.knapsack.*" defaultexcludes="yes" destdir="docs/" author="true" version="true" use="true" windowtitle="${project.description}">
+		<javadoc sourcepath="." packagenames="org.knapsack*, org.knapsack.*" defaultexcludes="yes" destdir="${doc.dir}" author="true" version="true" use="true" windowtitle="${project.description}">
 		</javadoc>
 	</target>
 </project>
