@@ -73,13 +73,18 @@ public class LoadPropertiesFunction implements Fn<File, File> {
 			if (line.length() == 0 || line.trim().startsWith("#"))
 				continue;
 
-			String[] elems = line.split("=");
-
-			if (elems.length < 2)
+			if (!line.contains("="))
 				throw new IOException("Invalid line in property file: " + line);
 			
+			String[] elems = line.split("=");		
+			
 			String key = elems[0].trim();
-			String value = line.substring(elems[0].length() + 1).trim();
+			
+			String value = null;
+			if (elems.length == 1)
+				value = "";
+			else 
+				value = line.substring(elems[0].length() + 1).trim();
 			
 			if (System.getProperties().contains(key))
 				logger.log(LogService.LOG_WARNING, "Overriding property " + key + ".  Existing value: " + System.getProperty(key) + "  New value: " + value);
