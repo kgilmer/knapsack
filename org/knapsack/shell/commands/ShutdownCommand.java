@@ -59,7 +59,7 @@ public class ShutdownCommand extends AbstractKnapsackCommand {
 	
 	@Override
 	public String getUsage() {			
-		return "-f (force)";
+		return "[-f (force)]";
 	}
 
 	public String getDescription() {
