@@ -23,7 +23,6 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.felix.framework.Logger;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.log.LogService;

@@ -25,7 +25,6 @@ import java.util.Random;
 
 import org.apache.felix.cm.impl.ConfigurationManager;
 import org.apache.felix.framework.FrameworkFactory;
-import org.apache.felix.framework.Logger;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.launch.Framework;

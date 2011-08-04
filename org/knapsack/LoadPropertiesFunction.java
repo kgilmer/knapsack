@@ -21,7 +21,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.felix.framework.Logger;
 import org.osgi.service.log.LogService;
 import org.sprinkles.Applier.Fn;
 

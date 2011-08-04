@@ -106,9 +106,9 @@ public class LogCommand extends AbstractKnapsackCommand {
 			sb.append(ansi.a(Attribute.INTENSITY_FAINT));
 			sb.append(formatDateTime(entry.getTime()));
 			sb.append(ansi.a(Attribute.RESET));
-			sb.append(StringConstants.TAB);
+			sb.append(' ');
 			sb.append(getLevelLabel(entry.getLevel()));
-			sb.append(StringConstants.TAB);
+			sb.append(' ');
 			sb.append(entry.getMessage());
 			sb.append(StringConstants.TAB);
 			sb.append(BundlesCommand.getBundleLabel(entry.getBundle()));	 
@@ -121,6 +121,7 @@ public class LogCommand extends AbstractKnapsackCommand {
 		
 		//Check for an exception, if available display it.
 		if (entry.getException() != null) {
+			sb.append(ansi.fg(Color.RED));
 			sb.append(entry.getException().getMessage());
 			sb.append(StringConstants.CRLF);
 			
@@ -128,6 +129,7 @@ public class LogCommand extends AbstractKnapsackCommand {
 			PrintWriter pw = new PrintWriter(sWriter);
 			entry.getException().printStackTrace(pw);
 			sb.append(sWriter.toString());
+			sb.append(ansi.a(Attribute.RESET));
 			sb.append(StringConstants.CRLF);
 		}
 	}

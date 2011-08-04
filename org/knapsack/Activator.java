@@ -24,7 +24,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-import org.apache.felix.framework.Logger;
 import org.knapsack.init.pub.KnapsackInitService;
 import org.knapsack.shell.CommandParser;
 import org.knapsack.shell.ConsoleSocketListener;
@@ -56,7 +55,7 @@ public class Activator implements BundleActivator, ManagedService, LogService {
 	/**
 	 * This should be in sync with manifest version.
 	 */
-	public static final String KNAPSACK_VERSION = "0.8.3";
+	public static final String KNAPSACK_VERSION = "0.8.4";
 	public static final String KNAPSACK_PID = "org.knapsack";
 	
 	/**
@@ -231,7 +230,7 @@ public class Activator implements BundleActivator, ManagedService, LogService {
 		else if (frameworkLogger != null)
 			frameworkLogger.log(level, message);
 		else 
-			LogPrinter.doLog(null, null, level, message, null);		
+			Logger.doKnapsackLog(null, null, level, message, null);		
 	}
 	
 	/**
@@ -255,7 +254,7 @@ public class Activator implements BundleActivator, ManagedService, LogService {
 		else if (frameworkLogger != null)  
 			frameworkLogger.log(level, message, error);
 		else 
-			LogPrinter.doLog(null, null, level, message, error);
+			Logger.doKnapsackLog(null, null, level, message, error);
 	}
 
 	public void setLogger(Logger logger) {

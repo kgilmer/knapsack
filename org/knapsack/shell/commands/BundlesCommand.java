@@ -100,6 +100,9 @@ public class BundlesCommand extends AbstractKnapsackCommand {
 	}
 
 	public static String getBundleLabel(Bundle b) {
+		if (b == null)
+			return "";
+		
 		StringBuilder sb = new StringBuilder();
 		
 		BundlesCommand.appendId(sb, b.getBundleId());
