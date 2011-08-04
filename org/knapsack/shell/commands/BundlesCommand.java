@@ -21,7 +21,6 @@ import org.knapsack.shell.ConsoleSocketListener;
 import org.knapsack.shell.commands.Ansi.Attribute;
 import org.knapsack.shell.commands.Ansi.Color;
 import org.osgi.framework.Bundle;
-
 import org.sprinkles.Applier;
 
 /**
@@ -57,6 +56,11 @@ public class BundlesCommand extends AbstractKnapsackCommand {
 	}
 
 	public static void appendId(StringBuilder sb, long id) {		
+		if (ansi == null) {
+			Ansi.setEnabled(ConsoleSocketListener.getConfig().getBoolean(Config.CONFIG_KEY_COLOR_OUTPUT));
+			ansi = Ansi.ansi();
+		}
+		
 		sb.append("[");
 		if (id < 10)
 			sb.append(" ");
@@ -85,8 +89,16 @@ public class BundlesCommand extends AbstractKnapsackCommand {
 	 * @return The bundle version as defined in the manifest.
 	 */
 	public static String getBundleVersion(Bundle b) {
+		if (b == null)
+			return "";
+		
 		String version = (String) b.getHeaders().get("Bundle-Version");
 	
+		if (ansi == null) {
+			Ansi.setEnabled(ConsoleSocketListener.getConfig().getBoolean(Config.CONFIG_KEY_COLOR_OUTPUT));
+			ansi = Ansi.ansi();
+		}
+		
 		if (version == null) {
 			version = "";
 		}
@@ -117,6 +129,11 @@ public class BundlesCommand extends AbstractKnapsackCommand {
 	public static String getBundleName(Bundle b) {
 		if (b == null)
 			return "[null]";
+		
+		if (ansi == null) {
+			Ansi.setEnabled(ConsoleSocketListener.getConfig().getBoolean(Config.CONFIG_KEY_COLOR_OUTPUT));
+			ansi = Ansi.ansi();
+		}
 		
 		String name = (String) b.getHeaders().get("Bundle-SymbolicName");
 	
@@ -175,6 +192,11 @@ public class BundlesCommand extends AbstractKnapsackCommand {
 		default:
 			l = "[UNKNOWN STATE: " + state + "]";
 			break;
+		}
+		
+		if (ansi == null) {
+			Ansi.setEnabled(ConsoleSocketListener.getConfig().getBoolean(Config.CONFIG_KEY_COLOR_OUTPUT));
+			ansi = Ansi.ansi();
 		}
 		
 		sb.append(ansi.a(Attribute.NEGATIVE_ON));
