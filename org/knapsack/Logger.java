@@ -160,14 +160,19 @@ public class Logger extends org.apache.felix.framework.Logger {
 		switch (level) {
 		case 1:		
 			sb.append("ERROR  ");
+			break;
 		case 2:		
 			sb.append("WARNING");
+			break;
 		case 3:		
 			sb.append("INFO   ");	
+			break;
 		case 4:			
-			sb.append("DEBUG  ");			
+			sb.append("DEBUG  ");		
+			break;
 		default:
-			sb.append("UNKNOWN");				
+			sb.append("UNKNOWN");		
+			break;
 		}	
 	}
 }

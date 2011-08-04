@@ -115,6 +115,9 @@ public class BundlesCommand extends AbstractKnapsackCommand {
 	}
 
 	public static String getBundleName(Bundle b) {
+		if (b == null)
+			return "[null]";
+		
 		String name = (String) b.getHeaders().get("Bundle-SymbolicName");
 	
 		if (name == null) {
