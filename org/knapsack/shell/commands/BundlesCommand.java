@@ -16,7 +16,10 @@
  */
 package org.knapsack.shell.commands;
 
-import org.knapsack.shell.AbstractKnapsackCommand;
+import org.knapsack.Config;
+import org.knapsack.shell.ConsoleSocketListener;
+import org.knapsack.shell.commands.Ansi.Attribute;
+import org.knapsack.shell.commands.Ansi.Color;
 import org.osgi.framework.Bundle;
 
 import org.sprinkles.Applier;
@@ -28,10 +31,10 @@ import org.sprinkles.Applier;
  *
  */
 public class BundlesCommand extends AbstractKnapsackCommand {
-
+	
 	@Override
 	public String execute() throws Exception {
-		final StringBuilder sb = new StringBuilder();
+		final StringBuilder sb = new StringBuilder(1024 * 8);
 		
 		Applier.map(context.getBundles(), new PrintBundleFunction(sb, !arguments.contains("-b")));
 		
@@ -53,13 +56,14 @@ public class BundlesCommand extends AbstractKnapsackCommand {
 		return "Get list of OSGi bundles installed in the framework.";
 	}
 
-	public static void appendId(StringBuilder sb, long id) {
+	public static void appendId(StringBuilder sb, long id) {		
 		sb.append("[");
 		if (id < 10)
 			sb.append(" ");
-			
+		sb.append(ansi.fg(Color.BLUE));
 		sb.append(id);
-		sb.append("]");
+		sb.append(ansi.a(Attribute.RESET));
+		sb.append("]");		
 	}
 
 	/**
@@ -68,7 +72,12 @@ public class BundlesCommand extends AbstractKnapsackCommand {
 	 */
 	public static String getBundleLocation(Bundle b) {
 		//Remove "file://" prefix
-		return b.getLocation().substring(7);
+		StringBuilder sb = new StringBuilder();
+		sb.append(ansi.a(Attribute.INTENSITY_FAINT));
+		sb.append(b.getLocation().substring(7));
+		sb.append(ansi.a(Attribute.RESET));
+		
+		return sb.toString();
 	}
 
 	/**
@@ -82,7 +91,12 @@ public class BundlesCommand extends AbstractKnapsackCommand {
 			version = "";
 		}
 	
-		return version;
+		StringBuilder sb = new StringBuilder();
+		sb.append(ansi.fg(Color.CYAN));
+		sb.append(version);
+		sb.append(ansi.a(Attribute.RESET));
+		
+		return sb.toString();
 	}
 
 	public static String getBundleLabel(Bundle b) {
@@ -111,7 +125,12 @@ public class BundlesCommand extends AbstractKnapsackCommand {
 		if (name.indexOf(";") > -1)
 			name = name.split(";")[0];
 	
-		return name;
+		StringBuilder sb = new StringBuilder();
+		sb.append(ansi.a(Attribute.INTENSITY_BOLD));
+		sb.append(name);
+		sb.append(ansi.a(Attribute.RESET));
+		
+		return sb.toString();
 	}
 
 	/**
@@ -120,22 +139,41 @@ public class BundlesCommand extends AbstractKnapsackCommand {
 	 * @param state
 	 * @return
 	 */
-	public static String getStateName(int state) {
+	public static void getStateName(int state, StringBuilder sb) {
+		Color c = Color.BLACK;
+		String l = null;
 		switch (state) {
 		case 0x00000001:
-			return "UNINS";
+			l = "UNINS";
+			c = Color.MAGENTA;
+			break;
 		case 0x00000002:
-			return "INSTL";
+			l = "INSTL";
+			c = Color.CYAN;
+			break;
 		case 0x00000004:
-			return "RESOL";
+			l = "RESOL";
+			break;
 		case 0x00000008:
-			return "START";
+			l = "START";
+			c = Color.YELLOW;
+			break;
 		case 0x00000010:
-			return " STOP";
+			l = " STOP";
+			c = Color.RED;
+			break;
 		case 0x00000020:
-			return "ACTIV";
+			l = "ACTIV";
+			c = Color.GREEN;
+			break;
+		default:
+			l = "[UNKNOWN STATE: " + state + "]";
+			break;
 		}
-	
-		return "[UNKNOWN STATE: " + state + "]";
+		
+		sb.append(ansi.a(Attribute.NEGATIVE_ON));
+		sb.append(ansi.fg(c));
+		sb.append(l);
+		sb.append(ansi.a(Attribute.RESET));	
 	}
 }

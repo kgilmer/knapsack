@@ -19,7 +19,6 @@ package org.knapsack.shell.commands;
 import java.util.Dictionary;
 import java.util.Enumeration;
 
-import org.knapsack.shell.AbstractKnapsackCommand;
 import org.knapsack.shell.StringConstants;
 import org.osgi.framework.Bundle;
 import org.sprinkles.Applier;

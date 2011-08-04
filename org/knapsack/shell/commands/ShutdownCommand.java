@@ -16,7 +16,6 @@
  */
 package org.knapsack.shell.commands;
 
-import org.knapsack.shell.AbstractKnapsackCommand;
 import org.osgi.service.log.LogService;
 
 /**

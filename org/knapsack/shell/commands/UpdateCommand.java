@@ -22,7 +22,6 @@ import java.util.Arrays;
 import org.knapsack.Activator;
 import org.knapsack.Config;
 import org.knapsack.init.InitThread;
-import org.knapsack.shell.AbstractKnapsackCommand;
 
 /**
  * A command to rescan the configured bundle directories looking for changes.

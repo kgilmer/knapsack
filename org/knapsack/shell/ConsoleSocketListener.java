@@ -46,7 +46,7 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.log.LogService;
 
 /**
- * Listens for a command on a socket.
+ * Listens for commands on a configured socket.
  * 
  * @author kgilmer
  * 
@@ -72,16 +72,33 @@ public class ConsoleSocketListener extends Thread {
 	private List<ServiceRegistration> commandRegistrations;
 
 	private ServerSocket socket;
-	private final Config config;
+	private static Config config;
 
+	/**
+	 * @param config
+	 * @param port
+	 * @param context
+	 * @param log
+	 * @param parser
+	 * @throws UnknownHostException
+	 * @throws IOException
+	 * @throws InvalidSyntaxException
+	 */
 	public ConsoleSocketListener(Config config, int port, BundleContext context, LogService log, CommandParser parser)
 			throws UnknownHostException, IOException, InvalidSyntaxException {
-		this.config = config;
+		ConsoleSocketListener.config = config;
 		this.parser = parser;
 		context.addServiceListener(parser, "(" + Constants.OBJECTCLASS + "=" + IKnapsackCommand.class.getName() + ")");
 		this.context = context;
 		this.log = log;
 		this.port = port;
+	}
+	
+	/**
+	 * @return instance of the global knapsack Config
+	 */
+	public static Config getConfig() {
+		return config;
 	}
 
 	public void run() {

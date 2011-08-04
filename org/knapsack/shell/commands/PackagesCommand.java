@@ -18,8 +18,9 @@ package org.knapsack.shell.commands;
 
 import java.util.Collection;
 
-import org.knapsack.shell.AbstractKnapsackCommand;
 import org.knapsack.shell.StringConstants;
+import org.knapsack.shell.commands.Ansi.Attribute;
+import org.knapsack.shell.commands.Ansi.Color;
 import org.osgi.framework.Bundle;
 import org.sprinkles.Applier;
 import org.sprinkles.Applier.Fn;
@@ -34,7 +35,7 @@ public class PackagesCommand extends AbstractKnapsackCommand {
 
 	@Override
 	public String execute() throws Exception {
-		final StringBuilder sb = new StringBuilder();
+		final StringBuilder sb = new StringBuilder(1024 * 8);
 		boolean brief = arguments.contains("-b");
 		
 		PrintPackagesForBundleFunction function = new PrintPackagesForBundleFunction(sb, brief);
@@ -219,13 +220,59 @@ public class PackagesCommand extends AbstractKnapsackCommand {
 
 		@Override
 		public String apply(String input) {
-			if (brief)
-				input = input.split(";")[0];
+			String [] elems =  input.split(";");			
 			
 			sb.append(StringConstants.TAB);
-			sb.append(input.trim());
+			sb.append(elems[0].trim());
+			
+			if (!brief) {
+				sb.append(ansi.a(Attribute.INTENSITY_FAINT));
+				for (int i = 1; i < elems.length; ++i) {
+					sb.append(';');
+					sb.append(elems[i]);					
+				}
+			}
+			sb.append(ansi.a(Attribute.RESET));
 			sb.append(StringConstants.CRLF);
-			return input;
+			
+			return null;
 		}
+	}
+
+	/**
+	 * Assumes input string like 'name=value'.
+	 * @param sb 
+	 * @param ins
+	 * @return
+	 */
+	public static String formatNameValuePair(StringBuilder sb, String ins) {
+		String [] elems = ins.split("=");
+		
+		if (elems.length != 2)
+			return ins;
+		
+		sb.append(ansi.fg(Color.MAGENTA));
+		sb.append(elems[0]);
+		sb.append(" = ");
+		sb.append(ansi.fg(Color.YELLOW));
+		sb.append(elems[1]);
+		
+		return sb.toString();
+	}
+	
+	/**
+	 * Assumes input string like 'name=value'.
+	 * @param sb 
+	 * @param ins
+	 * @return
+	 */
+	public static String formatNameValuePair(StringBuilder sb, String name, String value) {	
+		sb.append(ansi.fg(Color.BLACK));
+		sb.append(name);
+		sb.append(" = ");
+		sb.append(ansi.fg(Color.BLUE));
+		sb.append(value);
+		
+		return sb.toString();
 	}
 }

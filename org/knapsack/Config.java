@@ -37,6 +37,10 @@ public class Config extends Properties {
 	public static final String CONFIG_KEY_ROOT_DIR = "org.knapsack.rootDir";
 
 	/**
+	 * Enable color output of shell commands in terminal.
+	 */
+	public static final String CONFIG_KEY_COLOR_OUTPUT = "org.knapsack.shell.color";
+	/**
 	 * Emit log events to stdout
 	 */
 	public static final String CONFIG_KEY_LOG_STDOUT = "org.knapsack.log.stdout";
@@ -45,8 +49,14 @@ public class Config extends Properties {
 	 * Name of knapsack's configuration file
 	 */
 	public static final String CONFIGURATION_FILENAME = "felix.conf";
+	/**
+	 * Path to default configuration file within the knapsack jar.
+	 */
 	public static final String CONFIGURATION_RESOURCE_FILENAME = "/" + CONFIGURATION_FILENAME;
 
+	/**
+	 * If enabled pre-existing config admin Configurations will be overwritten on each start.
+	 */
 	public static final String CONFIG_KEY_OVERWRITE_CONFIGADMIN = "org.knapsack.configAdmin.overwrite";
 	
 	/**

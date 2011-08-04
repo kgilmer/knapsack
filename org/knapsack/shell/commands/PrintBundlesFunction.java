@@ -41,11 +41,11 @@ class PrintBundleFunction implements Applier.Fn<Bundle, Bundle> {
 
 	@Override
 	public Bundle apply(Bundle b) {
-		if (verbose) {
-			sb.append(BundlesCommand.getStateName(b.getState()));
-			sb.append(StringConstants.TAB);
+		if (verbose) {	
+			BundlesCommand.getStateName(b.getState(), sb);
+			sb.append(StringConstants.TAB);			
 			sb.append(BundlesCommand.getBundleLabel(b));
-			sb.append(StringConstants.TAB);
+			sb.append(StringConstants.TAB);			
 			sb.append(BundlesCommand.getBundleLocation(b));				
 		} else {
 			sb.append(BundlesCommand.getBundleLabel(b));

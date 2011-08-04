@@ -18,8 +18,9 @@ package org.knapsack.shell.commands;
 
 import java.util.Arrays;
 
-import org.knapsack.shell.AbstractKnapsackCommand;
 import org.knapsack.shell.StringConstants;
+import org.knapsack.shell.commands.Ansi.Attribute;
+import org.knapsack.shell.commands.Ansi.Color;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
 import org.sprinkles.Applier;
@@ -136,7 +137,11 @@ public class ServicesCommand extends AbstractKnapsackCommand {
 	 * @return
 	 */
 	public static String getServiceName(ServiceReference sr) {	
-		return ((String[]) sr.getProperty("objectClass"))[0];
+		StringBuffer sb = new StringBuffer();
+		sb.append(ansi.fg(Color.YELLOW));
+		sb.append(((String[]) sr.getProperty("objectClass"))[0]);
+		sb.append(ansi.a(Attribute.RESET));
+		return sb.toString();
 	}
 
 	/**
