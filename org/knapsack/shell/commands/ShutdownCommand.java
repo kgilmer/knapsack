@@ -48,7 +48,12 @@ public class ShutdownCommand extends AbstractKnapsackCommand {
 					}
 				}
 			}).start();
-		context.getBundle(0).stop();
+		
+		try {
+			context.getBundle(0).stop();
+		} catch (IllegalStateException e) {
+			System.exit(0);
+		}
 		
 		return MSG;
 	}
