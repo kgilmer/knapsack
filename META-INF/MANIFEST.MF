@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Knapsack for Apache Felix
 Bundle-SymbolicName: org.knapsack
 Bundle-Version: 0.0.0
-Main-Class: org.knapsack.Bootstrap
+Main-Class: org.knapsack.Launcher
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: 
  org.osgi.service.startlevel;uses:="org.osgi.framework";version="1.1",
