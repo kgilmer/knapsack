@@ -16,7 +16,9 @@
  */
 package org.knapsack.init;
 
-import org.knapsack.Activator;
+
+import org.knapsack.Launcher;
+import org.osgi.service.log.LogService;
 import org.sprinkles.Applier;
 
 /**
@@ -33,7 +35,7 @@ class StopBundleFunction implements Applier.Fn<BundleJarWrapper, BundleJarWrappe
 			element.getBundle().stop();
 			return element;
 		} catch (Exception e) {
-			Activator.logError("Unable to stop " + element.getJar() + ".", e);
+			Launcher.getLogger().log(LogService.LOG_ERROR, "Unable to stop " + element.getJar() + ".", e);
 			return null;
 		}			
 	}		

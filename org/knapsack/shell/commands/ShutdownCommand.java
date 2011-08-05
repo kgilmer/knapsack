@@ -16,6 +16,7 @@
  */
 package org.knapsack.shell.commands;
 
+import org.knapsack.KnapsackLogger;
 import org.osgi.service.log.LogService;
 
 /**
@@ -26,9 +27,9 @@ import org.osgi.service.log.LogService;
  */
 public class ShutdownCommand extends AbstractKnapsackCommand {
 	
-	private final LogService log;
-	public ShutdownCommand(LogService log) {
-		this.log = log;
+	private final KnapsackLogger log;
+	public ShutdownCommand(KnapsackLogger log2) {
+		this.log = log2;
 	}
 
 	private static final String MSG = "OSGi framework is shutting down due to user request via shell.";

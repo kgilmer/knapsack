@@ -16,8 +16,8 @@
  */
 package org.knapsack.shell.commands;
 
-import org.knapsack.Config;
-import org.knapsack.shell.ConsoleSocketListener;
+import org.knapsack.PropertyHelper;
+import org.knapsack.PropertyKeys;
 import org.knapsack.shell.commands.Ansi.Attribute;
 import org.knapsack.shell.commands.Ansi.Color;
 import org.osgi.framework.Bundle;
@@ -57,7 +57,7 @@ public class BundlesCommand extends AbstractKnapsackCommand {
 
 	public static void appendId(StringBuilder sb, long id) {		
 		if (ansi == null) {
-			Ansi.setEnabled(ConsoleSocketListener.getConfig().getBoolean(Config.CONFIG_KEY_COLOR_OUTPUT));
+			Ansi.setEnabled(PropertyHelper.getBoolean(PropertyKeys.CONFIG_KEY_COLOR_OUTPUT));
 			ansi = Ansi.ansi();
 		}
 		
@@ -95,7 +95,7 @@ public class BundlesCommand extends AbstractKnapsackCommand {
 		String version = (String) b.getHeaders().get("Bundle-Version");
 	
 		if (ansi == null) {
-			Ansi.setEnabled(ConsoleSocketListener.getConfig().getBoolean(Config.CONFIG_KEY_COLOR_OUTPUT));
+			Ansi.setEnabled(PropertyHelper.getBoolean(PropertyKeys.CONFIG_KEY_COLOR_OUTPUT));
 			ansi = Ansi.ansi();
 		}
 		
@@ -131,7 +131,7 @@ public class BundlesCommand extends AbstractKnapsackCommand {
 			return "[null]";
 		
 		if (ansi == null) {
-			Ansi.setEnabled(ConsoleSocketListener.getConfig().getBoolean(Config.CONFIG_KEY_COLOR_OUTPUT));
+			Ansi.setEnabled(PropertyHelper.getBoolean(PropertyKeys.CONFIG_KEY_COLOR_OUTPUT));
 			ansi = Ansi.ansi();
 		}
 		
@@ -195,7 +195,7 @@ public class BundlesCommand extends AbstractKnapsackCommand {
 		}
 		
 		if (ansi == null) {
-			Ansi.setEnabled(ConsoleSocketListener.getConfig().getBoolean(Config.CONFIG_KEY_COLOR_OUTPUT));
+			Ansi.setEnabled(PropertyHelper.getBoolean(PropertyKeys.CONFIG_KEY_COLOR_OUTPUT));
 			ansi = Ansi.ansi();
 		}
 		

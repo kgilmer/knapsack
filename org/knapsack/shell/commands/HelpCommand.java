@@ -20,7 +20,6 @@ import org.knapsack.shell.CommandParser;
 import org.knapsack.shell.StringConstants;
 import org.knapsack.shell.commands.Ansi.Attribute;
 import org.knapsack.shell.pub.IKnapsackCommand;
-
 import org.sprinkles.Applier;
 
 /**

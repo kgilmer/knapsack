@@ -24,14 +24,15 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
-import org.knapsack.Activator;
 import org.knapsack.FSHelper;
+import org.knapsack.Launcher;
 import org.knapsack.shell.pub.IKnapsackCommand;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.log.LogService;
 
 /**
  * Parses Strings into IKnapSackCommand instances.
@@ -120,7 +121,7 @@ public class CommandParser implements ServiceListener {
 			final IKnapsackCommand cmd = (IKnapsackCommand) context.getService(ref);		
 			
 			if (commands.containsKey(cmd.getName())) {
-				Activator.logWarning("A shell command named " + cmd.getName() + " has already been registered.  Ignoring second registration.");
+				Launcher.getLogger().log(LogService.LOG_WARNING, "A shell command named " + cmd.getName() + " has already been registered.  Ignoring second registration.");
 			} else {
 				addCommand(cmd);				
 			}
@@ -139,7 +140,7 @@ public class CommandParser implements ServiceListener {
 	private void addCommand(IKnapsackCommand command) {
 		commands.put(command.getName(), command);
 		try {
-			FSHelper.createFilesystemCommand(scriptDir, command.getName());
+			FSHelper.createFilesystemCommand(scriptDir, command.getName(), Launcher.getLogger());
 		} catch (IOException e) {
 			//Ignore this error, the symlink was created by a pre-existing instance.
 		}
@@ -150,7 +151,7 @@ public class CommandParser implements ServiceListener {
 		try {
 			FSHelper.deleteFilesystemCommand(scriptDir, command.getName());
 		} catch (IOException e) {
-			Activator.logError("Error while unregistering command " + command.getName(), e);
+			Launcher.getLogger().log(LogService.LOG_ERROR, "Error while unregistering command " + command.getName(), e);
 		}
 	}
 }

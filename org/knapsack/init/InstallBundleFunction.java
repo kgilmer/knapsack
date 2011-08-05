@@ -22,9 +22,12 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.knapsack.Activator;
+import org.knapsack.KnapsackLogger;
+import org.knapsack.Launcher;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
+import org.osgi.service.log.LogService;
 import org.sprinkles.Applier;
 
 /**
@@ -37,15 +40,19 @@ class InstallBundleFunction implements Applier.Fn<File, BundleJarWrapper> {
 
 	private Map<String, Bundle> installedBundleMap;
 	private final Collection<BundleJarWrapper> installed;
+	private final BundleContext context;
+	private KnapsackLogger logger;
 
-	public InstallBundleFunction(Collection<BundleJarWrapper> installed) {
+	public InstallBundleFunction(Collection<BundleJarWrapper> installed, BundleContext context) {
 		this.installed = installed;
-		installedBundleMap = createLocationList();
+		this.context = context;
+		this.logger = Launcher.getLogger();
+		installedBundleMap = createLocationList(context);
 	}
 
-	public static Map<String, Bundle> createLocationList() {
+	public static Map<String, Bundle> createLocationList(BundleContext context) {
 		Map<String, Bundle> l = new HashMap<String, Bundle>();
-		for (Bundle b : Arrays.asList(Activator.getContext().getBundles()))
+		for (Bundle b : Arrays.asList(context.getBundles()))
 			l.put(b.getLocation(), b);
 		
 		return l;
@@ -54,27 +61,27 @@ class InstallBundleFunction implements Applier.Fn<File, BundleJarWrapper> {
 	@Override
 	public BundleJarWrapper apply(File element) {
 		if (!element.getName().toUpperCase().endsWith(".JAR")) {
-			Activator.logWarning("Ignoring " + element.getName() + ", not a jar.");
+			logger.log(LogService.LOG_WARNING, "Ignoring " + element.getName() + ", not a jar.");
 			return null;
 		}
 		
 		String fileUri = fileToUri(element);
 		
 		if (isInstalled(fileUri) && !fileChanged(element)) {
-			Activator.logDebug(element.getName() + " is already installed.");
+			logger.log(LogService.LOG_DEBUG, element.getName() + " is already installed.");
 			return new BundleJarWrapper(element, installedBundleMap.get(fileUri));
 		} else if (isInstalled(fileUri) && fileChanged(element)) {
 			uninstallBundle(installedBundleMap.get(fileUri));
 		}
 			
 		try {
-			Bundle b = Activator.getContext().installBundle(fileUri);		
-			Activator.getBundleSizeMap().put(element, element.length());
+			Bundle b = context.installBundle(fileUri);		
+			InitThread.getBundleSizeMap().put(element, element.length());
 			BundleJarWrapper wrapper = new BundleJarWrapper(element, b);
 			installed.add(wrapper);
 			return wrapper;		
 		} catch (BundleException e) {
-			Activator.logError("Unable to install " + element.getName() + " as a bundle.", e);
+			logger.log(LogService.LOG_ERROR, "Unable to install " + element.getName() + " as a bundle.", e);
 			return null;
 		}
 	}
@@ -88,7 +95,7 @@ class InstallBundleFunction implements Applier.Fn<File, BundleJarWrapper> {
 		try {
 			bundle.uninstall();
 		} catch (BundleException e) {
-			Activator.logError("An error occurred while uninstalling " + bundle.getLocation() + ".", e);
+			logger.log(LogService.LOG_ERROR, "An error occurred while uninstalling " + bundle.getLocation() + ".", e);
 		}
 	}
 
@@ -99,7 +106,7 @@ class InstallBundleFunction implements Applier.Fn<File, BundleJarWrapper> {
 	 * @return
 	 */
 	private boolean fileChanged(File element) {
-		Map<File, Long> bsm = Activator.getBundleSizeMap();
+		Map<File, Long> bsm = InitThread.getBundleSizeMap();
 		
 		if (!bsm.containsKey(element))
 			return true;

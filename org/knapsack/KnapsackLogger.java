@@ -21,35 +21,45 @@ package org.knapsack;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import org.knapsack.shell.StringConstants;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.log.LogEntry;
+import org.osgi.service.log.LogListener;
+import org.osgi.service.log.LogReaderService;
 
 /**
  * A subclass of the Felix logger that prints log output in a different style.
  **/
-public class Logger extends org.apache.felix.framework.Logger {
+public class KnapsackLogger extends org.apache.felix.framework.Logger implements LogListener {
 	private static final String DEFAULT_DATE_FORMAT = "MM.dd HH:mm:ss";
 	private static SimpleDateFormat dateFormatter;
+	private boolean enabled;
+	private final List<LogReaderService> logListeners;
 	
 	/**
 	 * @param dateFormat
 	 */
-	public Logger(String dateFormat) {
+	public KnapsackLogger(String dateFormat) {
 		dateFormatter = new SimpleDateFormat(dateFormat);
+		enabled = true;
+		logListeners = new ArrayList<LogReaderService>();
 	}
 	
 	/**
 	 * 
 	 */
-	public Logger() {
+	public KnapsackLogger() {
 		this(DEFAULT_DATE_FORMAT);
 	}
 	
 	protected void doLog(Bundle bundle, ServiceReference sr, int level, String msg, Throwable throwable) {
-		doKnapsackLog(bundle, sr, level, msg, throwable);
+		if (enabled)
+			doKnapsackLog(bundle, sr, level, msg, throwable);
 	}
 	
 	/**
@@ -174,5 +184,29 @@ public class Logger extends org.apache.felix.framework.Logger {
 			sb.append("UNKNOWN");		
 			break;
 		}	
+	}
+
+	/**
+	 * @param value
+	 */
+	public void setLogStdout(boolean value) {
+		enabled = value;
+	}
+
+	public void removeLogReader(LogReaderService service) {
+		logListeners.remove(service);
+	}
+
+	public void addLogReader(LogReaderService svc) {
+		// Add ourselves to every LogReader service available to get the
+		// superset of all log data.
+		if (!logListeners.contains(svc))
+			svc.addLogListener(this);
+	}
+
+	@Override
+	public void logged(LogEntry entry) {
+		if (enabled)
+			doLog(entry.getBundle(), entry.getServiceReference(), entry.getLevel(), entry.getMessage(), entry.getException());
 	}
 }

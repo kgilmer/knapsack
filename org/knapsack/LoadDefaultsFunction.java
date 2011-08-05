@@ -37,15 +37,15 @@ import org.sprinkles.Applier.Fn;
 public class LoadDefaultsFunction implements Fn<File, File> {
 
 	private final ConfigurationAdmin ca;
-	private final Logger log;
+	private final KnapsackLogger log;
 	private final boolean overwriteConfiguration;
 
 	/**
 	 * @param ca ConfigurationAdmin
-	 * @param frameworkLogger Logger
+	 * @param frameworkLogger KnapsackLogger
 	 * @param overwriteConfiguration if true, pre-existing Configurations will be overwritten
 	 */
-	public LoadDefaultsFunction(ConfigurationAdmin ca, Logger frameworkLogger, boolean overwriteConfiguration) {
+	public LoadDefaultsFunction(ConfigurationAdmin ca, KnapsackLogger frameworkLogger, boolean overwriteConfiguration) {
 		this.ca = ca;
 		this.log = frameworkLogger;
 		this.overwriteConfiguration = overwriteConfiguration;		
@@ -124,6 +124,6 @@ public class LoadDefaultsFunction implements Fn<File, File> {
 	 * @return
 	 */
 	private boolean isDefaultFile(File f) {
-		return f.getParentFile().getName().equals(Config.DEFAULT_DIRECTORY_NAME) && !f.getName().equalsIgnoreCase(".properties");
+		return f.getParentFile().getName().equals(PropertyKeys.DEFAULT_DIRECTORY_NAME) && !f.getName().equalsIgnoreCase(".properties");
 	}
 }

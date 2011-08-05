@@ -16,9 +16,6 @@
  */
 package org.knapsack;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.util.Properties;
 
 /**
@@ -28,7 +25,7 @@ import java.util.Properties;
  * @author kgilmer
  *
  */
-public class Config extends Properties {
+public class PropertyKeys extends Properties {
 	private static final long serialVersionUID = -5479563157788056552L;
 
 	/**
@@ -48,11 +45,7 @@ public class Config extends Properties {
 	/**
 	 * Name of knapsack's configuration file
 	 */
-	public static final String CONFIGURATION_FILENAME = "felix.conf";
-	/**
-	 * Path to default configuration file within the knapsack jar.
-	 */
-	public static final String CONFIGURATION_RESOURCE_FILENAME = "/" + CONFIGURATION_FILENAME;
+	public static final String [] CONFIGURATION_FILENAME = {"felix.properties", "knapsack.properties", "log.properties"};
 
 	/**
 	 * If enabled pre-existing config admin Configurations will be overwritten on each start.
@@ -60,7 +53,7 @@ public class Config extends Properties {
 	public static final String CONFIG_KEY_OVERWRITE_CONFIGADMIN = "org.knapsack.configAdmin.overwrite";
 	
 	/**
-	 * If true the internal Logger will be started with the framework.
+	 * If true the internal KnapsackLogger will be started with the framework.
 	 */
 	public static final String CONFIG_KEY_BUILTIN_LOGGER = "org.knapsack.builtin.logger";
 
@@ -80,7 +73,7 @@ public class Config extends Properties {
 	public static final String DEFAULT_BUNDLE_DIRECTORY = "bundle";
 	
 	/**
-	 * Only one instance of Config per runtime.
+	 * Only one instance of PropertyKeys per runtime.
 	 */
 	
 	public final static String BASE_SCRIPT_FILENAME = ".knapsack-command.sh";
@@ -92,7 +85,7 @@ public class Config extends Properties {
 	/**
 	 * Directory name where configadmin default property files are stored.
 	 */
-	protected static final String DEFAULT_DIRECTORY_NAME = "default";
+	protected static final String DEFAULT_DIRECTORY_NAME = "properties";
 	
 	/**
 	 * Filename for configadmin directory.
@@ -118,81 +111,5 @@ public class Config extends Properties {
 	 */
 	public static final String SYSTEM_PROPERTY_KEY_SHELL_PORT = "org.knapsack.shell.port";
 
-	/**
-	 * Base directory where knapsack instance is running.
-	 */
-	private final File baseDirectory;
-
-	/**
-	 * Initialize state
-	 * 
-	 * @throws IOException
-	 * @throws InterruptedException 
-	 */
-	protected Config(File baseDirectory) throws IOException {	
-		Properties originalProperties = new Properties();
-		for (Object key : System.getProperties().keySet())
-			originalProperties.put(key, System.getProperty(key.toString()));
-		
-					
-		this.baseDirectory = baseDirectory;
-		load(new FileInputStream(getConfigFile()));
-		
-		// Overwrite any pre-existing properties that may have been reset by load().  
-		// This makes the default/*.properties property files take precedence over felix.conf, 
-		// allowing for simple overrides.
-		for (Object key : originalProperties.keySet())
-			this.put(key, originalProperties.get(key.toString()));
-		
-		//Specify the root of the knapsack install if not explicitly defined.
-		if (!this.containsKey(CONFIG_KEY_ROOT_DIR))
-			this.put(CONFIG_KEY_ROOT_DIR, baseDirectory);
-		
-		//Specify a default bundle directory if not explicitly defined.
-		if (!this.containsKey(CONFIG_KEY_BUNDLE_DIRS))
-			this.put(CONFIG_KEY_BUNDLE_DIRS, DEFAULT_BUNDLE_DIRECTORY);
-	}
-	
-	/**
-	 * Get the knapsack configuration file.
-	 * 
-	 * @return
-	 * @throws IOException
-	 */
-	private File getConfigFile() throws IOException {	
-		return new File(baseDirectory, CONFIGURATION_FILENAME);
-	}
-
-	/**
-	 * Parse value as boolean.
-	 * 
-	 * @param key
-	 * @return true if key value is 'true', false otherwise.
-	 */
-	public boolean getBoolean(String key) {
-		if (this.containsKey(key))
-			return Boolean.parseBoolean(this.get(key).toString());
-		
-		return false;
-	}
-
-	/**
-	 * Convenience method to return value as a string or null if key doesn't exist.
-	 * @param key
-	 * @return
-	 */
-	public String getString(String key) {	
-		if (this.containsKey(key))
-			return this.get(key).toString();
-		
-		return null;
-	}
-	
-	/* (non-Javadoc)
-	 * @see java.util.Hashtable#contains(java.lang.Object)
-	 */
-	public boolean contains(Object key) {
-		return this.get(key) != null;
-	}
-	
+	public static final String CONF_ADMIN_CONFIGURATION_FILENAME = "configadmin.properties";	
 }

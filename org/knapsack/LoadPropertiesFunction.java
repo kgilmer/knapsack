@@ -19,8 +19,9 @@ package org.knapsack;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Map.Entry;
+import java.util.Properties;
 
-import org.apache.commons.io.IOUtils;
 import org.osgi.service.log.LogService;
 import org.sprinkles.Applier.Fn;
 
@@ -35,12 +36,12 @@ public class LoadPropertiesFunction implements Fn<File, File> {
 	 * Extension that property files must have to be handled.  Example "http.properties".
 	 */
 	private static final String PROPERTY_FILE_EXTENSION = ".properties";
-	private final Logger logger;
+	private final KnapsackLogger logger;
 
 	/**
-	 * @param logger Logger
+	 * @param logger KnapsackLogger
 	 */
-	public LoadPropertiesFunction(Logger logger) {
+	public LoadPropertiesFunction(KnapsackLogger logger) {
 		this.logger = logger;
 	}
 
@@ -67,28 +68,16 @@ public class LoadPropertiesFunction implements Fn<File, File> {
 	 * @throws IOException on I/O error
 	 */
 	private void loadPropertyFile(File file) throws IOException {
+		Properties pf = new Properties();
+		pf.load(new FileInputStream(file));
 		
-		for (String line : IOUtils.readLines(new FileInputStream(file))) {
-			if (line.length() == 0 || line.trim().startsWith("#"))
+		for (Entry<Object, Object> e : pf.entrySet()) {
+			if (System.getProperties().containsKey(e.getKey())) {
+				logger.log(LogService.LOG_WARNING, "Ignoring property that already has a value:" + e.getKey() + ".  Existing value: " + System.getProperty(e.getKey().toString()));
 				continue;
-
-			if (!line.contains("="))
-				throw new IOException("Invalid line in property file: " + line);
+			}
 			
-			String[] elems = line.split("=");		
-			
-			String key = elems[0].trim();
-			
-			String value = null;
-			if (elems.length == 1)
-				value = "";
-			else 
-				value = line.substring(elems[0].length() + 1).trim();
-			
-			if (System.getProperties().contains(key))
-				logger.log(LogService.LOG_WARNING, "Overriding property " + key + ".  Existing value: " + System.getProperty(key) + "  New value: " + value);
-
-			System.getProperties().put(key, value);
+			System.getProperties().put(e.getKey(), e.getValue());
 		}
 	}
 

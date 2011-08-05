@@ -14,12 +14,12 @@
  *  limitations under the License.
  *
  */
-package org.knapsack;
+package org.knapsack.init;
 
 import java.io.File;
 import java.util.Collection;
 
-import org.knapsack.init.InitThread;
+import org.knapsack.PropertyKeys;
 import org.knapsack.init.pub.KnapsackInitService;
 import org.sprinkles.Applier;
 
@@ -30,18 +30,20 @@ import org.sprinkles.Applier;
  *
  */
 public class KnapsackInitServiceImpl implements KnapsackInitService {
-
-	private final Config config;
 	private final File baseDir;
 	private Collection<File> bundleDirs = null;
+	private String dirList;
 
 	/**
 	 * @param baseDir
 	 * @param config
 	 */
-	public KnapsackInitServiceImpl(File baseDir, Config config) {
+	public KnapsackInitServiceImpl(File baseDir) {
 		this.baseDir = baseDir;
-		this.config = config;
+		this.dirList = System.getProperty(PropertyKeys.CONFIG_KEY_BUNDLE_DIRS);
+		
+		if (dirList == null)
+			dirList = PropertyKeys.DEFAULT_BUNDLE_DIRECTORY;
 	}
 
 	@Override
@@ -53,7 +55,7 @@ public class KnapsackInitServiceImpl implements KnapsackInitService {
 	/**
 	 * Called by knapsack Activator synchronously so that all bundles are resolved before framework start event is fired.
 	 */
-	protected void updateBundlesSync() {
+	public void updateBundlesSync() {
 		(new InitThread(getBundleDirectories())).run();
 	}
 
@@ -61,7 +63,7 @@ public class KnapsackInitServiceImpl implements KnapsackInitService {
 	public Collection<File> getBundleDirectories() {
 		if (bundleDirs == null)
 			bundleDirs = Applier.map(
-					config.getString(Config.CONFIG_KEY_BUNDLE_DIRS).split(","), new Applier.Fn<String, File>() {
+					dirList.split(","), new Applier.Fn<String, File>() {
 
 				@Override
 				public File apply(String element) {

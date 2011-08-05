@@ -2,8 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Knapsack for Apache Felix
 Bundle-SymbolicName: org.knapsack
-Bundle-Version: 0.8.4
-Bundle-Activator: org.knapsack.Activator
+Bundle-Version: 0.0.0
 Main-Class: org.knapsack.Bootstrap
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: 

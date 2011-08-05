@@ -1,5 +1,7 @@
 <?xml version="1.0"?>
 <project name="knapsack" default="jar">
+	<property file="Felix.properties"/>
+	<property file="knapsack.version"/>
 	<property name="project.description" value="Knapsack for Apache Felix" />
 	<property name="external.dir" location="external" />
 	<property name="doc.dir" location="${basedir}/docs" />
@@ -9,12 +11,6 @@
 	<property name="svn.bin" location="/usr/bin/svn" />
 	<property name="git.bin" location="/usr/bin/git" />
 	<property name="rm.bin" location="/bin/rm" />
-
-	<property name="framework.version" value="3.2.2" />
-	<property name="log.version" value="1.0.1" />
-	<property name="configadmin.version" value="1.2.8" />
-	<property name="compendium.version" value="1.4.0" />
-	<property name="commons_io.version" value="2.0.1" />
 
 	<property name="framework.fqpn" value="org.apache.felix.framework" />
 	<property name="log.fqpn" value="org.apache.felix.log" />
@@ -78,14 +74,18 @@
 	</target>
 
 	<target name="stage" depends="fetch">
-		<copy toDir=".">
+		<move toDir=".">
 			<fileset dir="${external.dir}/${framework.fqpn}/src/main/java" includes="**/*.java" />
 			<fileset dir="${external.dir}/${log.fqpn}/src/main/java" includes="**/*.java" />
 			<fileset dir="${external.dir}/${configadmin.fqpn}/src/main/java" includes="**/*.java" />
 			<fileset dir="${external.dir}/${compendium.fqpn}/src/main/java" includes="org/osgi/service/cm/*.java, org/osgi/service/log/*.java" />
 			<fileset dir="${external.dir}/${commons_io.fqpn}/src/main/java" includes="**/*.java" />
 			<fileset dir="${external.dir}/sprinkles/src" includes="**/*.java" excludes="org/sprinkles/test/**.*"/>
-		</copy>
+		</move>
+		
+		<copy toDir="org/apache/felix/framework/" file="Felix.properties"/>
+		<copy toDir="org/knapsack/" file="knapsack.version"/>
+				
 	</target>
 
 	<target name="compile" depends="stage" description="compile the Java source code to class files">
@@ -102,6 +102,7 @@
 			<fileset dir="scripts" />
 		</copy>
 		<manifest file="META-INF/MANIFEST.MF" mode="update">
+			<attribute name="Bundle-Version" value="${knapsack.version}" />
 			<attribute name="Felix-Framework-Version" value="${framework.version}" />
 			<attribute name="OSGi-Compendium-Version" value="${compendium.version}" />
 			<attribute name="Felix-ConfigAdmin-Version" value="${configadmin.version}" />

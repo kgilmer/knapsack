@@ -19,8 +19,8 @@ package org.knapsack.shell.commands;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.knapsack.Config;
-import org.knapsack.shell.ConsoleSocketListener;
+import org.knapsack.PropertyHelper;
+import org.knapsack.PropertyKeys;
 import org.knapsack.shell.pub.IKnapsackCommand;
 import org.osgi.framework.BundleContext;
 
@@ -40,7 +40,7 @@ public abstract class AbstractKnapsackCommand implements IKnapsackCommand {
 	protected static Ansi ansi;
 	
 	public void initialize(List<String> arguments, BundleContext context) {
-		Ansi.setEnabled(ConsoleSocketListener.getConfig().getBoolean(Config.CONFIG_KEY_COLOR_OUTPUT));
+		Ansi.setEnabled(PropertyHelper.getBoolean(PropertyKeys.CONFIG_KEY_COLOR_OUTPUT));
 		this.ansi = Ansi.ansi();
 		
 		if (arguments != null) {

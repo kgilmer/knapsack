@@ -19,16 +19,20 @@ package org.knapsack.init;
 import java.io.File;
 import java.util.Map;
 
-import org.knapsack.Activator;
+import org.knapsack.KnapsackLogger;
+import org.knapsack.Launcher;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
+import org.osgi.service.log.LogService;
 import org.sprinkles.Applier;
 
 public class UninstallBundleFunction implements Applier.Fn<File, File> {
 	private Map<String, Bundle> bundleMap;
+	private KnapsackLogger logger;
 
 	public UninstallBundleFunction() {
-		bundleMap = InstallBundleFunction.createLocationList();
+		logger = Launcher.getLogger();
+		bundleMap = InstallBundleFunction.createLocationList(Launcher.getBundleContext());
 	}
 
 	@Override
@@ -38,9 +42,9 @@ public class UninstallBundleFunction implements Applier.Fn<File, File> {
 		if (bundle != null) {
 			try {
 				bundle.uninstall();
-				Activator.getBundleSizeMap().remove(element);
+				InitThread.getBundleSizeMap().remove(element);
 			} catch (BundleException e) {
-				Activator.logError("Unable to uninstall " + element + ".", e);
+				logger.log(LogService.LOG_ERROR, "Unable to uninstall " + element + ".", e);
 				return null;
 			}
 

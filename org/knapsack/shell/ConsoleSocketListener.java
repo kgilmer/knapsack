@@ -27,8 +27,9 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.knapsack.Activator;
-import org.knapsack.Config;
+import org.knapsack.KnapsackLogger;
+import org.knapsack.PropertyHelper;
+import org.knapsack.PropertyKeys;
 import org.knapsack.shell.commands.BundlesCommand;
 import org.knapsack.shell.commands.HeadersCommand;
 import org.knapsack.shell.commands.HelpCommand;
@@ -67,12 +68,11 @@ public class ConsoleSocketListener extends Thread {
 
 	private final CommandParser parser;
 
-	private final LogService log;
+	private final KnapsackLogger log;
 
 	private List<ServiceRegistration> commandRegistrations;
 
 	private ServerSocket socket;
-	private static Config config;
 
 	/**
 	 * @param config
@@ -84,22 +84,15 @@ public class ConsoleSocketListener extends Thread {
 	 * @throws IOException
 	 * @throws InvalidSyntaxException
 	 */
-	public ConsoleSocketListener(Config config, int port, BundleContext context, LogService log, CommandParser parser)
+	public ConsoleSocketListener(int port, BundleContext context, KnapsackLogger log, CommandParser parser)
 			throws UnknownHostException, IOException, InvalidSyntaxException {
-		ConsoleSocketListener.config = config;
+
 		this.parser = parser;
 		context.addServiceListener(parser, "(" + Constants.OBJECTCLASS + "=" + IKnapsackCommand.class.getName() + ")");
 		this.context = context;
 		this.log = log;
 		this.port = port;
-	}
-	
-	/**
-	 * @return instance of the global knapsack Config
-	 */
-	public static Config getConfig() {
-		return config;
-	}
+	}	
 
 	public void run() {
 		running = true;
@@ -180,15 +173,15 @@ public class ConsoleSocketListener extends Thread {
 	private ServerSocket createServerSocket() throws UnknownHostException, IOException {
 		ServerSocket s;
 
-		if (config.getBoolean(Config.CONFIG_KEY_ACCEPT_ANY_HOST)) {
+		if (PropertyHelper.getBoolean(PropertyKeys.CONFIG_KEY_ACCEPT_ANY_HOST)) {
 			s = new ServerSocket(port, SERVER_BACKLOG_DEFAULT, null);
-			log.log(LogService.LOG_INFO, "Accepting socket connections from any host.");
+			log.log(LogService.LOG_INFO, "Accepting socket connections from any host on port " + port);
 		} else {
-			s = new ServerSocket(port, SERVER_BACKLOG_DEFAULT, InetAddress.getByAddress(new byte[] { 127, 0, 0, 1 }));
-			log.log(LogService.LOG_INFO, "Accepting socket connections from " + InetAddress.getByAddress(new byte[] { 127, 0, 0, 1 }));
+			InetAddress localhost = InetAddress.getByAddress(new byte[] { 127, 0, 0, 1 });
+			s = new ServerSocket(port, SERVER_BACKLOG_DEFAULT, localhost);
+			log.log(LogService.LOG_INFO, "Accepting socket connections from " + localhost + " on port " + port);
 		}
 
-		Activator.logDebug("Created shell socket on port " + port);
 		return s;
 	}
 

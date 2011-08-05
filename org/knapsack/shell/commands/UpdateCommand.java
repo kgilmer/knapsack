@@ -19,8 +19,7 @@ package org.knapsack.shell.commands;
 import java.io.File;
 import java.util.Arrays;
 
-import org.knapsack.Activator;
-import org.knapsack.Config;
+import org.knapsack.PropertyKeys;
 import org.knapsack.init.InitThread;
 
 /**
@@ -36,10 +35,9 @@ import org.knapsack.init.InitThread;
 public class UpdateCommand extends AbstractKnapsackCommand {
 
 	@Override
-	public String execute() throws Exception {
-		Config config = Activator.getConfig();
-		
-		InitThread init = new InitThread(new File(config.getString(Config.CONFIG_KEY_ROOT_DIR)), Arrays.asList(config.getString(Config.CONFIG_KEY_BUNDLE_DIRS).split(",")));
+	public String execute() throws Exception {		
+		InitThread init = new InitThread(new File(System.getProperty(PropertyKeys.CONFIG_KEY_ROOT_DIR)), 
+				Arrays.asList(System.getProperty(PropertyKeys.CONFIG_KEY_BUNDLE_DIRS).split(",")));
 		init.start();
 		
 		return "Rescanning and updating bundles from configured directories.";
