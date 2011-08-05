@@ -104,7 +104,7 @@
 		</manifest>
 		<jar destfile="${ant.project.name}.jar" manifest="META-INF/MANIFEST.MF">
 			<fileset dir="${build.dir}" includes="**/*.class,**/*.sh" />
-			<fileset dir="." includes="felix.conf,LICENSE-2.0.txt" />
+			<fileset dir="." includes="felix.properties,knapsack.properties,log.properties,LICENSE-2.0.txt" />
 		</jar>
 	</target>
 
