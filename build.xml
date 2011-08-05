@@ -74,10 +74,6 @@
 			<fileset dir="${external.dir}/${compendium.fqpn}/src/main/java" includes="org/osgi/service/cm/*.java, org/osgi/service/log/*.java" />
 			<fileset dir="${external.dir}/sprinkles/src" includes="**/*.java" excludes="org/sprinkles/test/**.*"/>
 		</move>
-		
-		<copy toDir="org/apache/felix/framework/" file="Felix.properties"/>
-		<copy toDir="org/knapsack/" file="knapsack.version"/>
-				
 	</target>
 
 	<target name="compile" depends="stage" description="compile the Java source code to class files">
@@ -102,8 +98,12 @@
 			<attribute name="Built-By" value="${user.name}" />
 			<attribute name="Built-Date" value="${TS_NOW}" />
 		</manifest>
+		
+		<copy toDir="${build.dir}/org/apache/felix/framework/" file="Felix.properties"/>
+		<copy toDir="${build.dir}/org/knapsack/" file="knapsack.version"/>
+		
 		<jar destfile="${ant.project.name}.jar" manifest="META-INF/MANIFEST.MF">
-			<fileset dir="${build.dir}" includes="**/*.class,**/*.sh,*.properties" />
+			<fileset dir="${build.dir}" includes="**/*.class,**/*.sh,**/*.properties,**/*.version" />
 			<fileset dir="." includes="felix.properties,knapsack.properties,log.properties,LICENSE-2.0.txt" />
 		</jar>
 	</target>
