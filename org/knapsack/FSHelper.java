@@ -16,28 +16,197 @@
  */
 package org.knapsack;
 
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.Socket;
 import java.net.URISyntaxException;
 import java.util.Arrays;
 
-import org.apache.commons.io.IOUtils;
 import org.knapsack.shell.StringConstants;
 import org.osgi.service.log.LogService;
 
 /**
  * Static methods that interface with the filesystem for specific Knapsack tasks.
+ * 
+ * Some of these methods were adapted from Apache commons-io version 2.0.1.  
+ * Specifically copy(), copyLarge(), closeQuietly(), and write().
+ * See http://commons.apache.org/io/ for details of full commons-io library.
+ * 
  * @author kgilmer
  *
  */
 public class FSHelper {
+	  private static final int DEFAULT_BUFFER_SIZE = 1024 * 4;
+	  
 	/**
-	 * Static class
+     * Unconditionally close a <code>Closeable</code>.
+     * <p>
+     * Equivalent to {@link Closeable#close()}, except any exceptions will be ignored.
+     * This is typically used in finally blocks.
+     * <p>
+     * Example code:
+     * <pre>
+     *   Closeable closeable = null;
+     *   try {
+     *       closeable = new FileReader("foo.txt");
+     *       // process closeable
+     *       closeable.close();
+     *   } catch (Exception e) {
+     *       // error handling
+     *   } finally {
+     *       IOUtils.closeQuietly(closeable);
+     *   }
+     * </pre>
+     *
+     * @param closeable the object to close, may be null or already closed
+     */
+    public static void closeQuietly(Closeable closeable) {
+        try {
+            if (closeable != null) {
+                closeable.close();
+            }
+        } catch (IOException ioe) {
+            // ignore
+        }
+    };
+
+	/**
+     * Unconditionally close an <code>OutputStream</code>.
+     * <p>
+     * Equivalent to {@link OutputStream#close()}, except any exceptions will be ignored.
+     * This is typically used in finally blocks.
+     * <p>
+     * Example code:
+     * <pre>
+     * byte[] data = "Hello, World".getBytes();
+     *
+     * OutputStream out = null;
+     * try {
+     *     out = new FileOutputStream("foo.txt");
+     *     out.write(data);
+     *     out.close(); //close errors are handled
+     * } catch (IOException e) {
+     *     // error handling
+     * } finally {
+     *     IOUtils.closeQuietly(out);
+     * }
+     * </pre>
+     *
+     * @param output  the OutputStream to close, may be null or already closed
+     */
+    public static void closeQuietly(OutputStream output) {
+        closeQuietly((Closeable)output);
+    }
+	
+	  /**
+     * Unconditionally close a <code>Socket</code>.
+     * <p>
+     * Equivalent to {@link Socket#close()}, except any exceptions will be ignored.
+     * This is typically used in finally blocks.
+     * <p>
+     * Example code:
+     * <pre>
+     *   Socket socket = null;
+     *   try {
+     *       socket = new Socket("http://www.foo.com/", 80);
+     *       // process socket
+     *       socket.close();
+     *   } catch (Exception e) {
+     *       // error handling
+     *   } finally {
+     *       IOUtils.closeQuietly(socket);
+     *   }
+     * </pre>
+     *
+     * @param sock the Socket to close, may be null or already closed
+     */
+    public static void closeQuietly(Socket sock){
+        if (sock != null){
+            try {
+                sock.close();
+            } catch (IOException ioe) {
+                // ignored
+            }
+        }
+    }
+
+	/**
+     * Copy bytes from an <code>InputStream</code> to an
+     * <code>OutputStream</code>.
+     * <p>
+     * This method buffers the input internally, so there is no need to use a
+     * <code>BufferedInputStream</code>.
+     * <p>
+     * Large streams (over 2GB) will return a bytes copied value of
+     * <code>-1</code> after the copy has completed since the correct
+     * number of bytes cannot be returned as an int. For large streams
+     * use the <code>copyLarge(InputStream, OutputStream)</code> method.
+     * 
+     * @param input  the <code>InputStream</code> to read from
+     * @param output  the <code>OutputStream</code> to write to
+     * @return the number of bytes copied, or -1 if &gt; Integer.MAX_VALUE
+     * @throws NullPointerException if the input or output is null
+     * @throws IOException if an I/O error occurs
+     */
+    public static int copy(InputStream input, OutputStream output) throws IOException {
+        long count = copyLarge(input, output);
+        if (count > Integer.MAX_VALUE) {
+            return -1;
+        }
+        return (int) count;
+    }
+
+	/**
+     * Copy bytes from a large (over 2GB) <code>InputStream</code> to an
+     * <code>OutputStream</code>.
+     * <p>
+     * This method buffers the input internally, so there is no need to use a
+     * <code>BufferedInputStream</code>.
+     * 
+     * @param input  the <code>InputStream</code> to read from
+     * @param output  the <code>OutputStream</code> to write to
+     * @return the number of bytes copied
+     * @throws NullPointerException if the input or output is null
+     * @throws IOException if an I/O error occurs
+     */
+    public static long copyLarge(InputStream input, OutputStream output)
+            throws IOException {
+        byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];
+        long count = 0;
+        int n = 0;
+        while (-1 != (n = input.read(buffer))) {
+            output.write(buffer, 0, n);
+            count += n;
+        }
+        return count;
+    }
+
+	/**
+	 * @param resourceFilename
+	 * @param outFile
+	 * @throws IOException
 	 */
-	private FSHelper() {
-	};
+	public static void copyResourceToFile(String resourceFilename, File outFile) throws IOException {
+		if (outFile.exists())
+			throw new IOException(outFile + " already exists, not overwriting.");
+		
+		InputStream istream = FSHelper.class.getResourceAsStream(resourceFilename);
+
+		if (istream == null)
+			throw new IOException("Jar resource is not present: " + resourceFilename);
+		
+		FileOutputStream fos = new FileOutputStream(outFile);
+		
+		copy(istream, fos);
+		closeQuietly(fos);
+	}
+
+	
+	
 
 	/**
 	 * Copy shell scripts from the Jar into the deployment directory.
@@ -75,8 +244,8 @@ public class FSHelper {
 
 			FileOutputStream fos = new FileOutputStream(baseScriptFile);
 			
-			IOUtils.write(sb.toString(), fos);
-			IOUtils.copy(istream, fos);
+			write(sb.toString(), fos);
+			copy(istream, fos);
 
 			fos.close();
 			
@@ -116,8 +285,19 @@ public class FSHelper {
 	private static void createSymlink(String baseFile, String link) throws InterruptedException, IOException {
 		String[] cmd = { "ln", "-s", baseFile, link };
 		Runtime.getRuntime().exec(cmd).waitFor();
-	}
+	}	
 
+	/**
+	 * @param dir
+	 * @throws IOException
+	 */
+	public static void deleteFilesInDir(File dir) throws IOException {
+		validateFile(dir, false, true, false, true);
+		for (File f : Arrays.asList(dir.listFiles()))
+			if (!f.delete())
+				throw new IOException("Unable to delete: " + f);
+	}
+	
 	/**
 	 * Delete the filesystem symlink for a command.
 	 * 
@@ -133,11 +313,19 @@ public class FSHelper {
 		if (!cmd.delete())
 			throw new IOException("Failed to delete " + cmd);
 	}
-
+    
+	 /**
+	 * @param dir
+	 * @return
+	 * @throws IOException
+	 */
+	public static boolean directoryHasFiles(File dir) throws IOException {
+		validateFile(dir, false, true, false, true);
+		File[] children = dir.listFiles();
+		return children != null && children.length > 0;
+	}
 	
-	
-
-	/**
+	 /**
 	 * Determine that a File is as specified by input parameters, throw exception if something does not match.
 	 * 
 	 * @param f input file
@@ -170,46 +358,30 @@ public class FSHelper {
 		if (isDirectory && !f.isDirectory())
 			throw new IOException(f.getAbsolutePath() + " is not a directory.");
 	}
-
-	/**
-	 * @param dir
-	 * @return
-	 * @throws IOException
+    
+    /**
+     * Writes chars from a <code>String</code> to bytes on an
+     * <code>OutputStream</code> using the default character encoding of the
+     * platform.
+     * <p>
+     * This method uses {@link String#getBytes()}.
+     * 
+     * @param data  the <code>String</code> to write, null ignored
+     * @param output  the <code>OutputStream</code> to write to
+     * @throws NullPointerException if output is null
+     * @throws IOException if an I/O error occurs
+     */
+    public static void write(String data, OutputStream output)
+            throws IOException {
+        if (data != null) {
+            output.write(data.getBytes());
+        }
+    }
+    
+    /**
+	 * Static class
 	 */
-	public static boolean directoryHasFiles(File dir) throws IOException {
-		validateFile(dir, false, true, false, true);
-		File[] children = dir.listFiles();
-		return children != null && children.length > 0;
+	private FSHelper() {
 	}
 
-	/**
-	 * @param dir
-	 * @throws IOException
-	 */
-	public static void deleteFilesInDir(File dir) throws IOException {
-		validateFile(dir, false, true, false, true);
-		for (File f : Arrays.asList(dir.listFiles()))
-			if (!f.delete())
-				throw new IOException("Unable to delete: " + f);
-	}	
-
-	/**
-	 * @param resourceFilename
-	 * @param outFile
-	 * @throws IOException
-	 */
-	public static void copyResourceToFile(String resourceFilename, File outFile) throws IOException {
-		if (outFile.exists())
-			throw new IOException(outFile + " already exists, not overwriting.");
-		
-		InputStream istream = FSHelper.class.getResourceAsStream(resourceFilename);
-
-		if (istream == null)
-			throw new IOException("Jar resource is not present: " + resourceFilename);
-		
-		FileOutputStream fos = new FileOutputStream(outFile);
-		
-		IOUtils.copy(istream, fos);
-		IOUtils.closeQuietly(fos);
-	}
 }

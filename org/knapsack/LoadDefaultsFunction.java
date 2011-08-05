@@ -21,8 +21,9 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Dictionary;
 import java.util.Hashtable;
+import java.util.Map.Entry;
+import java.util.Properties;
 
-import org.apache.commons.io.IOUtils;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.log.LogService;
@@ -82,20 +83,18 @@ public class LoadDefaultsFunction implements Fn<File, File> {
 			return;
 		}
 		
+		Properties pf = new Properties();
+		pf.load(new FileInputStream(file));
 		Dictionary<String, String> kvp = new Hashtable<String, String>();
-		for (String line : IOUtils.readLines(new FileInputStream(file))) {
-			line = line.trim();
-			
-			if (line.length() == 0 || line.startsWith("#"))
+		
+		for (Entry<Object, Object> e : pf.entrySet()) {
+			if (System.getProperties().containsKey(e.getKey())) {
+				log.log(LogService.LOG_WARNING, "Ignoring property that already has a value:" + e.getKey() + ".  Existing value: " + System.getProperty(e.getKey().toString()));
 				continue;
+			}
 			
-			String [] elems = line.split("=");
-			
-			if (elems.length != 2)
-				throw new IOException("Invalid line in config admin property file: " + line);
-			
-			kvp.put(elems[0].trim(), elems[1].trim());
-		}
+			kvp.put(e.getKey().toString(), e.getValue().toString());
+		}		
 		
 		if (kvp.size() > 0) {	
 			Configuration config = ca.getConfiguration(pid, null);

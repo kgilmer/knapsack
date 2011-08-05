@@ -22,7 +22,7 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
-import org.apache.commons.io.IOUtils;
+import org.knapsack.FSHelper;
 
 /**
  * Emulates the portion of netcat that reads from stdin and writes to a socket.  This class
@@ -66,8 +66,8 @@ public class Netcat {
 		InputStream in = socket.getInputStream();
 		
 		//Push, pull, close.
-		IOUtils.copy(input, out);
-		IOUtils.copy(in, output);		
-		IOUtils.closeQuietly(socket);
+		FSHelper.copy(input, out);
+		FSHelper.copy(in, output);		
+		FSHelper.closeQuietly(socket);
 	}
 }

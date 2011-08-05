@@ -15,11 +15,5 @@ Export-Package:
  org.osgi.framework.hooks.service;uses:="org.osgi.framework";version="1.0",
  org.knapsack.shell.pub; version="0.8.3",
  org.knapsack.init.pub; version="0.8.3",
- org.apache.commons.io; version="2.0.1",
- org.apache.commons.io.comparator; version="2.0.1",
- org.apache.commons.io.filefilter; version="2.0.1",
- org.apache.commons.io.input; version="2.0.1",
- org.apache.commons.io.monitor; version="2.0.1",
- org.apache.commons.io.output; version="2.0.1",
  org.osgi.service.log; version="1.0.1",
  org.osgi.service.cm; version="1.2.8"

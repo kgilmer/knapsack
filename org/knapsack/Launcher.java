@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Random;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.felix.cm.impl.ConfigurationManager;
 import org.apache.felix.framework.FrameworkFactory;
 import org.knapsack.init.KnapsackInitServiceImpl;
@@ -334,8 +333,8 @@ public class Launcher {
 
 		FileOutputStream fos = new FileOutputStream(new File(defaultDir, PropertyKeys.CONF_ADMIN_CONFIGURATION_FILENAME));
 
-		IOUtils.write(StringConstants.CRLF + "felix.cm.dir = " + configAdminDir + StringConstants.CRLF, fos);
-		IOUtils.closeQuietly(fos);
+		FSHelper.write(StringConstants.CRLF + "felix.cm.dir = " + configAdminDir + StringConstants.CRLF, fos);
+		FSHelper.closeQuietly(fos);
 	}
 
 	/**

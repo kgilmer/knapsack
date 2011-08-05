@@ -16,7 +16,6 @@
 	<property name="log.fqpn" value="org.apache.felix.log" />
 	<property name="configadmin.fqpn" value="org.apache.felix.configadmin" />
 	<property name="compendium.fqpn" value="org.osgi.compendium" />
-	<property name="commons_io.fqpn" value="commons-io" />
 
 	<tstamp>
 		<format property="TS_NOW" pattern="yyyy-MM-dd HH:mm:ss" />
@@ -60,12 +59,6 @@
 			<arg value="${external.dir}/${compendium.fqpn}" />
 		</exec>
 
-		<exec executable="${svn.bin}">
-			<arg value="export" />
-			<arg value="http://svn.apache.org/repos/asf/commons/proper/io/tags/${commons_io.fqpn}-${commons_io.version}" />
-			<arg value="${external.dir}/${commons_io.fqpn}" />
-		</exec>
-
 		<exec executable="${git.bin}">
 			<arg value="clone" />
 			<arg value="git://github.com/kgilmer/Sprinkles.git" />
@@ -79,7 +72,6 @@
 			<fileset dir="${external.dir}/${log.fqpn}/src/main/java" includes="**/*.java" />
 			<fileset dir="${external.dir}/${configadmin.fqpn}/src/main/java" includes="**/*.java" />
 			<fileset dir="${external.dir}/${compendium.fqpn}/src/main/java" includes="org/osgi/service/cm/*.java, org/osgi/service/log/*.java" />
-			<fileset dir="${external.dir}/${commons_io.fqpn}/src/main/java" includes="**/*.java" />
 			<fileset dir="${external.dir}/sprinkles/src" includes="**/*.java" excludes="org/sprinkles/test/**.*"/>
 		</move>
 		
