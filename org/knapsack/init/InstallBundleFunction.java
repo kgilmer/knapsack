@@ -76,7 +76,7 @@ class InstallBundleFunction implements Applier.Fn<File, BundleJarWrapper> {
 			
 		try {
 			Bundle b = context.installBundle(fileUri);		
-			InitThread.getBundleSizeMap().put(element, element.length());
+			BundleInitThread.getBundleSizeMap().put(element, element.length());
 			BundleJarWrapper wrapper = new BundleJarWrapper(element, b);
 			installed.add(wrapper);
 			return wrapper;		
@@ -106,7 +106,7 @@ class InstallBundleFunction implements Applier.Fn<File, BundleJarWrapper> {
 	 * @return
 	 */
 	private boolean fileChanged(File element) {
-		Map<File, Long> bsm = InitThread.getBundleSizeMap();
+		Map<File, Long> bsm = BundleInitThread.getBundleSizeMap();
 		
 		if (!bsm.containsKey(element))
 			return true;

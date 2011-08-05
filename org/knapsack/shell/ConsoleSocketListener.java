@@ -29,7 +29,7 @@ import java.util.List;
 
 import org.knapsack.KnapsackLogger;
 import org.knapsack.PropertyHelper;
-import org.knapsack.PropertyKeys;
+import org.knapsack.ConfigurationConstants;
 import org.knapsack.shell.commands.BundlesCommand;
 import org.knapsack.shell.commands.HeadersCommand;
 import org.knapsack.shell.commands.HelpCommand;
@@ -173,7 +173,7 @@ public class ConsoleSocketListener extends Thread {
 	private ServerSocket createServerSocket() throws UnknownHostException, IOException {
 		ServerSocket s;
 
-		if (PropertyHelper.getBoolean(PropertyKeys.CONFIG_KEY_ACCEPT_ANY_HOST)) {
+		if (PropertyHelper.getBoolean(ConfigurationConstants.CONFIG_KEY_ACCEPT_ANY_HOST)) {
 			s = new ServerSocket(port, SERVER_BACKLOG_DEFAULT, null);
 			log.log(LogService.LOG_INFO, "Accepting socket connections from any host on port " + port);
 		} else {

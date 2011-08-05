@@ -19,7 +19,7 @@ package org.knapsack.init;
 import java.io.File;
 import java.util.Collection;
 
-import org.knapsack.PropertyKeys;
+import org.knapsack.ConfigurationConstants;
 import org.knapsack.init.pub.KnapsackInitService;
 import org.sprinkles.Applier;
 
@@ -40,15 +40,15 @@ public class KnapsackInitServiceImpl implements KnapsackInitService {
 	 */
 	public KnapsackInitServiceImpl(File baseDir) {
 		this.baseDir = baseDir;
-		this.dirList = System.getProperty(PropertyKeys.CONFIG_KEY_BUNDLE_DIRS);
+		this.dirList = System.getProperty(ConfigurationConstants.CONFIG_KEY_BUNDLE_DIRS);
 		
 		if (dirList == null)
-			dirList = PropertyKeys.DEFAULT_BUNDLE_DIRECTORY;
+			dirList = ConfigurationConstants.DEFAULT_BUNDLE_DIRECTORY;
 	}
 
 	@Override
 	public void updateBundles() {
-		(new InitThread(getBundleDirectories())).start();
+		(new BundleInitThread(getBundleDirectories())).start();
 	}
 	
 	
@@ -56,7 +56,7 @@ public class KnapsackInitServiceImpl implements KnapsackInitService {
 	 * Called by knapsack Activator synchronously so that all bundles are resolved before framework start event is fired.
 	 */
 	public void updateBundlesSync() {
-		(new InitThread(getBundleDirectories())).run();
+		(new BundleInitThread(getBundleDirectories())).run();
 	}
 
 	@Override

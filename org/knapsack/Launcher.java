@@ -1,3 +1,19 @@
+/*
+ *    Copyright 2011 Ken Gilmer
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ */
 package org.knapsack;
 
 import java.io.File;
@@ -33,6 +49,12 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.sprinkles.Applier;
 import org.sprinkles.functions.FileFunctions;
 
+/**
+ * Entry point to Knapsack.  The static main() method runs the knapsack startup process and initializes Felix.
+ * 
+ * @author kgilmer
+ *
+ */
 public class Launcher {
 	/**
 	 * Felix property to specify the logger instance.
@@ -65,8 +87,8 @@ public class Launcher {
 			FSHelper.validateFile(baseDirectory, true, true, false, true);
 
 			// Set initial directories
-			final File defaultDirectory = new File(baseDirectory, PropertyKeys.DEFAULT_DIRECTORY_NAME);
-			final File scriptDirectory = new File(baseDirectory, PropertyKeys.SCRIPT_DIRECTORY_NAME);
+			final File defaultDirectory = new File(baseDirectory, ConfigurationConstants.DEFAULT_DIRECTORY_NAME);
+			final File scriptDirectory = new File(baseDirectory, ConfigurationConstants.SCRIPT_DIRECTORY_NAME);
 
 			if (baseDirectoryUninitialized(baseDirectory)) 
 				createDefaultConfigurationFiles(baseDirectory);
@@ -81,7 +103,7 @@ public class Launcher {
 			if (System.getProperties().containsKey("felix.log.level"))
 				logger.setLogLevel(Integer.parseInt(System.getProperties().getProperty("felix.log.level")));
 			
-			logger.setLogStdout(PropertyHelper.getBoolean(PropertyKeys.CONFIG_KEY_LOG_STDOUT));
+			logger.setLogStdout(PropertyHelper.getBoolean(ConfigurationConstants.CONFIG_KEY_LOG_STDOUT));
 
 			// Create activators that will start
 			final List<BundleActivator> activators = createBundles();
@@ -96,16 +118,16 @@ public class Launcher {
 			context = felix.getBundleContext();
 			
 			// LogService should now be loaded, setup logger so all log output goes to stdout
-			if (PropertyHelper.getBoolean(PropertyKeys.CONFIG_KEY_LOG_STDOUT)) 				
+			if (PropertyHelper.getBoolean(ConfigurationConstants.CONFIG_KEY_LOG_STDOUT)) 				
 				addLogReadersToLogger(logger, context);
 			
 			// ConfigAdmin should now be loaded, setup defaults.
-			if (PropertyHelper.getBoolean(PropertyKeys.CONFIG_KEY_BUILTIN_CONFIGADMIN))
+			if (PropertyHelper.getBoolean(ConfigurationConstants.CONFIG_KEY_BUILTIN_CONFIGADMIN))
 				initializeConfigAdmin(felix.getBundleContext(), getConfigAdminDirectory(baseDirectory), logger);
 			
 			// Create the scripts for access from the native shell.
 			ConsoleSocketListener shell = null;
-			if (!PropertyHelper.getBoolean(PropertyKeys.CONFIG_DISABLE_SCRIPTS)) {
+			if (!PropertyHelper.getBoolean(ConfigurationConstants.CONFIG_DISABLE_SCRIPTS)) {
 				int port = generatePort();
 				shell = new ConsoleSocketListener(
 						port, context, logger, new CommandParser(context, scriptDirectory));
@@ -197,7 +219,7 @@ public class Launcher {
 		if (System.getProperty("felix.cm.dir") != null)
 			return new File(System.getProperty("felix.cm.dir"));
 		
-		return new File(baseDirectory, PropertyKeys.CONFIGADMIN_DIRECTORY_NAME);
+		return new File(baseDirectory, ConfigurationConstants.CONFIGADMIN_DIRECTORY_NAME);
 	}
 
 	/**
@@ -216,7 +238,7 @@ public class Launcher {
 			if (ca != null) {
 				Applier.map(
 						Applier.map(configAdminDir, FileFunctions.GET_FILES_FN)
-							, new LoadDefaultsFunction(ca, logger, PropertyHelper.getBoolean(PropertyKeys.CONFIG_KEY_OVERWRITE_CONFIGADMIN)));
+							, new LoadDefaultsFunction(ca, logger, PropertyHelper.getBoolean(ConfigurationConstants.CONFIG_KEY_OVERWRITE_CONFIGADMIN)));
 				
 				return;
 			}			
@@ -253,7 +275,7 @@ public class Launcher {
 	 * @throws FileNotFoundException
 	 */
 	private static InputStream getFelixConfigFileInputStream(File defaultDirectory) throws FileNotFoundException {
-		return new FileInputStream(new File(defaultDirectory, PropertyKeys.CONFIGURATION_FILENAME[0]));
+		return new FileInputStream(new File(defaultDirectory, ConfigurationConstants.CONFIGURATION_FILENAME[0]));
 	}
 
 	/**
@@ -264,10 +286,10 @@ public class Launcher {
 	private static List<BundleActivator> createBundles() {
 		List<BundleActivator> activators = new ArrayList<BundleActivator>();
 
-		if (PropertyHelper.getBoolean(PropertyKeys.CONFIG_KEY_BUILTIN_LOGGER))
+		if (PropertyHelper.getBoolean(ConfigurationConstants.CONFIG_KEY_BUILTIN_LOGGER))
 			activators.add(new org.apache.felix.log.Activator());
 
-		if (PropertyHelper.getBoolean(PropertyKeys.CONFIG_KEY_BUILTIN_CONFIGADMIN))
+		if (PropertyHelper.getBoolean(ConfigurationConstants.CONFIG_KEY_BUILTIN_CONFIGADMIN))
 			activators.add(new ConfigurationManager());
 
 		return activators;
@@ -289,8 +311,8 @@ public class Launcher {
 		if (FSHelper.directoryHasFiles(scriptDir))
 			FSHelper.deleteFilesInDir(scriptDir);
 
-		FSHelper.copyScripts(scriptDir, port, System.getProperties().getProperty(PropertyKeys.CONFIG_KEY_SHELL_COMMAND));
-		System.setProperty(PropertyKeys.SYSTEM_PROPERTY_KEY_SHELL_PORT, Integer.toString(port));
+		FSHelper.copyScripts(scriptDir, port, System.getProperties().getProperty(ConfigurationConstants.CONFIG_KEY_SHELL_COMMAND));
+		System.setProperty(ConfigurationConstants.SYSTEM_PROPERTY_KEY_SHELL_PORT, Integer.toString(port));
 	}
 
 	/**
@@ -321,17 +343,17 @@ public class Launcher {
 	 * @throws IOException
 	 */
 	private static void createDefaultConfigurationFiles(File baseDirectory) throws IOException {
-		File defaultDir = new File(baseDirectory, PropertyKeys.DEFAULT_DIRECTORY_NAME);
+		File defaultDir = new File(baseDirectory, ConfigurationConstants.DEFAULT_DIRECTORY_NAME);
 
 		FSHelper.validateFile(defaultDir, true, true, false, true);
 
-		for (String filename : Arrays.asList(PropertyKeys.CONFIGURATION_FILENAME))
+		for (String filename : Arrays.asList(ConfigurationConstants.CONFIGURATION_FILENAME))
 			FSHelper.copyResourceToFile("/" + filename, new File(defaultDir, filename));
 
-		File configAdminDir = new File(baseDirectory, PropertyKeys.CONFIGADMIN_DIRECTORY_NAME);
+		File configAdminDir = new File(baseDirectory, ConfigurationConstants.CONFIGADMIN_DIRECTORY_NAME);
 		FSHelper.validateFile(configAdminDir, true, true, false, true);
 
-		FileOutputStream fos = new FileOutputStream(new File(defaultDir, PropertyKeys.CONF_ADMIN_CONFIGURATION_FILENAME));
+		FileOutputStream fos = new FileOutputStream(new File(defaultDir, ConfigurationConstants.CONF_ADMIN_CONFIGURATION_FILENAME));
 
 		FSHelper.write(StringConstants.CRLF + "felix.cm.dir = " + configAdminDir + StringConstants.CRLF, fos);
 		FSHelper.closeQuietly(fos);
@@ -344,15 +366,15 @@ public class Launcher {
 	 */
 	private static boolean baseDirectoryUninitialized(File baseDirectory) {
 
-		return !(new File(baseDirectory, PropertyKeys.DEFAULT_DIRECTORY_NAME)).exists();
+		return !(new File(baseDirectory, ConfigurationConstants.DEFAULT_DIRECTORY_NAME)).exists();
 	}
 
 	/**
 	 * @return root directory that this instance of knapsack runs in.
 	 */
 	private static File getBaseDirectory() {
-		if (System.getProperty(PropertyKeys.CONFIG_KEY_ROOT_DIR) != null)
-			return new File(System.getProperty(PropertyKeys.CONFIG_KEY_ROOT_DIR));
+		if (System.getProperty(ConfigurationConstants.CONFIG_KEY_ROOT_DIR) != null)
+			return new File(System.getProperty(ConfigurationConstants.CONFIG_KEY_ROOT_DIR));
 
 		return new File(System.getProperty("user.dir"));
 	}

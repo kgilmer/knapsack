@@ -123,6 +123,6 @@ public class LoadDefaultsFunction implements Fn<File, File> {
 	 * @return
 	 */
 	private boolean isDefaultFile(File f) {
-		return f.getParentFile().getName().equals(PropertyKeys.DEFAULT_DIRECTORY_NAME) && !f.getName().equalsIgnoreCase(".properties");
+		return f.getParentFile().getName().equals(ConfigurationConstants.DEFAULT_DIRECTORY_NAME) && !f.getName().equalsIgnoreCase(".properties");
 	}
 }

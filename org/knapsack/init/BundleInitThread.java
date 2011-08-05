@@ -34,7 +34,7 @@ import org.sprinkles.functions.FileFunctions;
  * @author kgilmer
  *
  */
-public class InitThread extends Thread {
+public class BundleInitThread extends Thread {
 	/**
 	 * A list of directories that knapsack will look for bundles in.
 	 */
@@ -46,7 +46,7 @@ public class InitThread extends Thread {
 	 * @param rootDir
 	 * @param filenames
 	 */
-	public InitThread(File rootDir, List<String> filenames) {	
+	public BundleInitThread(File rootDir, List<String> filenames) {	
 		bundleDirs = new ArrayList<File>();
 		for (String bfn : filenames) 
 			bundleDirs.add(new File(rootDir, bfn.trim()));
@@ -54,7 +54,7 @@ public class InitThread extends Thread {
 		logger = Launcher.getLogger();
 	}
 	
-	public InitThread(Collection<File> directories) {	
+	public BundleInitThread(Collection<File> directories) {	
 		bundleDirs = new ArrayList<File>();
 		bundleDirs.addAll(directories);		
 		logger = Launcher.getLogger();

@@ -19,8 +19,8 @@ package org.knapsack.shell.commands;
 import java.io.File;
 import java.util.Arrays;
 
-import org.knapsack.PropertyKeys;
-import org.knapsack.init.InitThread;
+import org.knapsack.ConfigurationConstants;
+import org.knapsack.init.BundleInitThread;
 
 /**
  * A command to rescan the configured bundle directories looking for changes.
@@ -36,8 +36,8 @@ public class UpdateCommand extends AbstractKnapsackCommand {
 
 	@Override
 	public String execute() throws Exception {		
-		InitThread init = new InitThread(new File(System.getProperty(PropertyKeys.CONFIG_KEY_ROOT_DIR)), 
-				Arrays.asList(System.getProperty(PropertyKeys.CONFIG_KEY_BUNDLE_DIRS).split(",")));
+		BundleInitThread init = new BundleInitThread(new File(System.getProperty(ConfigurationConstants.CONFIG_KEY_ROOT_DIR)), 
+				Arrays.asList(System.getProperty(ConfigurationConstants.CONFIG_KEY_BUNDLE_DIRS).split(",")));
 		init.start();
 		
 		return "Rescanning and updating bundles from configured directories.";

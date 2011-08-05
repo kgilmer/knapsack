@@ -221,7 +221,7 @@ public class FSHelper {
 			if (!scriptDir.mkdirs())
 				throw new IOException("Unable to create directories: " + scriptDir);
 
-		File baseScriptFile = new File(scriptDir, PropertyKeys.BASE_SCRIPT_FILENAME);
+		File baseScriptFile = new File(scriptDir, ConfigurationConstants.BASE_SCRIPT_FILENAME);
 
 		if (!baseScriptFile.exists()) {
 			StringBuilder sb = new StringBuilder();
@@ -238,7 +238,7 @@ public class FSHelper {
 			sb.append("\"");
 			sb.append(StringConstants.CRLF);
 		
-			InputStream istream = PropertyKeys.class.getResourceAsStream("/scripts/" + PropertyKeys.BASE_SCRIPT_FILENAME);
+			InputStream istream = ConfigurationConstants.class.getResourceAsStream("/scripts/" + ConfigurationConstants.BASE_SCRIPT_FILENAME);
 			if (istream == null)
 				throw new IOException("Jar resource does not exist: " + baseScriptFile);
 
@@ -262,7 +262,7 @@ public class FSHelper {
 	 */
 	public static void createFilesystemCommand(File scriptDir, String commandName, KnapsackLogger logger) throws IOException {
 		File sf = new File(scriptDir, commandName);
-		File baseScriptFile = new File(scriptDir, PropertyKeys.BASE_SCRIPT_FILENAME);
+		File baseScriptFile = new File(scriptDir, ConfigurationConstants.BASE_SCRIPT_FILENAME);
 
 		if (sf.exists())
 			throw new IOException(commandName + " already exists in " + scriptDir);

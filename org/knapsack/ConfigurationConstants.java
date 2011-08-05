@@ -20,12 +20,11 @@ import java.util.Properties;
 
 /**
  * Class for knapsack and framework configuration.  
- * It also handles creating the initial default configuration if it doesn't exist upon start.
  * 
  * @author kgilmer
  *
  */
-public class PropertyKeys extends Properties {
+public class ConfigurationConstants extends Properties {
 	private static final long serialVersionUID = -5479563157788056552L;
 
 	/**
@@ -73,7 +72,7 @@ public class PropertyKeys extends Properties {
 	public static final String DEFAULT_BUNDLE_DIRECTORY = "bundle";
 	
 	/**
-	 * Only one instance of PropertyKeys per runtime.
+	 * Only one instance of ConfigurationConstants per runtime.
 	 */
 	
 	public final static String BASE_SCRIPT_FILENAME = ".knapsack-command.sh";
@@ -111,5 +110,8 @@ public class PropertyKeys extends Properties {
 	 */
 	public static final String SYSTEM_PROPERTY_KEY_SHELL_PORT = "org.knapsack.shell.port";
 
+	/**
+	 * Name of file for ConfigAdmin properties.
+	 */
 	public static final String CONF_ADMIN_CONFIGURATION_FILENAME = "configadmin.properties";	
 }

@@ -42,7 +42,7 @@ public class UninstallBundleFunction implements Applier.Fn<File, File> {
 		if (bundle != null) {
 			try {
 				bundle.uninstall();
-				InitThread.getBundleSizeMap().remove(element);
+				BundleInitThread.getBundleSizeMap().remove(element);
 			} catch (BundleException e) {
 				logger.log(LogService.LOG_ERROR, "Unable to uninstall " + element + ".", e);
 				return null;
