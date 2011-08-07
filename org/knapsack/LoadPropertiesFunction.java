@@ -91,7 +91,7 @@ public class LoadPropertiesFunction implements Fn<File, File> {
 	 * @return
 	 * @throws IOException
 	 */
-	private String evalSubsitutions(final String ins) throws IOException {
+	public static String evalSubsitutions(final String ins) throws IOException {
 		int si = ins.indexOf("${");
 		if (si > -1) {
 			int ti = ins.indexOf('}', si + 2);

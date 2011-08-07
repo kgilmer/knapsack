@@ -25,6 +25,8 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Random;
 
@@ -295,6 +297,10 @@ public class Launcher {
 	private static Properties createFelixProperties(File defaultDirectory, KnapsackLogger logger, List<BundleActivator> activators) throws FileNotFoundException, IOException {
 		Properties felixConfig = new Properties();
 		felixConfig.load(getFelixConfigFileInputStream(defaultDirectory));
+		
+		for (Entry e : felixConfig.entrySet())
+			felixConfig.put(e.getKey(), LoadPropertiesFunction.evalSubsitutions(e.getValue().toString()));
+		
 		felixConfig.put(FELIX_LOGGER_INSTANCE, logger);
 		felixConfig.put(FELIX_BUNDLE_INSTANCES, activators);
 
