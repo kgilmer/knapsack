@@ -26,9 +26,8 @@
 		<delete dir="${build.dir}" />
 		<delete dir="${external.dir}" />
 		<delete dir="${doc.dir}" />
-	</target>
-
-	<target name="clobber" depends="clean" description="remove all artifact files">
+		<delete dir="org/apache" />
+		<delete dir="org/osgi" />
 		<delete file="${ant.project.name}.jar" />
 	</target>
 
@@ -58,12 +57,6 @@
 			<arg value="http://svn.apache.org/repos/asf/felix/releases/${compendium.fqpn}-${compendium.version}" />
 			<arg value="${external.dir}/${compendium.fqpn}" />
 		</exec>
-
-		<exec executable="${git.bin}">
-			<arg value="clone" />
-			<arg value="git://github.com/kgilmer/Sprinkles.git" />
-			<arg value="${external.dir}/sprinkles" />
-		</exec>		
 	</target>
 
 	<target name="stage" depends="fetch">
@@ -71,8 +64,7 @@
 			<fileset dir="${external.dir}/${framework.fqpn}/src/main/java" includes="**/*.java" />
 			<fileset dir="${external.dir}/${log.fqpn}/src/main/java" includes="**/*.java" />
 			<fileset dir="${external.dir}/${configadmin.fqpn}/src/main/java" includes="**/*.java" />
-			<fileset dir="${external.dir}/${compendium.fqpn}/src/main/java" includes="org/osgi/service/cm/*.java, org/osgi/service/log/*.java" />
-			<fileset dir="${external.dir}/sprinkles/src" includes="**/*.java" excludes="org/sprinkles/test/**.*"/>
+			<fileset dir="${external.dir}/${compendium.fqpn}/src/main/java" includes="org/osgi/service/cm/*.java, org/osgi/service/log/*.java" />		
 		</move>
 	</target>
 
