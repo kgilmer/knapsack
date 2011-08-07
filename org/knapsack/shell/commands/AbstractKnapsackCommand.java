@@ -41,7 +41,7 @@ public abstract class AbstractKnapsackCommand implements IKnapsackCommand {
 	
 	public void initialize(List<String> arguments, BundleContext context) {
 		Ansi.setEnabled(PropertyHelper.getBoolean(ConfigurationConstants.CONFIG_KEY_COLOR_OUTPUT));
-		this.ansi = Ansi.ansi();
+		AbstractKnapsackCommand.ansi = Ansi.ansi();
 		
 		if (arguments != null) {
 			this.arguments = arguments;
