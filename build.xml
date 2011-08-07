@@ -102,6 +102,8 @@
 			<fileset dir="${build.dir}" includes="**/*.class,**/*.sh,**/*.properties,**/*.version" />
 			<fileset dir="." includes="*.properties,LICENSE-2.0.txt" />
 		</jar>
+		
+		<chmod file="${ant.project.name}.jar" perm="a+x"></chmod>
 	</target>
 
 	<target name="javadoc" depends="jar">
