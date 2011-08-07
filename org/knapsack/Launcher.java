@@ -19,7 +19,6 @@ package org.knapsack;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
@@ -35,7 +34,6 @@ import org.knapsack.init.KnapsackInitServiceImpl;
 import org.knapsack.init.pub.KnapsackInitService;
 import org.knapsack.shell.CommandParser;
 import org.knapsack.shell.ConsoleSocketListener;
-import org.knapsack.shell.StringConstants;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -201,7 +199,8 @@ public class Launcher {
 			
 			return p.getProperty("knapsack.version");
 		} catch (Exception e) {
-			return "[unknown]";
+			//To be consistent with Felix
+			return "0.0.0";
 		}
 	}
 
@@ -251,10 +250,10 @@ public class Launcher {
 	 * @return
 	 */
 	private static File getConfigAdminDirectory(File baseDirectory) {
-		if (System.getProperty("felix.cm.dir") != null)
-			return new File(System.getProperty("felix.cm.dir"));
+		if (System.getProperty("felix.cm.dir") == null)
+			System.setProperty("felix.cm.dir", System.getProperty(ConfigurationConstants.CONFIG_KEY_ROOT_DIR) + ConfigurationConstants.CONFIGADMIN_DIRECTORY_NAME);
 		
-		return new File(baseDirectory, ConfigurationConstants.CONFIGADMIN_DIRECTORY_NAME);
+		return new File(System.getProperty("felix.cm.dir"));
 	}
 
 	/**
@@ -384,14 +383,6 @@ public class Launcher {
 
 		for (String filename : Arrays.asList(ConfigurationConstants.CONFIGURATION_FILENAME))
 			FSHelper.copyResourceToFile("/" + filename, new File(defaultDir, filename));
-
-		File configAdminDir = new File(baseDirectory, ConfigurationConstants.CONFIGADMIN_DIRECTORY_NAME);
-		FSHelper.validateFile(configAdminDir, true, true, false, true);
-
-		FileOutputStream fos = new FileOutputStream(new File(defaultDir, ConfigurationConstants.CONF_ADMIN_CONFIGURATION_FILENAME));
-
-		FSHelper.write(StringConstants.CRLF + "felix.cm.dir = " + configAdminDir + StringConstants.CRLF, fos);
-		FSHelper.closeQuietly(fos);
 	}
 
 	/**
@@ -408,10 +399,10 @@ public class Launcher {
 	 * @return root directory that this instance of knapsack runs in.
 	 */
 	private static File getBaseDirectory() {
-		if (System.getProperty(ConfigurationConstants.CONFIG_KEY_ROOT_DIR) != null)
-			return new File(System.getProperty(ConfigurationConstants.CONFIG_KEY_ROOT_DIR));
+		if (System.getProperty(ConfigurationConstants.CONFIG_KEY_ROOT_DIR) == null)
+			System.setProperty(ConfigurationConstants.CONFIG_KEY_ROOT_DIR, System.getProperty("user.dir"));		
 
-		return new File(System.getProperty("user.dir"));
+		return new File(System.getProperty(ConfigurationConstants.CONFIG_KEY_ROOT_DIR));
 	}
 
 	/**

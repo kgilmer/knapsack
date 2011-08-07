@@ -71,14 +71,44 @@ public class LoadPropertiesFunction implements Fn<File, File> {
 		Properties pf = new Properties();
 		pf.load(new FileInputStream(file));
 		
-		for (Entry<Object, Object> e : pf.entrySet()) {
+		for (Entry<Object, Object> e : pf.entrySet()) {	
 			if (System.getProperties().containsKey(e.getKey())) {
 				logger.log(LogService.LOG_WARNING, "Ignoring property that already has a value:" + e.getKey() + ".  Existing value: " + System.getProperty(e.getKey().toString()));
 				continue;
 			}
 			
-			System.getProperties().put(e.getKey(), e.getValue());
+			String finalValue = evalSubsitutions(e.getValue().toString());
+			
+			System.getProperties().put(e.getKey(), finalValue);
 		}
+	}
+
+	/**
+	 * A recursive function to replace variables with values from System.properties.
+	 * Variable is defined in ${var} style with 'var' being a system property.
+	 * 
+	 * @param ins
+	 * @return
+	 * @throws IOException
+	 */
+	private String evalSubsitutions(final String ins) throws IOException {
+		int si = ins.indexOf("${");
+		if (si > -1) {
+			int ti = ins.indexOf('}', si + 2);
+			
+			if (ti == -1)
+				throw new IOException("Property value has invalid subsitution variable syntax: " + ins);
+			
+			String varName = ins.substring(si + 2, ti);
+			String varVal = System.getProperty(varName);
+			String varLiteral = "\\$\\{" + varName + "\\}";
+			
+			String subLine = ins.replaceAll(varLiteral, varVal);
+			
+			return evalSubsitutions(subLine);
+		}
+		
+		return ins;
 	}
 
 	/**

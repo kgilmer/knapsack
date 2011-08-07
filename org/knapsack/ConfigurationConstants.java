@@ -44,7 +44,7 @@ public class ConfigurationConstants extends Properties {
 	/**
 	 * Name of knapsack's configuration file
 	 */
-	public static final String [] CONFIGURATION_FILENAME = {"felix.properties", "knapsack.properties", "log.properties"};
+	public static final String [] CONFIGURATION_FILENAME = {"felix.properties", "knapsack.properties", "log.properties", "configadmin.properties"};
 
 	/**
 	 * If enabled pre-existing config admin Configurations will be overwritten on each start.
@@ -109,9 +109,4 @@ public class ConfigurationConstants extends Properties {
 	 * Port that the shell is listening on for commands, or -1 if shell is disabled.
 	 */
 	public static final String SYSTEM_PROPERTY_KEY_SHELL_PORT = "org.knapsack.shell.port";
-
-	/**
-	 * Name of file for ConfigAdmin properties.
-	 */
-	public static final String CONF_ADMIN_CONFIGURATION_FILENAME = "configadmin.properties";	
 }
