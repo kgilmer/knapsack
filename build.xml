@@ -1,7 +1,9 @@
 <?xml version="1.0"?>
 <project name="knapsack" default="jar">
-	<property file="Felix.properties"/>
+	
+	<property file="felix.version"/>
 	<property file="knapsack.version"/>
+	
 	<property name="project.description" value="Knapsack for Apache Felix" />
 	<property name="external.dir" location="external" />
 	<property name="doc.dir" location="${basedir}/docs" />
@@ -28,6 +30,7 @@
 		<delete dir="${doc.dir}" />
 		<delete dir="org/apache" />
 		<delete dir="org/osgi" />
+		<delete dir="bin" />
 		<delete file="${ant.project.name}.jar" />
 	</target>
 
@@ -59,16 +62,17 @@
 		</exec>
 	</target>
 
-	<target name="stage" depends="fetch">
+	<target name="stage-dependencies" depends="fetch">
 		<move toDir=".">
 			<fileset dir="${external.dir}/${framework.fqpn}/src/main/java" includes="**/*.java" />
 			<fileset dir="${external.dir}/${log.fqpn}/src/main/java" includes="**/*.java" />
 			<fileset dir="${external.dir}/${configadmin.fqpn}/src/main/java" includes="**/*.java" />
 			<fileset dir="${external.dir}/${compendium.fqpn}/src/main/java" includes="org/osgi/service/cm/*.java, org/osgi/service/log/*.java" />		
 		</move>
+		<delete dir="${external.dir}"></delete>
 	</target>
 
-	<target name="compile" depends="stage" description="compile the Java source code to class files">
+	<target name="compile" depends="stage-dependencies" description="compile the Java source code to class files">
 		<mkdir dir="${build.dir}" />
 		<javac srcdir="." destdir="${build.dir}" source="1.6" target="1.6" encoding="utf-8" fork="true" includeantruntime="false">
 			<include name="org/**" />

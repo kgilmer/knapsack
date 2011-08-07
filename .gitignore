@@ -4,5 +4,6 @@ build.properties
 default.properties
 org/apache
 org/osgi
-bin/external/
+bin/*
 external/
+classes/
