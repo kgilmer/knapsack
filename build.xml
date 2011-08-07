@@ -91,7 +91,7 @@
 			<attribute name="Built-Date" value="${TS_NOW}" />
 		</manifest>
 		
-		<copy toDir="${build.dir}/org/apache/felix/framework/" file="Felix.properties"/>
+		<copy toFile="${build.dir}/org/apache/felix/framework/Felix.properties" file="felix.version" />
 		<copy toDir="${build.dir}/org/knapsack/" file="knapsack.version"/>
 		
 		<jar destfile="${ant.project.name}.jar" manifest="META-INF/MANIFEST.MF">
