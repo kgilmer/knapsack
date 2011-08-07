@@ -1,19 +1,25 @@
 Manifest-Version: 1.0
+Ant-Version: Apache Ant 1.7.1
+Created-By: 19.0-b09 (Sun Microsystems Inc.)
 Bundle-ManifestVersion: 2
 Bundle-Name: Knapsack for Apache Felix
 Bundle-SymbolicName: org.knapsack
-Bundle-Version: 0.0.0
+Bundle-Version: 0.9.0
 Main-Class: org.knapsack.Launcher
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Export-Package: 
- org.osgi.service.startlevel;uses:="org.osgi.framework";version="1.1",
- org.osgi.framework.launch;uses:="org.osgi.framework";version="1.0",
- org.osgi.util.tracker;uses:="org.osgi.framework";version="1.4",
- org.osgi.service.url;version="1.0",
- org.osgi.framework;version="1.5",
- org.osgi.service.packageadmin;uses:="org.osgi.framework";version="1.2",
- org.osgi.framework.hooks.service;uses:="org.osgi.framework";version="1.0",
- org.knapsack.shell.pub; version="0.8.3",
- org.knapsack.init.pub; version="0.8.3",
- org.osgi.service.log; version="1.0.1",
- org.osgi.service.cm; version="1.2.8"
+Export-Package: org.osgi.service.startlevel;uses:="org.osgi.framework"
+ ;version="1.1",org.osgi.framework.launch;uses:="org.osgi.framework";v
+ ersion="1.0",org.osgi.util.tracker;uses:="org.osgi.framework";version
+ ="1.4",org.osgi.service.url;version="1.0",org.osgi.framework;version=
+ "1.5",org.osgi.service.packageadmin;uses:="org.osgi.framework";versio
+ n="1.2",org.osgi.framework.hooks.service;uses:="org.osgi.framework";v
+ ersion="1.0",org.knapsack.shell.pub; version="0.8.3",org.knapsack.ini
+ t.pub; version="0.8.3",org.osgi.service.log; version="1.0.1",org.osgi
+ .service.cm; version="1.2.8"
+Felix-Framework-Version: 3.2.2
+OSGi-Compendium-Version: 1.4.0
+Felix-ConfigAdmin-Version: 1.2.8
+Felix-Log-Version: 1.0.1
+Built-By: kgilmer
+Built-Date: 2011-08-07 12:51:46
+
