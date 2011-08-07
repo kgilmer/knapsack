@@ -23,6 +23,7 @@ import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
@@ -134,10 +135,14 @@ public class ConsoleSocketListener extends Thread {
 				}
 			}
 		} catch (Exception e) {
-			log.log(LogService.LOG_ERROR, "An Error occurred while while processing command.", e);
-			if (commandRegistrations != null) {
-				for (ServiceRegistration sr : commandRegistrations)
-					sr.unregister();
+			if (e instanceof SocketException && ((SocketException)e).getMessage().startsWith("Socket closed")) {
+				//Ignore exception
+			} else {
+				log.log(LogService.LOG_ERROR, "An Error occurred while while processing command.", e);
+				if (commandRegistrations != null) {
+					for (ServiceRegistration sr : commandRegistrations)
+						sr.unregister();
+				}
 			}
 		} finally {
 			socket = null;

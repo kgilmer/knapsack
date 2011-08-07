@@ -79,6 +79,22 @@ public class Launcher {
 	 * @param args
 	 */
 	public static void main(String[] args) {
+		List<String> argList = Arrays.asList(args);
+		
+		if (argList.contains("-v") || argList.contains("--version")) {
+			printVersion();
+			return;
+		}
+		
+		if (argList.contains("-h") || argList.contains("--help") || argList.size() > 1) {
+			printHelp();
+			return;
+		}
+		
+		if (argList.size() == 1) {
+			System.setProperty(ConfigurationConstants.CONFIG_KEY_ROOT_DIR, argList.get(0));
+		}
+			
 		// Record boot time.
 		final long time = System.currentTimeMillis();
 
@@ -148,7 +164,7 @@ public class Launcher {
 			
 			felix.start();
 			
-			logger.log(LogService.LOG_INFO, "Knapsack " + getKnapsackVersion(context) + " for Apache Felix " + getFelixVersion(context) + " (" + baseDirectory + ") started in " + ((double) (System.currentTimeMillis() - time) / 1000) + " seconds.");
+			logger.log(LogService.LOG_INFO, "Knapsack " + getKnapsackVersion() + " for Apache Felix " + getFelixVersion(context) + " (" + baseDirectory + ") started in " + ((double) (System.currentTimeMillis() - time) / 1000) + " seconds.");
 		} catch (Exception e) {
 			logger.log(LogService.LOG_ERROR, "Unable to start knapsack.", e);
 			System.exit(1);
@@ -158,11 +174,25 @@ public class Launcher {
 	// /***************** Private helper methods
 	
 	/**
+	 * Print command usage information.
+	 */
+	private static void printHelp() {
+		System.out.println("Usage: knapsack.jar [-v|--version] [-h|--help] [root directory]");
+	}
+
+	/**
+	 * Print knapsack version.
+	 */
+	private static void printVersion() {
+		System.out.println("Knapsack version " + getKnapsackVersion());
+	}
+
+	/**
 	 * Get the version string from the build of the version of Knapsack.
 	 * @param context2
 	 * @return
 	 */
-	private static String getKnapsackVersion(BundleContext context2) {
+	private static String getKnapsackVersion() {
 		try {
 			InputStream istream = Launcher.class.getResourceAsStream("knapsack.version");
 			
@@ -171,7 +201,7 @@ public class Launcher {
 			
 			return p.getProperty("knapsack.version");
 		} catch (Exception e) {
-			return "";
+			return "[unknown]";
 		}
 	}
 
