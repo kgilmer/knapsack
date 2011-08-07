@@ -54,6 +54,9 @@ public class BundleInitThread extends Thread {
 		logger = Launcher.getLogger();
 	}
 	
+	/**
+	 * @param directories
+	 */
 	public BundleInitThread(Collection<File> directories) {	
 		bundleDirs = new ArrayList<File>();
 		bundleDirs.addAll(directories);		
@@ -126,6 +129,9 @@ public class BundleInitThread extends Thread {
 			logger.log(LogService.LOG_INFO, "Uninstalled Bundles: " + uninstalled);
 	}
 
+	/**
+	 * @return Map of installed bundles that their size when installed.
+	 */
 	public static Map<File, Long> getBundleSizeMap() {
 
 		return bundleJarSizeMap;

@@ -73,6 +73,11 @@ public class Launcher {
 
 	private static BundleContext context;
 
+	/**
+	 * Main entry point into knapsack.
+	 * 
+	 * @param args
+	 */
 	public static void main(String[] args) {
 		// Record boot time.
 		final long time = System.currentTimeMillis();
@@ -379,10 +384,16 @@ public class Launcher {
 		return new File(System.getProperty("user.dir"));
 	}
 
+	/**
+	 * @return instance of internal Logger class.
+	 */
 	public static KnapsackLogger getLogger() {	
 		return logger;
 	}
 
+	/**
+	 * @return bundle context or throw RuntimeException() if does not exist.
+	 */
 	public static BundleContext getBundleContext() {
 		if (context == null)
 			throw new RuntimeException("BundleContext is not available.");

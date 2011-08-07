@@ -36,7 +36,6 @@ public class KnapsackInitServiceImpl implements KnapsackInitService {
 
 	/**
 	 * @param baseDir
-	 * @param config
 	 */
 	public KnapsackInitServiceImpl(File baseDir) {
 		this.baseDir = baseDir;

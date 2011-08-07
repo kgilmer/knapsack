@@ -26,10 +26,19 @@ import org.osgi.framework.BundleException;
 import org.osgi.service.log.LogService;
 import org.sprinkles.Applier;
 
+/**
+ * A function to Uninstall bundles.
+ * 
+ * @author kgilmer
+ *
+ */
 public class UninstallBundleFunction implements Applier.Fn<File, File> {
-	private Map<String, Bundle> bundleMap;
-	private KnapsackLogger logger;
+	private final Map<String, Bundle> bundleMap;
+	private final KnapsackLogger logger;
 
+	/**
+	 * 
+	 */
 	public UninstallBundleFunction() {
 		logger = Launcher.getLogger();
 		bundleMap = InstallBundleFunction.createLocationList(Launcher.getBundleContext());
@@ -53,5 +62,4 @@ public class UninstallBundleFunction implements Applier.Fn<File, File> {
 			return null;
 		}
 	}
-
 }

@@ -205,16 +205,13 @@ public class FSHelper {
 		closeQuietly(fos);
 	}
 
-	
-	
-
 	/**
 	 * Copy shell scripts from the Jar into the deployment directory.
-	 * 
-	 * @param baseDirectory
+	 * @param scriptDir
+	 * @param shellPort
+	 * @param command
 	 * @throws IOException
-	 * @throws URISyntaxException 
-	 * @throws InterruptedException
+	 * @throws URISyntaxException
 	 */
 	public static void copyScripts(File scriptDir, int shellPort, String command) throws IOException, URISyntaxException {
 		if (!scriptDir.exists())
@@ -256,8 +253,9 @@ public class FSHelper {
 	/**
 	 * Generate the filesystem symlink necessary to allow a command to be called
 	 * from the shell environment.
-	 * 
+	 * @param scriptDir
 	 * @param commandName
+	 * @param logger
 	 * @throws IOException
 	 */
 	public static void createFilesystemCommand(File scriptDir, String commandName, KnapsackLogger logger) throws IOException {
@@ -300,7 +298,7 @@ public class FSHelper {
 	
 	/**
 	 * Delete the filesystem symlink for a command.
-	 * 
+	 * @param scriptDir
 	 * @param commandName
 	 * @throws IOException
 	 */
@@ -316,7 +314,7 @@ public class FSHelper {
     
 	 /**
 	 * @param dir
-	 * @return
+	 * @return true if directory has files.
 	 * @throws IOException
 	 */
 	public static boolean directoryHasFiles(File dir) throws IOException {

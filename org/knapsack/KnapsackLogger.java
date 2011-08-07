@@ -57,6 +57,7 @@ public class KnapsackLogger extends org.apache.felix.framework.Logger implements
 		this(DEFAULT_DATE_FORMAT);
 	}
 	
+	@Override
 	protected void doLog(Bundle bundle, ServiceReference sr, int level, String msg, Throwable throwable) {
 		if (enabled)
 			doKnapsackLog(bundle, sr, level, msg, throwable);
@@ -112,10 +113,10 @@ public class KnapsackLogger extends org.apache.felix.framework.Logger implements
 		getBundleVersion(b, sb);
 		sb.append(")");	
 	}
-	
+
 	/**
 	 * @param b
-	 * @return The bundle version as defined in the manifest.
+	 * @param sb
 	 */
 	public static void getBundleVersion(Bundle b, StringBuilder sb) {
 		String version = (String) b.getHeaders().get("Bundle-Version");
@@ -163,7 +164,7 @@ public class KnapsackLogger extends org.apache.felix.framework.Logger implements
 	
 	/**
 	 * @param level
-	 * @return A human-readable log level string.
+	 * @param sb
 	 */
 	private static void getLevelLabel(int level, StringBuilder sb) {
 						
@@ -193,10 +194,16 @@ public class KnapsackLogger extends org.apache.felix.framework.Logger implements
 		enabled = value;
 	}
 
+	/**
+	 * @param service
+	 */
 	public void removeLogReader(LogReaderService service) {
 		logListeners.remove(service);
 	}
 
+	/**
+	 * @param svc
+	 */
 	public void addLogReader(LogReaderService svc) {
 		// Add ourselves to every LogReader service available to get the
 		// superset of all log data.

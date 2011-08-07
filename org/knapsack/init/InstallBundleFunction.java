@@ -38,10 +38,10 @@ import org.sprinkles.Applier;
  */
 class InstallBundleFunction implements Applier.Fn<File, BundleJarWrapper> {
 
-	private Map<String, Bundle> installedBundleMap;
+	private final Map<String, Bundle> installedBundleMap;
 	private final Collection<BundleJarWrapper> installed;
 	private final BundleContext context;
-	private KnapsackLogger logger;
+	private final KnapsackLogger logger;
 
 	public InstallBundleFunction(Collection<BundleJarWrapper> installed, BundleContext context) {
 		this.installed = installed;
@@ -131,7 +131,7 @@ class InstallBundleFunction implements Applier.Fn<File, BundleJarWrapper> {
 	 * Create a string uri to compare against what the framework provides.
 	 * 
 	 * @param f
-	 * @return
+	 * @return Input stream with "file://" prepended.
 	 */
 	public static String fileToUri(File f) {
 		return "file://" + f.toString();
