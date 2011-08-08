@@ -26,6 +26,9 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.List;
 
 import org.knapsack.KnapsackLogger;
@@ -157,17 +160,46 @@ public class ConsoleSocketListener extends Thread {
 	private List<ServiceRegistration> registerCommands() {
 		List<ServiceRegistration> cr = new ArrayList<ServiceRegistration>();
 		
-		cr.add(context.registerService(IKnapsackCommand.class.getName(), new ShutdownCommand(log), null));
-		cr.add(context.registerService(IKnapsackCommand.class.getName(), new HelpCommand(parser), null));
-		cr.add(context.registerService(IKnapsackCommand.class.getName(), new BundlesCommand(), null));
-		cr.add(context.registerService(IKnapsackCommand.class.getName(), new ServicesCommand(), null));
-		cr.add(context.registerService(IKnapsackCommand.class.getName(), new LogCommand(), null));
-		cr.add(context.registerService(IKnapsackCommand.class.getName(), new UpdateCommand(), null));
-		cr.add(context.registerService(IKnapsackCommand.class.getName(), new PrintConfCommand(), null));
-		cr.add(context.registerService(IKnapsackCommand.class.getName(), new HeadersCommand(), null));
-		cr.add(context.registerService(IKnapsackCommand.class.getName(), new PackagesCommand(), null));
+		cr.add(context.registerService(
+				IKnapsackCommand.class.getName(), new ShutdownCommand(log), createDictionary("command.name=shutdown-knapsack")));
+		cr.add(context.registerService(
+				IKnapsackCommand.class.getName(), new HelpCommand(parser), createDictionary("command.name=help")));
+		cr.add(context.registerService(
+				IKnapsackCommand.class.getName(), new BundlesCommand(), createDictionary("command.name=bundles")));
+		cr.add(context.registerService(
+				IKnapsackCommand.class.getName(), new ServicesCommand(), createDictionary("command.name=services")));
+		cr.add(context.registerService(
+				IKnapsackCommand.class.getName(), new LogCommand(), createDictionary("command.name=log")));
+		cr.add(context.registerService(
+				IKnapsackCommand.class.getName(), new UpdateCommand(), createDictionary("command.name=update")));
+		cr.add(context.registerService(
+				IKnapsackCommand.class.getName(), new PrintConfCommand(), createDictionary("command.name=printconfig")));
+		cr.add(context.registerService(
+				IKnapsackCommand.class.getName(), new HeadersCommand(), createDictionary("command.name=headers")));
+		cr.add(context.registerService(
+				IKnapsackCommand.class.getName(), new PackagesCommand(), createDictionary("command.name=packages")));
 		
 		return commandRegistrations;
+	}
+
+	/**
+	 * Create a property dictionary by specifing name value pairs as one string seperated by "=" character.
+	 * @param nvp String or set of Strings in the style "name1=value1".
+	 * @return Dictionary loaded with name/value pairs.
+	 */
+	private Dictionary createDictionary(String ... nvp) {
+		Dictionary d = new Hashtable();
+		
+		for (String p : Arrays.asList(nvp)) {
+			String [] elems = p.split("=");
+			
+			if (elems.length != 2)
+				throw new RuntimeException("Invalid name/value pair syntax: " + p);
+			
+			d.put(elems[0].trim(), elems[1].trim());
+		}
+		
+		return d;
 	}
 
 	/**

@@ -109,4 +109,9 @@ public class ConfigurationConstants extends Properties {
 	 * Port that the shell is listening on for commands, or -1 if shell is disabled.
 	 */
 	public static final String SYSTEM_PROPERTY_KEY_SHELL_PORT = "org.knapsack.shell.port";
+
+	/**
+	 * If set all native shell commands will be prefixed by the defined String.
+	 */
+	public static final String CONFIG_KEY_COMMAND_PREFIX = "org.knapsack.shell.command.prefix";
 }
