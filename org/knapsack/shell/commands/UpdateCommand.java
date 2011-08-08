@@ -35,9 +35,16 @@ import org.knapsack.init.BundleInitThread;
 public class UpdateCommand extends AbstractKnapsackCommand {
 
 	@Override
-	public String execute() throws Exception {		
-		BundleInitThread init = new BundleInitThread(new File(System.getProperty(ConfigurationConstants.CONFIG_KEY_ROOT_DIR)), 
-				Arrays.asList(System.getProperty(ConfigurationConstants.CONFIG_KEY_BUNDLE_DIRS).split(",")));
+	public String execute() throws Exception {	
+		String bundleDirs = System.getProperty(ConfigurationConstants.CONFIG_KEY_BUNDLE_DIRS);
+		
+		if (bundleDirs == null)
+			bundleDirs = ConfigurationConstants.DEFAULT_BUNDLE_DIRECTORY;
+		
+		BundleInitThread init = 
+			new BundleInitThread(
+					new File(System.getProperty(ConfigurationConstants.CONFIG_KEY_ROOT_DIR)), 
+					Arrays.asList(bundleDirs.split(",")));
 		init.start();
 		
 		return "Rescanning and updating bundles from configured directories.";

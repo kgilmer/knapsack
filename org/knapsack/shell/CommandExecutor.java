@@ -66,7 +66,7 @@ public class CommandExecutor {
 				try {
 					return cmd.execute();
 				} catch (Exception e) {
-					String es = "An error occurred while executing: " + cmd.getName();
+					String es = "An error occurred while executing: " + cmd.getName() + StringConstants.CRLF;
 
 					if (e.getCause() != null && e.getCause().getMessage() != null) {
 						es = es + StringConstants.CRLF + "Message: " + e.getMessage() + StringConstants.CRLF + e.getCause().getMessage() + StringConstants.CRLF;
