@@ -27,6 +27,7 @@ import java.util.List;
 
 import org.knapsack.shell.StringConstants;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.log.LogEntry;
 import org.osgi.service.log.LogListener;
@@ -61,6 +62,13 @@ public class KnapsackLogger extends org.apache.felix.framework.Logger implements
 	protected void doLog(Bundle bundle, ServiceReference sr, int level, String msg, Throwable throwable) {
 		if (enabled)
 			doKnapsackLog(bundle, sr, level, msg, throwable);
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.apache.felix.framework.Logger#setSystemBundleContext(org.osgi.framework.BundleContext)
+	 */
+	protected void setSystemBundleContext(BundleContext context) {
+	    super.setSystemBundleContext(context);
 	}
 	
 	/**

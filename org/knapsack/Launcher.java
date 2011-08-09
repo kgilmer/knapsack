@@ -137,6 +137,8 @@ public class Launcher {
 			
 			context = felix.getBundleContext();
 			
+			logger.setSystemBundleContext(context);
+			
 			// LogService should now be loaded, setup logger so all log output goes to stdout
 			if (PropertyHelper.getBoolean(ConfigurationConstants.CONFIG_KEY_LOG_STDOUT)) 				
 				addLogReadersToLogger(logger, context);
