@@ -159,7 +159,7 @@ public class Launcher {
 			serviceImpl.updateBundlesSync();
 			
 			ServiceRegistration initSR = context.registerService(KnapsackInitService.class.getName(), serviceImpl, null);
-			Runtime.getRuntime().addShutdownHook(new KnapsackShutdownHook(felix, scriptDirectory, shell, initSR));
+			Runtime.getRuntime().addShutdownHook(new ShutdownHook(felix, scriptDirectory, shell, initSR, logger));
 			
 			felix.start();
 			
@@ -425,5 +425,5 @@ public class Launcher {
 			throw new RuntimeException("BundleContext is not available.");
 		
 		return context;
-	}
+	}	
 }

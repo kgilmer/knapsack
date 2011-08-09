@@ -17,6 +17,8 @@
 package org.knapsack.shell.commands;
 
 import org.knapsack.KnapsackLogger;
+import org.knapsack.Launcher;
+import org.osgi.framework.launch.Framework;
 import org.osgi.service.log.LogService;
 
 /**
@@ -26,45 +28,28 @@ import org.osgi.service.log.LogService;
  * 
  */
 public class ShutdownCommand extends AbstractKnapsackCommand {
-	
+
 	private final KnapsackLogger log;
+
 	public ShutdownCommand(KnapsackLogger log2) {
 		this.log = log2;
 	}
 
 	private static final String MSG = "OSGi framework is shutting down due to user request via shell.";
+
 	public String execute() throws Exception {
-		log.log(LogService.LOG_INFO, MSG);
-		//If force option enabled, kill the jvm after 4 seconds regardless if framework shutdown is complete.
-		if (arguments.contains("-f"))
-			(new Thread() {
-				@Override
-				public void run() {
-					try {
-						Thread.sleep(4000);
-						System.exit(0);
-					} catch (InterruptedException e) {
-						
-					}
-				}
-			}).start();
-		
-		try {
-			context.getBundle(0).stop();
-		} catch (IllegalStateException e) {
-			System.exit(0);
-		}
-		
+		System.exit(0);		
+
 		return MSG;
 	}
 
 	public String getName() {
 		return "shutdown-knapsack";
 	}
-	
+
 	@Override
-	public String getUsage() {			
-		return "[-f (force)]";
+	public String getUsage() {
+		return super.getUsage();
 	}
 
 	public String getDescription() {

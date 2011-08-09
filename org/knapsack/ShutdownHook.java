@@ -18,9 +18,11 @@ package org.knapsack;
 
 import java.io.File;
 
+import org.apache.felix.framework.Logger;
 import org.knapsack.shell.ConsoleSocketListener;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.framework.launch.Framework;
+import org.osgi.service.log.LogService;
 
 /**
  * A shutdown hook to shutdown Knapsack and Felix gracefully before exiting the JVM.
@@ -28,11 +30,12 @@ import org.osgi.framework.launch.Framework;
  * @author kgilmer
  *
  */
-public class KnapsackShutdownHook extends Thread {
+public class ShutdownHook extends Thread {
 	private final Framework framework;
 	private final File scriptDirectory;
 	private final ConsoleSocketListener shell;
 	private final ServiceRegistration initSR;
+	private final Logger logger;
 
 	/**
 	 * @param framework
@@ -40,12 +43,13 @@ public class KnapsackShutdownHook extends Thread {
 	 * @param shell
 	 * @param initSR
 	 */
-	public KnapsackShutdownHook(Framework framework, File scriptDirectory, ConsoleSocketListener shell, ServiceRegistration initSR) {
+	public ShutdownHook(Framework framework, File scriptDirectory, ConsoleSocketListener shell, ServiceRegistration initSR, Logger logger) {
 		super("Knapsack Shutdown Hook");
 		this.framework = framework;
 		this.scriptDirectory = scriptDirectory;
 		this.shell = shell;
 		this.initSR = initSR;
+		this.logger = logger;
 	}
 
 	/* (non-Javadoc)
@@ -53,11 +57,14 @@ public class KnapsackShutdownHook extends Thread {
 	 */
 	public void run() {
 		try {
-			System.err.print("Shutdown started...");
-			
+			logger.log(LogService.LOG_INFO, "Shutdown started...");
+						
 			//These must be shutdown because they were created outside of the OSGi context.
-			shell.shutdown();
-			initSR.unregister();
+			if (shell != null)
+				shell.shutdown();
+			
+			if (initSR != null)
+				initSR.unregister();
 			
 			if (framework != null) {
 				framework.stop();
@@ -65,7 +72,7 @@ public class KnapsackShutdownHook extends Thread {
 			}
 
 			FSHelper.deleteFilesInDir(scriptDirectory);
-			System.err.println("shutdown complete.");
+			logger.log(LogService.LOG_INFO, "Shutdown complete.");
 		} catch (Exception ex) {
 			System.err.println("Error during felix shutdown: " + ex);
 		}

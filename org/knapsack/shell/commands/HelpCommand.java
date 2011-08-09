@@ -16,6 +16,10 @@
  */
 package org.knapsack.shell.commands;
 
+import java.io.InputStream;
+import java.util.Properties;
+
+import org.knapsack.Launcher;
 import org.knapsack.shell.CommandParser;
 import org.knapsack.shell.StringConstants;
 import org.knapsack.shell.commands.Ansi.Attribute;
@@ -39,9 +43,18 @@ public class HelpCommand extends AbstractKnapsackCommand {
 	public String execute() throws Exception {
 		final StringBuilder sb = new StringBuilder();
 		
-		Applier.map(parser.getCommands().values(), new PrintHelpFunction(sb));
+		if (getArguments().contains("versions")) {
+			getKnapsackVersionInfo(sb);
+		} else {
+			Applier.map(parser.getCommands().values(), new PrintHelpFunction(sb));
+		}
 		
 		return sb.toString();
+	}
+	
+	@Override
+	public boolean isValid() {
+		return arguments.size()< 2;
 	}
 
 	public String getName() {
@@ -49,8 +62,7 @@ public class HelpCommand extends AbstractKnapsackCommand {
 	}
 
 	public String getUsage() {
-
-		return super.getUsage();
+		return " [versions (version info)]";
 	}
 
 	public String getDescription() {
@@ -93,6 +105,40 @@ public class HelpCommand extends AbstractKnapsackCommand {
 				sb.append(' ');
 			
 			return sb.toString();
+		}
+	}
+	
+	/**
+	 * Get the version string from the build of the version of Knapsack.
+	 * @param context2
+	 * @return
+	 */
+	public static void getKnapsackVersionInfo(StringBuilder sb) {
+		try {
+			InputStream istream = Launcher.class.getResourceAsStream("knapsack.version");
+			
+			Properties p = new Properties();
+			p.load(istream);
+			
+			sb.append("Knapsack version: ");
+			sb.append(p.getProperty("knapsack.version"));
+			sb.append(StringConstants.CRLF);
+			
+			sb.append(p.getProperty("log.provider"));
+			sb.append(" version: ");
+			sb.append(p.getProperty("log.version"));
+			sb.append(StringConstants.CRLF);
+			
+			sb.append(p.getProperty("configadmin.provider"));
+			sb.append(" version: ");
+			sb.append(p.getProperty("configadmin.version"));
+			sb.append(StringConstants.CRLF);
+			
+			sb.append("OSGi compendium version: ");
+			sb.append(p.getProperty("compendium.version"));
+			sb.append(StringConstants.CRLF);			
+		} catch (Exception e) {
+			sb.append("[Unable to read version information]");
 		}
 	}
 }

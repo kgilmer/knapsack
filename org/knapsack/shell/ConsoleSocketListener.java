@@ -234,11 +234,12 @@ public class ConsoleSocketListener extends Thread {
 	 */
 	public void shutdown() {
 		running = false;
-		this.interrupt();
-		if (socket != null)
+
+		if (socket != null) {
 			try {
 				socket.close();
 			} catch (IOException e) {
 			}
+		}
 	}
 }
