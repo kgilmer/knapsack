@@ -114,4 +114,11 @@ public class ConfigurationConstants extends Properties {
 	 * If set all native shell commands will be prefixed by the defined String.
 	 */
 	public static final String CONFIG_KEY_COMMAND_PREFIX = "org.knapsack.shell.command.prefix";
+
+    /**
+     * Where scripts are stored in the Jar.
+     */
+    public static final String SCRIPT_RESOURCE_DIRECTORY = "/scripts";
+
+    public static final String LAUNCH_SCRIPT_FILENAME = "knapsack-start.sh";
 }

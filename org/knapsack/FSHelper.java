@@ -235,7 +235,7 @@ public class FSHelper {
 			sb.append("\"");
 			sb.append(StringConstants.CRLF);
 		
-			InputStream istream = ConfigurationConstants.class.getResourceAsStream("/scripts/" + ConfigurationConstants.BASE_SCRIPT_FILENAME);
+			InputStream istream = ConfigurationConstants.class.getResourceAsStream(ConfigurationConstants.SCRIPT_RESOURCE_DIRECTORY + File.separator + ConfigurationConstants.BASE_SCRIPT_FILENAME);
 			if (istream == null)
 				throw new IOException("Jar resource does not exist: " + baseScriptFile);
 
@@ -247,6 +247,14 @@ public class FSHelper {
 			fos.close();
 			
 			baseScriptFile.setExecutable(true, true);
+			
+			//Copy the launch script to the bin directory.
+			istream = ConfigurationConstants.class.getResourceAsStream(ConfigurationConstants.SCRIPT_RESOURCE_DIRECTORY + File.separator + ConfigurationConstants.LAUNCH_SCRIPT_FILENAME);
+			baseScriptFile = new File(scriptDir, ConfigurationConstants.LAUNCH_SCRIPT_FILENAME);
+			fos = new FileOutputStream(baseScriptFile);
+			copy(istream, fos);
+			fos.close();
+			baseScriptFile.setExecutable(true, true);			
 		}
 	}
 

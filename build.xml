@@ -74,7 +74,7 @@
 
 	<target name="compile" depends="stage-dependencies" description="compile the Java source code to class files">
 		<mkdir dir="${build.dir}" />
-		<javac srcdir="." destdir="${build.dir}" source="1.6" target="1.6" encoding="utf-8" fork="true" includeantruntime="false">
+		<javac srcdir="." destdir="${build.dir}" source="1.6" target="1.6" encoding="utf-8" fork="true" includeantruntime="false" debuglevel="lines">
 			<include name="org/**" />
 			<exclude name="${external.dir}/**" />
 		</javac>
