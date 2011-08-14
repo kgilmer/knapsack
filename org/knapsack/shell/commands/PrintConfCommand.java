@@ -19,7 +19,6 @@ package org.knapsack.shell.commands;
 import java.util.Map.Entry;
 
 import org.knapsack.shell.StringConstants;
-import org.knapsack.shell.commands.Ansi.Attribute;
 import org.sprinkles.Applier;
 
 /**
@@ -44,7 +43,6 @@ public class PrintConfCommand extends AbstractKnapsackCommand {
 			}
 		});
 		
-		sb.append(ansi.a(Attribute.RESET));
 		return sb.toString();
 	}
 

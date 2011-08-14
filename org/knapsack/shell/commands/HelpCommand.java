@@ -22,7 +22,6 @@ import java.util.Properties;
 import org.knapsack.Launcher;
 import org.knapsack.shell.CommandParser;
 import org.knapsack.shell.StringConstants;
-import org.knapsack.shell.commands.Ansi.Attribute;
 import org.knapsack.shell.pub.IKnapsackCommand;
 import org.sprinkles.Applier;
 
@@ -79,17 +78,11 @@ public class HelpCommand extends AbstractKnapsackCommand {
 
 		@Override
 		public IKnapsackCommand apply(IKnapsackCommand cmd) {
-			sb.append(ansi.a(Attribute.INTENSITY_BOLD));
 			sb.append(pad(cmd.getName(), 10));
-			sb.append(ansi.a(Attribute.RESET));
 			sb.append(" ");
-			sb.append(ansi.a(Attribute.ITALIC));
 			sb.append(pad(cmd.getUsage(), 10));
-			sb.append(ansi.a(Attribute.RESET));
 			sb.append(StringConstants.TAB);
-			sb.append(ansi.a(Attribute.INTENSITY_FAINT));
 			sb.append(cmd.getDescription());
-			sb.append(ansi.a(Attribute.RESET));
 			sb.append(StringConstants.CRLF);
 					
 			return cmd;

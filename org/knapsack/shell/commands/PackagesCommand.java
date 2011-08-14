@@ -19,8 +19,6 @@ package org.knapsack.shell.commands;
 import java.util.Collection;
 
 import org.knapsack.shell.StringConstants;
-import org.knapsack.shell.commands.Ansi.Attribute;
-import org.knapsack.shell.commands.Ansi.Color;
 import org.osgi.framework.Bundle;
 import org.sprinkles.Applier;
 import org.sprinkles.Applier.Fn;
@@ -226,13 +224,11 @@ public class PackagesCommand extends AbstractKnapsackCommand {
 			sb.append(elems[0].trim());
 			
 			if (!brief) {
-				sb.append(ansi.a(Attribute.INTENSITY_FAINT));
 				for (int i = 1; i < elems.length; ++i) {
 					sb.append(';');
 					sb.append(elems[i]);					
 				}
 			}
-			sb.append(ansi.a(Attribute.RESET));
 			sb.append(StringConstants.CRLF);
 			
 			return null;
@@ -251,10 +247,8 @@ public class PackagesCommand extends AbstractKnapsackCommand {
 		if (elems.length != 2)
 			return ins;
 		
-		sb.append(ansi.fg(Color.MAGENTA));
 		sb.append(elems[0]);
 		sb.append(" = ");
-		sb.append(ansi.fg(Color.YELLOW));
 		sb.append(elems[1]);
 		
 		return sb.toString();
@@ -267,10 +261,8 @@ public class PackagesCommand extends AbstractKnapsackCommand {
 	 * @return
 	 */
 	public static String formatNameValuePair(StringBuilder sb, String name, String value) {	
-		sb.append(ansi.fg(Color.BLACK));
 		sb.append(name);
 		sb.append(" = ");
-		sb.append(ansi.fg(Color.BLUE));
 		sb.append(value);
 		
 		return sb.toString();

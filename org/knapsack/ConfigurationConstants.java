@@ -35,7 +35,7 @@ public class ConfigurationConstants extends Properties {
 	/**
 	 * Enable color output of shell commands in terminal.
 	 */
-	public static final String CONFIG_KEY_COLOR_OUTPUT = "org.knapsack.shell.color";
+	//public static final String CONFIG_KEY_COLOR_OUTPUT = "org.knapsack.shell.color";
 	/**
 	 * Emit log events to stdout
 	 */

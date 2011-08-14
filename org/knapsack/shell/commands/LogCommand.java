@@ -26,8 +26,6 @@ import java.util.Enumeration;
 import java.util.List;
 
 import org.knapsack.shell.StringConstants;
-import org.knapsack.shell.commands.Ansi.Attribute;
-import org.knapsack.shell.commands.Ansi.Color;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.log.LogEntry;
@@ -103,9 +101,7 @@ public class LogCommand extends AbstractKnapsackCommand {
 	private void addLogEntry(LogEntry entry, StringBuilder sb, boolean verbose) {
 
 		if (verbose) {
-			sb.append(ansi.a(Attribute.INTENSITY_FAINT));
 			sb.append(formatDateTime(entry.getTime()));
-			sb.append(ansi.a(Attribute.RESET));
 			sb.append(' ');
 			sb.append(getLevelLabel(entry.getLevel()));
 			sb.append(' ');
@@ -121,7 +117,6 @@ public class LogCommand extends AbstractKnapsackCommand {
 		
 		//Check for an exception, if available display it.
 		if (entry.getException() != null) {
-			sb.append(ansi.fg(Color.RED));
 			sb.append(entry.getException().getMessage());
 			sb.append(StringConstants.CRLF);
 			
@@ -129,7 +124,6 @@ public class LogCommand extends AbstractKnapsackCommand {
 			PrintWriter pw = new PrintWriter(sWriter);
 			entry.getException().printStackTrace(pw);
 			sb.append(sWriter.toString());
-			sb.append(ansi.a(Attribute.RESET));
 			sb.append(StringConstants.CRLF);
 		}
 	}
@@ -141,30 +135,23 @@ public class LogCommand extends AbstractKnapsackCommand {
 	public static String getLevelLabel(int level) {
 		StringBuffer sb = new StringBuffer();
 		
-		sb.append(ansi.a(Attribute.NEGATIVE_ON));
-		
 		switch (level) {
 		case 1:
-			sb.append(ansi.fg(Color.RED));
 			sb.append("ERROR  ");
 			break;
 		case 2:
-			sb.append(ansi.fg(Color.YELLOW));
 			sb.append("WARNING");
 			break;			
 		case 3:
-			sb.append(ansi.fg(Color.BLUE));
 			sb.append("INFO   ");
 			break;			
 		case 4:
-			sb.append(ansi.fg(Color.MAGENTA));
 			sb.append("DEBUG  ");
 			break;
 		default:
 			sb.append("UNKNOWN");				
 		}
 
-		sb.append(ansi.a(Attribute.RESET));
 		return sb.toString();
 	}
 	

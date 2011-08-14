@@ -1,4 +1,4 @@
-knapsack.version=0.9.3
+knapsack.version=0.9.4
 log.version=1.0.1
 log.provider=org.apache.felix.log
 configadmin.version=1.2.8
