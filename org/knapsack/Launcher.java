@@ -388,8 +388,9 @@ public class Launcher {
 
 		FSHelper.validateFile(defaultDir, true, true, false, true);
 
-		for (String filename : Arrays.asList(ConfigurationConstants.CONFIGURATION_FILENAME))
-			FSHelper.copyResourceToFile("/" + filename, new File(defaultDir, filename));
+		for (String filename : Arrays.asList(ConfigurationConstants.CONFIGURATION_FILENAME)) {
+				FSHelper.copyResourceToFile("/" + filename, new File(defaultDir, filename));			
+		}			
 	}
 
 	/**
@@ -398,8 +399,8 @@ public class Launcher {
 	 *         should be created.
 	 */
 	private static boolean baseDirectoryUninitialized(File baseDirectory) {
-
-		return !(new File(baseDirectory, ConfigurationConstants.DEFAULT_DIRECTORY_NAME)).exists();
+		File propertiesDir = new File(baseDirectory, ConfigurationConstants.DEFAULT_DIRECTORY_NAME);
+		return !(new File(propertiesDir, "felix.properties")).exists();
 	}
 
 	/**

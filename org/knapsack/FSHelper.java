@@ -189,10 +189,11 @@ public class FSHelper {
 	 * @param resourceFilename
 	 * @param outFile
 	 * @throws IOException
+	 * @returns true if resource was copied, false if resource already exists.
 	 */
-	public static void copyResourceToFile(String resourceFilename, File outFile) throws IOException {
+	public static boolean copyResourceToFile(String resourceFilename, File outFile) throws IOException {
 		if (outFile.exists())
-			throw new IOException(outFile + " already exists, not overwriting.");
+			return false;
 		
 		InputStream istream = FSHelper.class.getResourceAsStream(resourceFilename);
 
@@ -203,6 +204,8 @@ public class FSHelper {
 		
 		copy(istream, fos);
 		closeQuietly(fos);
+		
+		return true;
 	}
 
 	/**
