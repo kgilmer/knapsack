@@ -23,10 +23,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
-import java.util.List;
 
 import org.knapsack.shell.StringConstants;
-import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.log.LogEntry;
 import org.osgi.service.log.LogReaderService;
@@ -64,16 +62,13 @@ public class LogCommand extends AbstractKnapsackCommand {
 		if (ref != null)
 		{
 		    LogReaderService reader = (LogReaderService) context.getService(ref);	
-		    Enumeration<LogEntry> latestLogs = reader.getLog();
-		    List<ComparableLogEntry> entries = new ArrayList<ComparableLogEntry>();
 		    
-		    while (latestLogs.hasMoreElements())
-		    	entries.add(new ComparableLogEntry(latestLogs.nextElement()));
-		    
-		    Collections.sort(entries);
-		    	
-		    for (ComparableLogEntry entry : entries)
-		    	addLogEntry(entry, sb, verbose);
+		    Enumeration<LogEntry> latestLogs = reader.getLog();		   
+		    		    	    
+		    ArrayList<LogEntry> entryList = Collections.list(latestLogs);
+		    Collections.reverse(entryList);
+		    for (LogEntry entry : entryList)
+		    	addLogEntry(entry, sb, verbose);		 		 		    	
 		}
 		
 		return sb.toString();
@@ -153,53 +148,5 @@ public class LogCommand extends AbstractKnapsackCommand {
 		}
 
 		return sb.toString();
-	}
-	
-	private class ComparableLogEntry  implements Comparable<LogEntry>, LogEntry {
-
-		private final LogEntry entry;
-
-		public Bundle getBundle() {
-			return entry.getBundle();
-		}
-
-		public ServiceReference getServiceReference() {
-			return entry.getServiceReference();
-		}
-
-		public int getLevel() {
-			return entry.getLevel();
-		}
-
-		public String getMessage() {
-			return entry.getMessage();
-		}
-
-		public Throwable getException() {
-			return entry.getException();
-		}
-
-		public long getTime() {
-			return entry.getTime();
-		}
-
-		public ComparableLogEntry(LogEntry entry) {
-			this.entry = entry;
-			
-		}
-
-		@Override
-		public int compareTo(LogEntry o) {
-			if (o instanceof ComparableLogEntry) {
-				long result = this.getTime() - (((ComparableLogEntry) o).getTime());
-				
-				if (result > 0)
-					return 1;
-				if (result < 0)
-					return -1;
-			}
-			
-			return 0;
-		}
 	}
 }
