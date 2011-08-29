@@ -45,6 +45,8 @@ $ bin/update
 ...
 ```
 
+Knapsack now will look in the configured bundle directories for new or changed bundles.  It will start/stop/install bundles accordingly.
+
 - You will see some exceptions in the output, but these are not critical and refer to some missing optional dependencies.  You can confirm that the http server and web console are running with:
 
 ```
@@ -66,7 +68,7 @@ Knapsack will create it's preferred configuration environment if it's not alread
 
 ```
 $ ls
-bin  bundle  cache  configAdmin default felix.conf  knapsack.jar
+bin  bundle  cache  configAdmin properties felix.conf  knapsack.jar
 ```
 
 ## /bin
@@ -80,16 +82,25 @@ Organizing an application is into logical areas of functionality, for example a 
 ## /cache
 This is where the Felix bundle cache goes.  It is an exploded form of the bundle jars.  By default, this directory is deleted each time Knapsack runs, to ensure that the latest code from bundle directories is always getting executed.
 
-## /configAdmin
+## /configadmin
 Configuration Admin typically keeps its state in the bundle cache.  We want to preserve configuration state across knapsack instances so we store it seperately.
 
-## /default
+## /properties
 Startup state can be set in Felix via system properties or Configuration Admin.  Knapsack will load property files and Configuration Admin dictionaries from the default directory.  Any file ending with ".properties" will be treated as a properties file, otherwise the filename will be assumed a PID and a Configuration will be created with its name/value pairs.
 
 Since all files in this directory are properties, one can have different files for different services or bundles, rather than one giant property file.  This also is nice for installers, when a set of properties corresponds to a bundle or aspect of functionality.
 
-## /felix.conf
-A default felix configuration is generated if it doesn't already exist.  This lets the user tune the startup settings that are related to the framework internals.  Some knapsack settings are also available.
+## /properties/felix.properties
+A default felix configuration is generated if it doesn't already exist.  This lets the user tune the startup settings that are related to the framework internals.
+
+## /properties/knapsack.properties
+The knapsack launcher-specific properties.  These properties allow to enable/disable specific features and tune the shell integration with the local environment.
+
+## /properties/log.properties
+The log properties.  Set log verbosity here.
+
+## /properties/configadmin.properties
+The ConfigAdmin properties.  By default, simply specifying the persistence directory.
 
 # System shell features
 
