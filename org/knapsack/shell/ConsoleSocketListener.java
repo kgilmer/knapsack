@@ -34,6 +34,7 @@ import java.util.List;
 import org.knapsack.KnapsackLogger;
 import org.knapsack.PropertyHelper;
 import org.knapsack.ConfigurationConstants;
+import org.knapsack.shell.commands.BounceCommand;
 import org.knapsack.shell.commands.BundlesCommand;
 import org.knapsack.shell.commands.HeadersCommand;
 import org.knapsack.shell.commands.HelpCommand;
@@ -176,6 +177,8 @@ public class ConsoleSocketListener extends Thread {
 				IKnapsackCommand.class.getName(), new PrintConfCommand(), createDictionary("command.name=printconfig")));
 		cr.add(context.registerService(
 				IKnapsackCommand.class.getName(), new HeadersCommand(), createDictionary("command.name=headers")));
+		cr.add(context.registerService(
+				IKnapsackCommand.class.getName(), new BounceCommand(), createDictionary("command.name=bounde")));
 		cr.add(context.registerService(
 				IKnapsackCommand.class.getName(), new PackagesCommand(), createDictionary("command.name=packages")));
 		
