@@ -113,7 +113,7 @@ public class PackagesCommand extends AbstractKnapsackCommand {
 
 	@Override
 	public String getName() {
-		return "packages";
+		return "knapsack-packages";
 	}
 
 	@Override

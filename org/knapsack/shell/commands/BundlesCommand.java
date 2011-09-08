@@ -38,7 +38,7 @@ public class BundlesCommand extends AbstractKnapsackCommand {
 
 	@Override
 	public String getName() {
-		return "bundles";
+		return "knapsack-bundles";
 	}
 	
 	@Override

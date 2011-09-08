@@ -44,7 +44,7 @@ public class BounceCommand extends AbstractKnapsackCommand {
 
 	@Override
 	public String getName() {
-		return "bounde";
+		return "knapsack-bounce";
 	}
 	
 	@Override

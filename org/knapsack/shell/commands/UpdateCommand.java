@@ -52,7 +52,7 @@ public class UpdateCommand extends AbstractKnapsackCommand {
 
 	@Override
 	public String getName() {
-		return "update";
+		return "knapsack-update-bundles";
 	}
 	
 	@Override

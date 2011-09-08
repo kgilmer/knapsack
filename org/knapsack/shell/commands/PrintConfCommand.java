@@ -48,7 +48,7 @@ public class PrintConfCommand extends AbstractKnapsackCommand {
 
 	@Override
 	public String getName() {
-		return "printconfig";
+		return "knapsack-properties";
 	}
 	
 	@Override

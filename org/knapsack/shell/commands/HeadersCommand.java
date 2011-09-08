@@ -54,7 +54,7 @@ public class HeadersCommand extends AbstractKnapsackCommand {
 
 	@Override
 	public String getName() {
-		return "headers";
+		return "knapsack-headers";
 	}
 	
 	@Override

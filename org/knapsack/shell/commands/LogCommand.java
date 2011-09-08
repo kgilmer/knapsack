@@ -76,7 +76,7 @@ public class LogCommand extends AbstractKnapsackCommand {
 
 	@Override
 	public String getName() {
-		return "log";
+		return "knapsack-log";
 	}
 	
 	@Override
