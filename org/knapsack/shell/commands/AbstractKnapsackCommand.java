@@ -19,6 +19,7 @@ package org.knapsack.shell.commands;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.knapsack.shell.ConsoleSocketListener;
 import org.knapsack.shell.pub.IKnapsackCommand;
 import org.osgi.framework.BundleContext;
 
@@ -60,6 +61,15 @@ public abstract class AbstractKnapsackCommand implements IKnapsackCommand {
 	public String getUsage() {
 		return "";
 	}
+	
+	public final String getName() {
+		return ConsoleSocketListener.getCommandPrefix() + getCommandName();
+	}
+	
+	/**
+	 * @return The root name of the command.  The shell system may append or prepend based on configuration.
+	 */
+	public abstract String getCommandName();
 
 	public String getDescription() {
 		return "No help available for this command.";

@@ -114,8 +114,8 @@ public class ServicesCommand extends AbstractKnapsackCommand {
 	}
 
 	@Override
-	public String getName() {
-		return "knapsack-services";
+	public String getCommandName() {
+		return "services";
 	}
 	
 	@Override

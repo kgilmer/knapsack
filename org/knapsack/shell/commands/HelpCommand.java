@@ -56,8 +56,8 @@ public class HelpCommand extends AbstractKnapsackCommand {
 		return arguments.size()< 2;
 	}
 
-	public String getName() {
-		return "knapsack-help";
+	public String getCommandName() {
+		return "help";
 	}
 
 	public String getUsage() {

@@ -112,8 +112,8 @@ public class PackagesCommand extends AbstractKnapsackCommand {
 	}
 
 	@Override
-	public String getName() {
-		return "knapsack-packages";
+	public String getCommandName() {
+		return "packages";
 	}
 
 	@Override

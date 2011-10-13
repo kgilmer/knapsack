@@ -43,8 +43,8 @@ public class BounceCommand extends AbstractKnapsackCommand {
 	}
 
 	@Override
-	public String getName() {
-		return "knapsack-bounce";
+	public String getCommandName() {
+		return "bounce";
 	}
 	
 	@Override

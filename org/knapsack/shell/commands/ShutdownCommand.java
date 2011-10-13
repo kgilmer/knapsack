@@ -43,8 +43,8 @@ public class ShutdownCommand extends AbstractKnapsackCommand {
 		return MSG;
 	}
 
-	public String getName() {
-		return "knapsack-shutdown";
+	public String getCommandName() {
+		return "shutdown";
 	}
 
 	@Override

@@ -151,8 +151,12 @@ public class Launcher {
 			ConsoleSocketListener shell = null;
 			if (!PropertyHelper.getBoolean(ConfigurationConstants.CONFIG_DISABLE_SCRIPTS)) {
 				int port = generatePort();
+				String cmdPrefix = "";
+				if (System.getProperty(ConfigurationConstants.CONFIG_KEY_COMMAND_PREFIX) != null)
+					cmdPrefix = System.getProperty(ConfigurationConstants.CONFIG_KEY_COMMAND_PREFIX);
+				
 				shell = new ConsoleSocketListener(
-						port, context, logger, new CommandParser(context, scriptDirectory));
+						port, context, logger, new CommandParser(context, scriptDirectory), cmdPrefix);
 				shell.start();
 				createKnapsackScripts(scriptDirectory, port);
 			}

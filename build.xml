@@ -23,7 +23,6 @@
 		<format property="TS_NOW" pattern="yyyy-MM-dd HH:mm:ss" />
 	</tstamp>
 
-
 	<target name="clean" description="remove intermediate files">
 		<delete dir="${build.dir}" />
 		<delete dir="${external.dir}" />

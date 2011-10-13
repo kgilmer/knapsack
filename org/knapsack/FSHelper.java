@@ -270,11 +270,7 @@ public class FSHelper {
 	 * @throws IOException
 	 */
 	public static void createFilesystemCommand(File scriptDir, String commandName, KnapsackLogger logger) throws IOException {
-		File sf = null;
-		if (System.getProperty(ConfigurationConstants.CONFIG_KEY_COMMAND_PREFIX) != null)
-			sf = new File(System.getProperty(ConfigurationConstants.CONFIG_KEY_COMMAND_PREFIX) + scriptDir, commandName);
-		else 
-			sf = new File(scriptDir, commandName);
+		File sf = new File(scriptDir, commandName);
 		
 		File baseScriptFile = new File(scriptDir, ConfigurationConstants.BASE_SCRIPT_FILENAME);
 

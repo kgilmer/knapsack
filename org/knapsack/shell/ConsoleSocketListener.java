@@ -79,6 +79,8 @@ public class ConsoleSocketListener extends Thread {
 
 	private ServerSocket socket;
 
+	private static String commandPrefix;
+
 	/**
 	 * @param config
 	 * @param port
@@ -89,10 +91,11 @@ public class ConsoleSocketListener extends Thread {
 	 * @throws IOException
 	 * @throws InvalidSyntaxException
 	 */
-	public ConsoleSocketListener(int port, BundleContext context, KnapsackLogger log, CommandParser parser)
+	public ConsoleSocketListener(int port, BundleContext context, KnapsackLogger log, CommandParser parser, String commandPrefix)
 			throws UnknownHostException, IOException, InvalidSyntaxException {
 
 		this.parser = parser;
+		this.commandPrefix = commandPrefix;
 		context.addServiceListener(parser, "(" + Constants.OBJECTCLASS + "=" + IKnapsackCommand.class.getName() + ")");
 		this.context = context;
 		this.log = log;
@@ -203,6 +206,10 @@ public class ConsoleSocketListener extends Thread {
 		}
 		
 		return d;
+	}
+	
+	public static String getCommandPrefix() {
+		return commandPrefix;
 	}
 
 	/**
