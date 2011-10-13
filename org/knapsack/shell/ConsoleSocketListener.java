@@ -71,7 +71,7 @@ public class ConsoleSocketListener extends Thread {
 
 	private CommandExecutor executor;
 
-	private final CommandParser parser;
+	private static CommandParser parser;
 
 	private final KnapsackLogger log;
 
@@ -164,28 +164,26 @@ public class ConsoleSocketListener extends Thread {
 	private List<ServiceRegistration> registerCommands() {
 		List<ServiceRegistration> cr = new ArrayList<ServiceRegistration>();
 		
-		cr.add(context.registerService(
-				IKnapsackCommand.class.getName(), new ShutdownCommand(log), createDictionary("command.name=shutdown-knapsack")));
-		cr.add(context.registerService(
-				IKnapsackCommand.class.getName(), new HelpCommand(parser), createDictionary("command.name=help")));
-		cr.add(context.registerService(
-				IKnapsackCommand.class.getName(), new BundlesCommand(), createDictionary("command.name=bundles")));
-		cr.add(context.registerService(
-				IKnapsackCommand.class.getName(), new ServicesCommand(), createDictionary("command.name=services")));
-		cr.add(context.registerService(
-				IKnapsackCommand.class.getName(), new LogCommand(), createDictionary("command.name=log")));
-		cr.add(context.registerService(
-				IKnapsackCommand.class.getName(), new UpdateCommand(), createDictionary("command.name=update")));
-		cr.add(context.registerService(
-				IKnapsackCommand.class.getName(), new PrintConfCommand(), createDictionary("command.name=printconfig")));
-		cr.add(context.registerService(
-				IKnapsackCommand.class.getName(), new HeadersCommand(), createDictionary("command.name=headers")));
-		cr.add(context.registerService(
-				IKnapsackCommand.class.getName(), new BounceCommand(), createDictionary("command.name=bounde")));
-		cr.add(context.registerService(
-				IKnapsackCommand.class.getName(), new PackagesCommand(), createDictionary("command.name=packages")));
+		cr.add(registerCommand(new ShutdownCommand()));
+		cr.add(registerCommand(new HelpCommand()));
+		cr.add(registerCommand(new BundlesCommand()));
+		cr.add(registerCommand(new ServicesCommand()));
+		cr.add(registerCommand(new LogCommand()));
+		cr.add(registerCommand(new UpdateCommand()));
+		cr.add(registerCommand(new PrintConfCommand()));
+		cr.add(registerCommand(new HeadersCommand()));
+		cr.add(registerCommand(new BounceCommand()));
+		cr.add(registerCommand(new PackagesCommand()));
 		
 		return commandRegistrations;
+	}
+	
+	private ServiceRegistration registerCommand(IKnapsackCommand cmd) {
+		return context.registerService(IKnapsackCommand.class.getName(), cmd, createDictionary("command.name=" + cmd.getName()));
+	}
+	
+	public static CommandParser getParser() {
+		return parser;
 	}
 
 	/**

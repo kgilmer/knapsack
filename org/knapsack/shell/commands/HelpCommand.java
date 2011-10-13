@@ -21,6 +21,7 @@ import java.util.Properties;
 
 import org.knapsack.Launcher;
 import org.knapsack.shell.CommandParser;
+import org.knapsack.shell.ConsoleSocketListener;
 import org.knapsack.shell.StringConstants;
 import org.knapsack.shell.pub.IKnapsackCommand;
 import org.sprinkles.Applier;
@@ -35,8 +36,8 @@ public class HelpCommand extends AbstractKnapsackCommand {
 	
 	private final CommandParser parser;
 
-	public HelpCommand(CommandParser parser) {
-		this.parser = parser;		
+	public HelpCommand() {
+		this.parser = ConsoleSocketListener.getParser();		
 	}
 
 	public String execute() throws Exception {
