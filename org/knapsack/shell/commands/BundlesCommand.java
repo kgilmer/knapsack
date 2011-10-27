@@ -31,7 +31,9 @@ public class BundlesCommand extends AbstractKnapsackCommand {
 	public String execute() throws Exception {
 		final StringBuilder sb = new StringBuilder(1024 * 8);
 		
-		Applier.map(context.getBundles(), new PrintBundleFunction(sb, !arguments.contains("-b")));
+		Applier.map(
+				context.getBundles(), 
+				new PrintBundleFunction(sb, arguments.contains("-v")));
 		
 		return sb.toString();
 	}
@@ -43,7 +45,7 @@ public class BundlesCommand extends AbstractKnapsackCommand {
 	
 	@Override
 	public String getUsage() {
-		return "[-b (brief)]";
+		return "[-v (verbose)]";
 	}
 	
 	@Override
