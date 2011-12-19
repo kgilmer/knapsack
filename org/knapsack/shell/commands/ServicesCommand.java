@@ -38,7 +38,7 @@ public class ServicesCommand extends AbstractKnapsackCommand {
 		final boolean dependencies = arguments.contains("-d");
 		final boolean properties = arguments.contains("-p");
 		
-		Applier.map(context.getServiceReferences(null, null), 
+		Applier.map(context.getServiceReferences((String) null, null), 
 				new Applier.Fn<ServiceReference, ServiceReference>() {
 
 			@Override
